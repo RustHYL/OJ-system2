@@ -2,11 +2,12 @@ import {RouteRecordRaw} from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import AdminView from "@/views/AdminView.vue";
 import NoAuthView from "@/views/NoAuthView.vue";
+import ACCESS_ENUM from "@/access/accessEnum";
 
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        name: 'home',
+        name: '主页',
         component: HomeView
     },
     {
@@ -19,20 +20,20 @@ export const routes: Array<RouteRecordRaw> = [
     },
     {
         path: '/admin',
-        name: 'admin',
+        name: '管理员页面',
         component: AdminView,
         meta: {
-            access: 'canAdmin',
+            access: ACCESS_ENUM.ADMIN,
         }
     },
     {
         path: '/noAuth',
-        name: 'noAuth',
+        name: '无权限',
         component: NoAuthView,
     },
     {
         path: '/about',
-        name: 'about',
+        name: '关于我的',
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
