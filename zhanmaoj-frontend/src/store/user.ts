@@ -3,10 +3,6 @@
 import {StoreOptions} from "vuex";
 import ACCESS_ENUM from "@/access/accessEnum";
 
-
-// getters
-const getters = {}
-
 // actions（支持异步）
 // 执行异步操作，触发mutation的更改（actions调用mutation）
 
@@ -22,9 +18,8 @@ export default {
             userRole: ACCESS_ENUM.NOT_LOGIN,
         },
     }),
-    getters,
     actions: {
-        async getLoginUser ({ commit, state }, payload) {
+        getLoginUser ({ commit, state }, payload) {
             commit('updateUser', payload)
         }
     },

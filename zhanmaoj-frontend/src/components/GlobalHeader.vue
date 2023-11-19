@@ -30,17 +30,19 @@ import ACCESS_ENUM from "@/access/accessEnum";
 const router = useRouter();
 const selectedKeys = ref(['/']);
 const store = useStore();
-const loginUser = store.state.user?.loginUser;
-//展示的路由
-const visibleRoutes = computed(()=>{
+
+
+const visibleRoutes = computed(() => {
   return routes.filter((item, index) => {
-    if (item.meta?.hideInMenu){
+    if (item.meta?.hideInMenu) {
       return false;
     }
-    //权限校验
-    return checkAccess(loginUser, item?.meta?.access as string);
-  })
-})
+    // 根据权限过滤菜单(不要将const store.state.user.loginUser，会导致loginUser不变)
+    return checkAccess(store.state.user.loginUser, item?.meta?.access as string);
+  });
+});
+
+
 
 setTimeout(() =>{
   store.dispatch("user/getLoginUser", {
