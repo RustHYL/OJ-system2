@@ -572,3 +572,42 @@ onMounted(() => {
 
 ## 后端项目初始化
 
+1)从星球代码库下载 springboot-init 万用模板（已经在本地的话直接复制)
+
+2)ctrl+shift+R全局替换 springboot-init 为项目名(zhanmaoj-backend)
+
+3）全局替换 springbootinit 包名为新的包名(xxx)
+
+4)修改 springbootinit 文件夹的名称为新的包名对应的名称(xxx)
+
+5）本地新建数据库，直接执行 sql/create_table.sql 脚本，修改库名为xxx，执行即可6)改 application.yml 配置，修改 MySQL数据库的连接库名、账号密码，端口号(3306)
+
+
+
+### 初始化模板介绍
+
+
+
+1)先阅读README.md
+
+2)sql/create_table.sql定义了数据库的初始化建库建表语句
+
+3)sql//postes_mapping.json帖子表在es中的建表语句4)aop：用于全局权限校验、全局日志记录
+
+5)常见：万用的类，比如通用响应类
+
+6)config：用于接收application.yml中的参数，初始化一些客户端的配置类(比如对象存储客户端)7)常量：定义常量
+
+8)控制器：接受请求
+
+9)ESDAO：类似mybatic的mapper，用于操作ES 
+
+10)例外：异常处理相关
+
+11)工作：任务相关(定时任务、单次任务)
+
+(12)经理：服务层(一般是定义一些公用的服务、对接第三方api等)
+
+13)映射器：myb导则的数据访问层，用于操作数据库
+
+14)模型：数据模型、实体类、包装类、枚举值
