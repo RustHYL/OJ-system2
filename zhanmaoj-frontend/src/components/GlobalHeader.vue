@@ -14,7 +14,7 @@
       </a-menu>
     </a-col>
     <a-col flex="100px">
-      <div>{{ store.state.user?.loginUser?.username ?? '未登录' }}</div>
+      <div>{{ store.state.user?.loginUser?.userName ?? '未登录' }}</div>
     </a-col>
   </a-row>
 </template>
@@ -44,12 +44,12 @@ const visibleRoutes = computed(() => {
 
 
 
-setTimeout(() =>{
-  store.dispatch("user/getLoginUser", {
-    username: "管理员",
-    userRole: ACCESS_ENUM.ADMIN,
-  });
-}, 3000)
+// setTimeout(() =>{
+//   store.dispatch("user/getLoginUser", {
+//     username: "管理员",
+//     userRole: ACCESS_ENUM.ADMIN,
+//   });
+// }, 3000)
 
 router.afterEach((to, from, failure) => {
   selectedKeys.value = [to.path];

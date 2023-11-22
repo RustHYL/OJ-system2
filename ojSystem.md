@@ -586,8 +586,6 @@ onMounted(() => {
 
 ### 初始化模板介绍
 
-
-
 1)先阅读README.md
 
 2)sql/create_table.sql定义了数据库的初始化建库建表语句
@@ -611,3 +609,211 @@ onMounted(() => {
 13)映射器：myb导则的数据访问层，用于操作数据库
 
 14)模型：数据模型、实体类、包装类、枚举值
+
+
+
+### 前后端联调
+
+1）安装请求工具类 Axios：
+
+官方文档：https://axios-http.com/docs/intro
+
+代码：
+
+```shell
+cnpm install axios
+```
+
+2）编写调用后端的代码
+
+传统情况下，每个请求都要单独编写代码。至少得写请求路径。
+
+可直接自动生成！！！！
+
+https://github.com/ferdikoomen/openapi-typescript-codegen
+
+先安装：
+
+```shell
+npm install openapi-typescript-codegen --save-dev
+```
+
+再执行命令生成代码：
+
+```shell
+openapi --input http://localhost:8101/api//v2/api-docs --output ./generated --client axios
+```
+
+3）直接使用生成的Service代码，直接调用函数发送请求：
+
+```typescript
+const res = await UserControllerService.getLoginUserUsingGet();
+```
+
+
+
+如果要自定义请求参数：
+
+1）使用代码生成器提供的全局参数修改对象（generated/core/OpenAPI.ts）：
+
+```typescript
+export const OpenAPI: OpenAPIConfig = {
+    BASE: 'http://localhost:8101',
+    VERSION: '1.0',
+    WITH_CREDENTIALS: false,
+    CREDENTIALS: 'include',
+    TOKEN: undefined,
+    USERNAME: undefined,
+    PASSWORD: undefined,
+    HEADERS: undefined,
+    ENCODE_PATH: undefined,
+};
+```
+
+https://github.com/ferdikoomen/openapi-typescript-codegen/blob/master/docs/openapi-object.md
+
+2）直接定义 axios 请求库的全局参数，比如全局请求响应拦截器
+
+文档：https://axios-http.com/docs/interceptors
+
+```typescript
+// Add a request interceptor
+axios.interceptors.request.use(function (config) {
+    // Do something before request is sent
+    return config;
+  }, function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+  });
+
+// Add a response interceptor
+axios.interceptors.response.use(function (response) {
+    // Any status code that lie within the range of 2xx cause this function to trigger
+    // Do something with response data
+    return response;
+  }, function (error) {
+    // Any status codes that falls outside the range of 2xx cause this function to trigger
+    // Do something with response error
+    return Promise.reject(error);
+  });
+```
+
+
+
+### 用户登录功能
+
+#### 自动登录
+
+1）在 store\user.ts 编写获取远程登录用户信息的代码：
+
+```typescript
+actions: {
+    async getLoginUser ({ commit, state }, payload) {
+        const res = await UserControllerService.getLoginUserUsingGet();
+        if (res.code === 0){
+            commit('updateUser', res.data)
+        } else {
+            commit('updateUser', { ...state.loginUser, userRole: ACCESS_ENUM.NOT_LOGIN })
+        }
+    }
+},
+```
+
+2）在哪里去触发 getLoginUser 函数的执行：全局位置
+
+选择：
+
+1.路由拦截 ✔
+
+2.全局页面入口 app.vue
+
+3.全局通用布局（所有页面共享的组件）
+
+
+
+### 全局权限管理优化
+
+1）新建 access\index.ts 文件，把原有的路由拦截、权限校验逻辑放入独立的文件中
+
+优点：有助于统一管理，不需要权限校验只需不在 main.ts 中引入
+
+2）编写权限管理和自动登录逻辑
+
+如果没有登录就自动登录：
+
+```typescript
+router.beforeEach(async (to, from, next) => {
+    const loginUser = store.state.user?.loginUser;
+
+    // 自动登录
+    if (!loginUser || !loginUser.userRole) {
+        await store.dispatch("user/getLoginUser");
+    }
+    const needAccess = to.meta.access ?? ACCESS_ENUM.NOT_LOGIN;
+    //如果没有登录，跳转到登录页面
+    if (needAccess !== ACCESS_ENUM.NOT_LOGIN) {
+        if (!loginUser || !loginUser.userRole){
+            next(`user/login?redirect=${to.fullPath}`);
+            return;
+        }
+        //如果已经登录了，但是没有对应的权限，跳转到无权限页面
+        if (!checkAccess(loginUser, needAccess as string)){
+            next('/noAuth');
+        }
+    }
+
+    next();
+})
+```
+
+### 支持多套布局
+
+1）在 routes 路由文件中新建一套用户路由，使用 vue-router 自带的子路由机制，实现布局和嵌套路由
+
+```typescript
+{
+    path: '/user',
+    name: '用户',
+    component: UserLayout,
+    children:[
+        {
+            path: '/user/login',
+            name: '用户登录',
+            component: UserLoginView
+        },
+        {
+            path: '/user/register',
+            name: '用户注册',
+            component: UserRegisterView
+        }
+    ]
+},
+```
+
+2）新建一套 UserLayout 、UserLoginView、 UserRegisterView 页面，并且在 routes 中引入
+
+3）在 app.vue 根页面文件，根据路由去区分多套布局
+
+```vue
+<div id="app">
+  <template v-if="route.path.startsWith('/user')">
+    <router-view/>
+  </template>
+  <template v-else>
+    <BasicLayout />
+  </template>
+</div>
+```
+
+ 当前这种方式通过if、else区分布局不是最优雅的，理想情况是直接读取 routes.ts ,在这个文件中定义多套布局，然后自动使用页面布局（类似UserLayout一样嵌套）
+
+但是项目是根据路由的名字来自动生成导航栏，嵌套会导致页面全无，if 更简便。
+
+
+
+### 登录页面
+
+登录页面不需要导航栏和原有布局
+
+
+
