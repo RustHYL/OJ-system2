@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 判题信息消息枚举
+ */
 public enum JudgeInfoMessageEnum {
 
     ACCEPTED("成功", "Accepted"),
