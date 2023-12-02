@@ -6,6 +6,7 @@ import router from './router';
 import store from './store';
 import '@/plugins/axios';
 import '@/access/index';
+import 'bytemd/dist/index.css';
 
 const app = createApp(App);
 app.use(store);
