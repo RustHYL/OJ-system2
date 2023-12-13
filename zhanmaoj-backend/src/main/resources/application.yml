@@ -89,3 +89,6 @@ cos:
     secretKey: 75sV4TjrtmXDrOhruwmWQOGwhWN5kOqA
     region: ap-shanghai
     bucket: maowulang-1321206406
+# 代码沙箱配置
+codesandbox:
+  type: example
