@@ -1,7 +1,6 @@
 package com.hyl.zhanmaoj.judge;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBox;
@@ -9,18 +8,18 @@ import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBoxFactory;
 import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBoxProxy;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeResponse;
+import com.hyl.zhanmaoj.judge.strategy.JudgeContext;
 import com.hyl.zhanmaoj.model.dto.question.JudgeCase;
+import com.hyl.zhanmaoj.model.dto.questionsbumit.JudgeInfo;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
 import com.hyl.zhanmaoj.model.enums.QuestionSubmitStatusEnum;
-import com.hyl.zhanmaoj.model.vo.QuestionSubmitVO;
 import com.hyl.zhanmaoj.service.QuestionService;
 import com.hyl.zhanmaoj.service.QuestionSubmitService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,11 +33,13 @@ public class JudgeServiceImpl implements JudgeService {
     @Resource
     private QuestionSubmitService questionSubmitService;
 
+    @Resource JudgeManager judgeManager;
+
     @Value("${codesandbox.type:example}")
     private String type;
 
     @Override
-    public QuestionSubmitVO doJudge(long questionSubmitId) {
+    public QuestionSubmit doJudge(long questionSubmitId) {
         QuestionSubmit questionSubmit = questionSubmitService.getById(questionSubmitId);
         if (questionSubmit == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "提交信息不存在");
@@ -74,8 +75,28 @@ public class JudgeServiceImpl implements JudgeService {
                 .inputList(inputList)
                 .build();
         ExecuteCodeResponse executeCodeResponse = codeSandBox.executeCode(executeCodeRequest);
-        //todo 根据执行结果判断题目状态（是否执行错误）
-
-        return null;
+        List<String> outputList = executeCodeResponse.getOutputList();
+        //根据执行结果判断题目状态（是否执行错误)
+        JudgeContext judgeContext = new JudgeContext();
+        judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
+        judgeContext.setInputList(inputList);
+        judgeContext.setOutputList(outputList);
+        judgeContext.setJudgeCaseList(judgeCaseList);
+        judgeContext.setQuestion(question);
+        judgeContext.setQuestionSubmit(questionSubmit);
+        //选择策略
+        JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
+        //修改数据库的判题记录
+        questionSubmitUpdate = new QuestionSubmit();
+        questionSubmitUpdate.setId(questionSubmitId);
+        questionSubmitUpdate.setJudgeInfo(JSONUtil.toJsonStr(judgeInfo));
+        String message = judgeInfo.getMessage();
+        questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
+        boolean update = questionSubmitService.updateById(questionSubmitUpdate);
+        if (!update){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新失败");
+        }
+        QuestionSubmit questionSubmitResult = questionSubmitService.getById(questionSubmitId);
+        return questionSubmitResult;
     }
 }

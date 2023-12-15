@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.constant.CommonConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
+import com.hyl.zhanmaoj.judge.JudgeService;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitAddRequest;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Question;
@@ -22,10 +23,12 @@ import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +45,10 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 
     @Resource
     private UserService userService;
+
+    @Resource
+    @Lazy
+    private JudgeService judgeService;
 
     /**
      * 提交问题
@@ -80,9 +87,12 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (!save) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "数据插入失败");
         }
-        //todo 执行判题服务
-
-        return questionSubmit.getId();
+        Long id = questionSubmit.getId();
+        //执行判题服务:执行比较慢（异步）
+        CompletableFuture.runAsync(() -> {
+            judgeService.doJudge(id);
+        });
+        return id;
     }
 
 

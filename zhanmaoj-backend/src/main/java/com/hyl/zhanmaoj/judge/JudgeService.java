@@ -1,9 +1,9 @@
 package com.hyl.zhanmaoj.judge;
 
 
-import com.hyl.zhanmaoj.model.vo.QuestionSubmitVO;
+import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
 
 public interface JudgeService {
 
-    QuestionSubmitVO doJudge(long questionSubmitId);
+    QuestionSubmit doJudge(long questionSubmitId);
 }
