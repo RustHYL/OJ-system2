@@ -1,4 +1,4 @@
-package com.hyl.zhanmaoj.model.dto.questionsbumit;
+package com.hyl.zhanmaojcodesandbox.model;
 
 import lombok.Data;
 

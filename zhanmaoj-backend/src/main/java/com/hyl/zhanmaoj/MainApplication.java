@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
  * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
-// todo 如需开启 Redis，须移除 exclude 中的内容
+
 @SpringBootApplication
 @MapperScan("com.hyl.zhanmaoj.mapper")
 @EnableScheduling

@@ -3,12 +3,14 @@ package com.hyl.zhanmaoj.judge.codesandbox.impl;
 import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBox;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeResponse;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.JudgeInfo;
+import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
 import com.hyl.zhanmaoj.model.enums.JudgeInfoMessageEnum;
 import com.hyl.zhanmaoj.model.enums.QuestionSubmitStatusEnum;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+@Slf4j
 public class ExampleCodeSandBox implements CodeSandBox {
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {

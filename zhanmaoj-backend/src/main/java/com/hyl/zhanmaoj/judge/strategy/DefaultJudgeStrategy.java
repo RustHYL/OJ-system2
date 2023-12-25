@@ -3,7 +3,7 @@ package com.hyl.zhanmaoj.judge.strategy;
 import cn.hutool.json.JSONUtil;
 import com.hyl.zhanmaoj.model.dto.question.JudgeCase;
 import com.hyl.zhanmaoj.model.dto.question.JudgeConfig;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.JudgeInfo;
+import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.enums.JudgeInfoMessageEnum;
 

@@ -2,7 +2,6 @@ package com.hyl.zhanmaoj.judge.codesandbox;
 
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeResponse;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
