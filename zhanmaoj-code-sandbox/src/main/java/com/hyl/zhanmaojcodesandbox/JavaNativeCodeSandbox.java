@@ -3,16 +3,23 @@ package com.hyl.zhanmaojcodesandbox;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.StrUtil;
 import com.hyl.zhanmaojcodesandbox.model.ExecuteCodeRequest;
 import com.hyl.zhanmaojcodesandbox.model.ExecuteCodeResponse;
+import com.hyl.zhanmaojcodesandbox.model.ExecuteMessage;
+import com.hyl.zhanmaojcodesandbox.model.JudgeInfo;
+import com.hyl.zhanmaojcodesandbox.utils.ProcessUtils;
+import org.springframework.util.StopWatch;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class JavaNativeCodeSandbox implements CodeSandbox {
 
@@ -50,45 +57,76 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         //编译代码
         String compileCmd = String.format("javac -encoding utf-8 %s", userCodeFile.getAbsolutePath());
         try {
-            Process process = Runtime.getRuntime().exec(compileCmd);
-            //等待程序执行，获取错误码
-            int exitValue = process.waitFor();
-            //正常退出
-            if (exitValue == 0) {
-                System.out.println("编译成功");
-                //分批获取正常进程输出
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                StringBuilder compileOutputStringBuilder = new StringBuilder();
-                String compileOutput;
-                //逐行读取
-                while ((compileOutput = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutput);
-                }
-                System.out.println(compileOutputStringBuilder);
-            } else {
-                System.out.println("编译失败:" + exitValue);
-                //分批获取正常进程输出
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                StringBuilder compileOutputStringBuilder = new StringBuilder();
-                String compileOutput;
-                //逐行读取
-                while ((compileOutput = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutput);
-                }
-                System.out.println(compileOutputStringBuilder);
-                //分批获取异常进程输出
-                BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                StringBuilder errorCompileOutputStringBuilder = new StringBuilder();
-                String errorCompileOutput;
-                //逐行读取
-                while ((errorCompileOutput = errorBufferedReader.readLine()) != null) {
-                    errorCompileOutputStringBuilder.append(errorCompileOutput);
-                }
-                System.out.println(errorCompileOutputStringBuilder);
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            Process compileProcess = Runtime.getRuntime().exec(compileCmd);
+            ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(compileProcess, "编译");
+            System.out.println(executeMessage);
+        } catch (Exception e) {
+            return this.getErrorResponse(e);
         }
-        return null;
+        //执行程序
+        List<ExecuteMessage> executeMessageList = new ArrayList<>();
+        for (String inputArgs : inputList) {
+            String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+            try {
+                Process runProcess = Runtime.getRuntime().exec(runCmd);
+                ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
+                executeMessageList.add(executeMessage);
+                System.out.println(executeMessage);
+            } catch (Exception e) {
+                return this.getErrorResponse(e);
+            }
+        }
+        //收集整理输出结果
+        ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
+        List<String> outputList = new ArrayList<>();
+        for (ExecuteMessage executeMessage : executeMessageList) {
+            String errorMessage = executeMessage.getErrorMessage();
+            //如果有错误直接设置响应为错误，响应信息为错误信息
+            //todo 改造设置成输出全部output（不管错误或者成功），可以用于打分（错一部分）
+            if (StrUtil.isNotBlank(errorMessage)) {
+                executeCodeResponse.setMessage(errorMessage);
+                //用户提交的代码错误
+                executeCodeResponse.setStatus(3);
+                break;
+            }
+            outputList.add(executeMessage.getMessage());
+        }
+        executeCodeResponse.setOutputList(outputList);
+        if (outputList.size() == executeMessageList.size()) {
+            executeCodeResponse.setStatus(1);
+        }
+        JudgeInfo judgeInfo = new JudgeInfo();
+        //时间使用总和
+//        judgeInfo.setTime(executeMessageList.stream().mapToLong(ExecuteMessage::getTime).sum());
+        //时间使用最大值,容易和判题标准时间作比较，进行判题
+        judgeInfo.setTime(executeMessageList.stream().mapToLong(ExecuteMessage::getTime).max().getAsLong());
+//        judgeInfo.setMemory();
+        //todo 借助第三方库从process中获取
+        executeCodeResponse.setJudgeInfo(judgeInfo);
+        //文件清理
+        if (userCodeFile.getParentFile() != null) {
+            boolean del = FileUtil.del(userCodeParentPath);
+            if (del) {
+                System.out.println("删除文件夹成功");
+            } else {
+                System.out.println("删除文件夹失败");
+            }
+        }
+        return executeCodeResponse;
+    }
+
+    /**
+     * 获取程序运行错误响应
+     * @param e
+     * @return
+     */
+    private ExecuteCodeResponse getErrorResponse(Throwable e) {
+        ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
+        executeCodeResponse.setOutputList(new ArrayList<>());
+        executeCodeResponse.setMessage(e.getMessage());
+        //程序执行错误
+        executeCodeResponse.setStatus(2);
+        executeCodeResponse.setJudgeInfo(new JudgeInfo());
+        return executeCodeResponse;
     }
 }
