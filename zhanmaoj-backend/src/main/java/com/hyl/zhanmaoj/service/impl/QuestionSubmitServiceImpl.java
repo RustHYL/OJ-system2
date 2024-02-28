@@ -109,7 +109,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
             return queryWrapper;
         }
         String language = questionSubmitQueryRequest.getLanguage();
-        Integer status = Integer.valueOf(questionSubmitQueryRequest.getStatus());
+        Integer status = questionSubmitQueryRequest.getStatus();;
         Long questionId = questionSubmitQueryRequest.getQuestionId();
         Long userId = questionSubmitQueryRequest.getUserId();
         String sortField = questionSubmitQueryRequest.getSortField();

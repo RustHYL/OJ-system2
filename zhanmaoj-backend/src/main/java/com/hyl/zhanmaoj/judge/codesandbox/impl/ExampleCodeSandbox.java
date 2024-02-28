@@ -1,6 +1,6 @@
 package com.hyl.zhanmaoj.judge.codesandbox.impl;
 
-import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBox;
+import com.hyl.zhanmaoj.judge.codesandbox.CodeSandbox;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeResponse;
 import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class ExampleCodeSandBox implements CodeSandBox {
+public class ExampleCodeSandbox implements CodeSandbox {
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         List<String> inputList = executeCodeRequest.getInputList();

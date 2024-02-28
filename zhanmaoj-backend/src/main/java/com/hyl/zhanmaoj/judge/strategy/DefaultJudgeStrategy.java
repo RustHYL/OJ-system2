@@ -8,6 +8,7 @@ import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.enums.JudgeInfoMessageEnum;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DefaultJudgeStrategy implements JudgeStrategy {
     @Override
@@ -18,8 +19,8 @@ public class DefaultJudgeStrategy implements JudgeStrategy {
         List<JudgeCase> judgeCaseList = judgeContext.getJudgeCaseList();
         Question question = judgeContext.getQuestion();
         JudgeInfo judgeInfoResponse = new JudgeInfo();
-        Long memory = judgeInfo.getMemory();
-        Long time = judgeInfo.getTime();
+        Long memory = Optional.ofNullable(judgeInfo.getMemory()).orElse(0L);
+        Long time = Optional.ofNullable(judgeInfo.getTime()).orElse(0L);
         judgeInfoResponse.setMemory(memory);
         judgeInfoResponse.setTime(time);
         //根据执行结果判断题目状态（是否执行错误）

@@ -9,6 +9,7 @@ import UserRegisterView from "@/views/user/UserRegisterView.vue";
 import AddQuestionView from "@/views/question/AddQuestionView.vue";
 import ManageQuestionView from "@/views/question/ManageQuestionView.vue";
 import QuestionsView from "@/views/question/QuestionsView.vue";
+import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
 import AnswerQuestionView from "@/views/question/AnswerQuestionView.vue";
 
 
@@ -58,6 +59,11 @@ export const routes: Array<RouteRecordRaw> = [
         path: '/questions',
         name: '浏览题目',
         component: QuestionsView,
+    },
+    {
+        path: '/question_submit',
+        name: '提交列表',
+        component: QuestionSubmitView,
         meta: {
             access: ACCESS_ENUM.USER,
         }

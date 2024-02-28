@@ -3,9 +3,9 @@ package com.hyl.zhanmaoj.judge;
 import cn.hutool.json.JSONUtil;
 import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.exception.BusinessException;
-import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBox;
-import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBoxFactory;
-import com.hyl.zhanmaoj.judge.codesandbox.CodeSandBoxProxy;
+import com.hyl.zhanmaoj.judge.codesandbox.CodeSandbox;
+import com.hyl.zhanmaoj.judge.codesandbox.CodeSandboxFactory;
+import com.hyl.zhanmaoj.judge.codesandbox.CodeSandboxProxy;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.hyl.zhanmaoj.judge.codesandbox.model.ExecuteCodeResponse;
 import com.hyl.zhanmaoj.judge.strategy.JudgeContext;
@@ -62,8 +62,8 @@ public class JudgeServiceImpl implements JudgeService {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新失败");
         }
         //调用代码沙箱
-        CodeSandBox codeSandBox = CodeSandBoxFactory.newInstance(type);
-        codeSandBox = new CodeSandBoxProxy(codeSandBox);
+        CodeSandbox codeSandBox = CodeSandboxFactory.newInstance(type);
+        codeSandBox = new CodeSandboxProxy(codeSandBox);
         String code = questionSubmit.getCode();
         String language = questionSubmit.getLanguage();
         String judgeCaseStr = question.getJudgeCase();

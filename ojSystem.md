@@ -650,8 +650,6 @@ openapi --input http://localhost:8101/api//v2/api-docs --output ./generated --cl
 const res = await UserControllerService.getLoginUserUsingGet();
 ```
 
-
-
 如果要自定义请求参数：
 
 1）使用代码生成器提供的全局参数修改对象（generated/core/OpenAPI.ts）：
