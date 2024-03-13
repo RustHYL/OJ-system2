@@ -14,8 +14,50 @@
       </a-menu>
     </a-col>
     <a-col flex="100px">
-      <div>{{ store.state.user?.loginUser?.userName ?? '未登录' }}</div>
+        <a-dropdown trigger="click">
+          <a-avatar
+              :size="32"
+              :style="{ marginRight: '8px', cursor: 'pointer' }"
+          >
+            <img alt="avatar" :src="store.state.user?.loginUser?.userAvatar || defaultUserAvatar" />
+          </a-avatar>
+          <template #content>
+            <a-doption v-if="store.state.user?.loginUser.id">
+              <a-space @click="$router.push({ name: 'Info' })">
+                <icon-user />
+                <span>
+                  用户中心
+                </span>
+              </a-space>
+            </a-doption>
+            <a-doption v-if="store.state.user?.loginUser.id">
+              <a-space @click="$router.push({ name: 'Setting' })">
+                <icon-settings />
+                <span>
+                  设置中心
+                </span>
+              </a-space>
+            </a-doption>
+            <a-doption v-if="store.state.user?.loginUser.id">
+              <a-space @click="handleLogout">
+                <icon-export />
+                <span>
+                  退出登陆
+                </span>
+              </a-space>
+            </a-doption>
+            <a-doption v-if="!store.state.user?.loginUser.id">
+              <a-space @click="handleLogin">
+                <icon-export />
+                <span>
+                  登陆
+                </span>
+              </a-space>
+            </a-doption>
+          </template>
+        </a-dropdown>
     </a-col>
+<!--    <div>{{ store.state.user?.loginUser?.userName ?? '未登录' }}</div>-->
   </a-row>
 </template>
 
@@ -25,12 +67,13 @@ import {useRouter} from "vue-router";
 import {computed, ref} from "vue";
 import {useStore} from "vuex";
 import checkAccess from "@/access/checkAccess";
-import ACCESS_ENUM from "@/access/accessEnum";
+import {UserControllerService} from "../../generated";
+import message from "@arco-design/web-vue/es/message";
 
 const router = useRouter();
 const selectedKeys = ref(['/']);
 const store = useStore();
-
+const defaultUserAvatar = require('@/assets/notLogin.svg');
 
 const visibleRoutes = computed(() => {
   return routes.filter((item, index) => {
@@ -44,13 +87,6 @@ const visibleRoutes = computed(() => {
 
 
 
-// setTimeout(() =>{
-//   store.dispatch("user/getLoginUser", {
-//     username: "管理员",
-//     userRole: ACCESS_ENUM.ADMIN,
-//   });
-// }, 3000)
-
 router.afterEach((to, from, failure) => {
   selectedKeys.value = [to.path];
 })
@@ -60,6 +96,21 @@ const doMenuClick = (key: string) =>{
     path: key
   });
 }
+
+const handleLogout = async () => {
+  const res = await UserControllerService.userLogoutUsingPost();
+  if (res.code === 0) {
+    message.success("退出成功");
+    await router.push('/user/login');
+  } else {
+    message.error("退出失败:" + res.message);
+  }
+};
+
+const handleLogin = async () => {
+  await router.push('/user/login');
+};
+
 </script>
 
 <style scoped>

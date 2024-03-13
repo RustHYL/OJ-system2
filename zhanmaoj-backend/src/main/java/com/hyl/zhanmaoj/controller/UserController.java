@@ -1,5 +1,6 @@
 package com.hyl.zhanmaoj.controller;
 
+
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hyl.zhanmaoj.annotation.AuthCheck;
 import com.hyl.zhanmaoj.common.BaseResponse;
@@ -10,17 +11,15 @@ import com.hyl.zhanmaoj.config.WxOpenConfig;
 import com.hyl.zhanmaoj.constant.UserConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
-import com.hyl.zhanmaoj.model.dto.user.UserAddRequest;
-import com.hyl.zhanmaoj.model.dto.user.UserLoginRequest;
-import com.hyl.zhanmaoj.model.dto.user.UserQueryRequest;
-import com.hyl.zhanmaoj.model.dto.user.UserRegisterRequest;
-import com.hyl.zhanmaoj.model.dto.user.UserUpdateMyRequest;
-import com.hyl.zhanmaoj.model.dto.user.UserUpdateRequest;
+import com.hyl.zhanmaoj.model.dto.user.*;
 import com.hyl.zhanmaoj.model.entity.User;
 import com.hyl.zhanmaoj.model.vo.LoginUserVO;
+import com.hyl.zhanmaoj.model.vo.PageVO;
+import com.hyl.zhanmaoj.model.vo.UserAdminVO;
 import com.hyl.zhanmaoj.model.vo.UserVO;
 import com.hyl.zhanmaoj.service.UserService;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,9 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户接口
- *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
 @RestController
 @RequestMapping("/user")
@@ -95,6 +91,27 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        return ResultUtils.success(loginUserVO);
+    }
+
+    /**
+     * 用户后台登录
+     *
+     * @param userLoginRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/login/admin")
+    public BaseResponse<LoginUserVO> userAdminLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        LoginUserVO loginUserVO = userService.userAdminLogin(userAccount, userPassword, request);
         return ResultUtils.success(loginUserVO);
     }
 
@@ -167,6 +184,9 @@ public class UserController {
         }
         User user = new User();
         BeanUtils.copyProperties(userAddRequest, user);
+        user.setGender(0);
+        user.setUserProfile("这个人很懒什么都没有~");
+        user.setUserName(user.getUserAccount());
         boolean result = userService.save(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(user.getId());
@@ -180,7 +200,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.SUPER_ROLE)
     public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -197,11 +217,17 @@ public class UserController {
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @AuthCheck(mustRole = UserConstant.SUPER_ROLE)
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
             HttpServletRequest request) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        if (StringUtils.isNotBlank(userUpdateRequest.getUserRole())) {
+            User loginUser = userService.getLoginUser(request);
+            if (!loginUser.getUserRole().equals(UserConstant.SUPER_ROLE)){
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "用户权限不足");
+            }
         }
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
@@ -285,10 +311,48 @@ public class UserController {
         return ResultUtils.success(userVOPage);
     }
 
-    // endregion
+    /**
+     * 管理员用户查询(排除登陆本人)
+     * @param userSearchAdminRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/list/admin/vo")
+    public BaseResponse<List<UserAdminVO>> listUserVO(@RequestBody UserSearchAdminRequest userSearchAdminRequest,
+                                                      HttpServletRequest request) {
+        if (userSearchAdminRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        PageVO pageVO = userSearchAdminRequest.getPageVO();
+        long size = pageVO.getSize();
+        long current = pageVO.getCurrent();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        UserAdminVO userAdminVO = userSearchAdminRequest.getUserAdminVO();
+        if (userAdminVO == null) {
+            userAdminVO = new UserAdminVO();
+        }
+        userAdminVO.setPageSize(size);
+        userAdminVO.setCurrent(current);
+        UserQueryRequest userQueryRequest = new UserQueryRequest();
+        BeanUtils.copyProperties(userAdminVO, userQueryRequest);
+        User loginUser = userService.getLoginUser(request);
+        String userRole = loginUser.getUserRole();
+        List<User> userList = userService.list(userService.getQueryWrapper(userQueryRequest));
+        //过滤自己的信息
+        List<User> userListFinal = userList.stream().filter(user -> !user.getId().equals(loginUser.getId()))
+                .collect(Collectors.toList());
+        //如果是管理员过滤超级管理员信息
+        if (UserConstant.ADMIN_ROLE.equals(userRole)) {
+            userListFinal = userListFinal.stream().filter(user -> !user.isSuper()).collect(Collectors.toList());
+        }
+        List<UserAdminVO> userAdminVOList = userService.getUserAdminVO(userListFinal);
+        return ResultUtils.success(userAdminVOList);
+    }
+
 
     /**
-     * 更新个人信息
+     *   更新个人信息
      *
      * @param userUpdateMyRequest
      * @param request

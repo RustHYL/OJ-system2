@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.constant.CommonConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
+import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.judge.JudgeService;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitAddRequest;
+import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
@@ -27,9 +29,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static com.hyl.zhanmaoj.common.DateUtils.convertStringToDate;
 
 /**
 * @author Alan
@@ -49,6 +54,8 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     @Lazy
     private JudgeService judgeService;
+
+
 
     /**
      * 提交问题
@@ -116,9 +123,45 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         String sortOrder = questionSubmitQueryRequest.getSortOrder();
         // 拼接查询条件
         queryWrapper.eq(StringUtils.isNotBlank(language), "language", language);
-        queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
-        queryWrapper.eq(ObjectUtils.isNotEmpty(questionId), "questionId", questionId);
+        queryWrapper.like(ObjectUtils.isNotEmpty(userId), "userId", userId);
+        queryWrapper.like(ObjectUtils.isNotEmpty(questionId), "questionId", questionId);
         queryWrapper.eq(QuestionSubmitStatusEnum.getEnumByValue(status) != null, "status", status);
+        queryWrapper.eq("isDelete", false);
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
+        return queryWrapper;
+    }
+
+
+    /**
+     * 获取查询包装类（用户根据哪些字段查询，根据前端传来的请求对象，得到 mybatis 框架支持的查询 QueryWrapper 类）
+     *
+     * @param questionSubmitQueryRequest
+     * @return
+     */
+    @Override
+    public QueryWrapper<QuestionSubmit> getQueryWrapper(QuestionSubmitQueryAdminRequest questionSubmitQueryRequest) {
+        QueryWrapper<QuestionSubmit> queryWrapper = new QueryWrapper<>();
+        if (questionSubmitQueryRequest == null) {
+            return queryWrapper;
+        }
+        Long id = questionSubmitQueryRequest.getId();
+        String language = questionSubmitQueryRequest.getLanguage();
+        Integer status = questionSubmitQueryRequest.getStatus();;
+        Long questionId = questionSubmitQueryRequest.getQuestionId();
+        Long userId = questionSubmitQueryRequest.getUserId();
+        Date createTime = questionSubmitQueryRequest.getCreateTime();
+        Date updateTime = questionSubmitQueryRequest.getUpdateTime();
+        String sortField = questionSubmitQueryRequest.getSortField();
+        String sortOrder = questionSubmitQueryRequest.getSortOrder();
+        // 拼接查询条件
+        queryWrapper.like(id != null, "id", id);
+        queryWrapper.eq(StringUtils.isNotBlank(language), "language", language);
+        queryWrapper.like(ObjectUtils.isNotEmpty(userId), "userId", userId);
+        queryWrapper.like(ObjectUtils.isNotEmpty(questionId), "questionId", questionId);
+        queryWrapper.eq(QuestionSubmitStatusEnum.getEnumByValue(status) != null, "status", status);
+        queryWrapper.between(createTime != null, "createTime", convertStringToDate(createTime, "00:00:00"), convertStringToDate(createTime, "23:59:59"));
+        queryWrapper.between(updateTime != null, "updateTime", convertStringToDate(updateTime, "00:00:00"), convertStringToDate(updateTime, "23:59:59"));
         queryWrapper.eq("isDelete", false);
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
@@ -150,6 +193,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         questionSubmitVOPage.setRecords(questionSubmitVOList);
         return questionSubmitVOPage;
     }
+
 
 
 }

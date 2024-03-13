@@ -10,7 +10,6 @@ import lombok.Data;
 
 /**
  * 题目
- * @TableName question
  */
 @TableName(value ="question")
 @Data

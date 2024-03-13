@@ -20,6 +20,10 @@ const checkAccess = (loginUser: any, needAccess = ACCESS_ENUM.NOT_LOGIN) =>{
     if (needAccess === ACCESS_ENUM.ADMIN){
         return loginUserAccess === ACCESS_ENUM.ADMIN;
     }
+    //需要超级管理员
+    if (needAccess === ACCESS_ENUM.SUPER){
+        return loginUserAccess === ACCESS_ENUM.SUPER;
+    }
 }
 
 export default checkAccess

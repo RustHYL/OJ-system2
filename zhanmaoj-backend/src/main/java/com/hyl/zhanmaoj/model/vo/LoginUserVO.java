@@ -7,8 +7,6 @@ import lombok.Data;
 /**
  * 已登录用户视图（脱敏）
  *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  **/
 @Data
 public class LoginUserVO implements Serializable {
@@ -34,6 +32,21 @@ public class LoginUserVO implements Serializable {
     private String userProfile;
 
     /**
+     * 电话
+     */
+    private String phone;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 性别
+     */
+    private Integer gender;
+
+    /**
      * 用户角色：user/admin/ban
      */
     private String userRole;
@@ -42,11 +55,6 @@ public class LoginUserVO implements Serializable {
      * 创建时间
      */
     private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 }

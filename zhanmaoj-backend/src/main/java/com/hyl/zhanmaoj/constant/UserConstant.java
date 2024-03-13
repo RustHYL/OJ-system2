@@ -3,8 +3,6 @@ package com.hyl.zhanmaoj.constant;
 /**
  * 用户常量
  *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
 public interface UserConstant {
 
@@ -24,6 +22,11 @@ public interface UserConstant {
      * 管理员角色
      */
     String ADMIN_ROLE = "admin";
+
+    /**
+     * 超级管理员角色
+     */
+    String SUPER_ROLE = "super";
 
     /**
      * 被封号

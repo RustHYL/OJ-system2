@@ -5,9 +5,6 @@ import lombok.Data;
 
 /**
  * 用户更新请求
- *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
 @Data
 public class UserUpdateRequest implements Serializable {
@@ -30,6 +27,21 @@ public class UserUpdateRequest implements Serializable {
      * 简介
      */
     private String userProfile;
+
+    /**
+     * 电话
+     */
+    private String phone;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 性别
+     */
+    private Integer gender;
 
     /**
      * 用户角色：user/admin/ban

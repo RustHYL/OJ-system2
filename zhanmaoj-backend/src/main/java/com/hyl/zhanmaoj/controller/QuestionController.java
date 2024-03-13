@@ -2,7 +2,7 @@ package com.hyl.zhanmaoj.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
-import com.hyl.zhanmaoj.annotation.AuthCheck;
+import com.google.gson.JsonSyntaxException;
 import com.hyl.zhanmaoj.common.BaseResponse;
 import com.hyl.zhanmaoj.common.DeleteRequest;
 import com.hyl.zhanmaoj.common.ErrorCode;
@@ -10,31 +10,33 @@ import com.hyl.zhanmaoj.common.ResultUtils;
 import com.hyl.zhanmaoj.constant.UserConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
+import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
 import com.hyl.zhanmaoj.model.dto.question.*;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitAddRequest;
+import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryRequest;
-import com.hyl.zhanmaoj.model.dto.user.UserQueryRequest;
+import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitUpdateAdminRequest;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
 import com.hyl.zhanmaoj.model.entity.User;
-import com.hyl.zhanmaoj.model.vo.QuestionSubmitVO;
-import com.hyl.zhanmaoj.model.vo.QuestionVO;
+import com.hyl.zhanmaoj.model.enums.QuestionSubmitStatusEnum;
+import com.hyl.zhanmaoj.model.vo.*;
 import com.hyl.zhanmaoj.service.QuestionService;
 import com.hyl.zhanmaoj.service.QuestionSubmitService;
 import com.hyl.zhanmaoj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 题目接口
  *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
 @RestController
 @RequestMapping("/question")
@@ -91,6 +93,65 @@ public class QuestionController {
         return ResultUtils.success(newQuestionId);
     }
 
+    @PostMapping("/add/backend")
+    public BaseResponse<Long> addQuestionBackend(@RequestBody QuestionAddAdminRequest questionAddRequest, HttpServletRequest request) {
+        if (questionAddRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Question question = new Question();
+        BeanUtils.copyProperties(questionAddRequest, question);
+        String tags = questionAddRequest.getTags();
+        List<String> tagsList = new ArrayList<>();
+        if (StringUtils.isNotBlank(tags)) {
+            try {
+                tagsList = GSON.fromJson(tags, List.class);
+                // 如果转换成功，这里会执行
+                System.out.println("Conversion successful: " + tagsList);
+            } catch (JsonSyntaxException e) {
+                // 如果转换失败，这里会捕获异常并执行
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入标签格式错误");
+            }
+        }
+        String judgeCaseStr = questionAddRequest.getJudgeCase();
+        List<Object> judgeCaseList = new ArrayList<>();
+        if (StringUtils.isNotBlank(judgeCaseStr)) {
+            try {
+                judgeCaseList = GSON.fromJson(judgeCaseStr, List.class);
+                for (Object o : judgeCaseList) {
+                    String json = GSON.toJson(o, Object.class);
+                    GSON.fromJson(json, JudgeCase.class);
+                }
+                // 如果转换成功，这里会执行
+                System.out.println("Conversion successful: " + judgeCaseStr);
+            } catch (JsonSyntaxException e) {
+                // 如果转换失败，这里会捕获异常并执行
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入判题用例格式错误");
+            }
+        }
+        question.setJudgeCase(GSON.toJson(judgeCaseList, List.class));
+        String judgeConfigStr = questionAddRequest.getJudgeConfig();
+        JudgeConfig judgeConfig = new JudgeConfig();
+        if (StringUtils.isNotBlank(judgeConfigStr)) {
+            try {
+                judgeConfig = GSON.fromJson(judgeConfigStr, JudgeConfig.class);
+                // 如果转换成功，这里会执行
+                System.out.println("Conversion successful: " + judgeConfig.toString());
+            } catch (JsonSyntaxException e) {
+                // 如果转换失败，这里会捕获异常并执行
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入判题配置格式错误");
+            }
+        }
+        question.setJudgeConfig(GSON.toJson(judgeConfig, JudgeConfig.class));
+        User loginUser = userService.getLoginUser(request);
+        question.setUserId(loginUser.getId());
+        question.setFavourNum(0);
+        question.setThumbNum(0);
+        boolean result = questionService.save(question);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        long newQuestionId = question.getId();
+        return ResultUtils.success(newQuestionId);
+    }
+
     /**
      * 删除
      *
@@ -123,7 +184,6 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateQuestion(@RequestBody QuestionUpdateRequest questionUpdateRequest) {
         if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -142,6 +202,66 @@ public class QuestionController {
         if (judgeConfig != null) {
             question.setJudgeConfig(GSON.toJson(judgeConfig));
         }
+        // 参数校验
+        questionService.validQuestion(question, false);
+        long id = questionUpdateRequest.getId();
+        // 判断是否存在
+        Question oldQuestion = questionService.getById(id);
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        boolean result = questionService.updateById(question);
+        return ResultUtils.success(result);
+    }
+
+    @PostMapping("/update/backend")
+    public BaseResponse<Boolean> updateQuestionBackend(@RequestBody QuestionUpdateAdminRequest questionUpdateRequest) {
+        if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Question question = new Question();
+        BeanUtils.copyProperties(questionUpdateRequest, question);
+        String tags = questionUpdateRequest.getTags();
+        List<String> tagsList = new ArrayList<>();
+        if (StringUtils.isNotBlank(tags)) {
+            try {
+                tagsList = GSON.fromJson(tags, List.class);
+                // 如果转换成功，这里会执行
+                System.out.println("Conversion successful: " + tagsList);
+            } catch (JsonSyntaxException e) {
+                // 如果转换失败，这里会捕获异常并执行
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入标签格式错误");
+            }
+        }
+        question.setTags(GSON.toJson(tagsList));
+        String judgeCaseStr = questionUpdateRequest.getJudgeCase();
+        List<Object> judgeCaseList = new ArrayList<>();
+        if (StringUtils.isNotBlank(judgeCaseStr)) {
+            try {
+                judgeCaseList = GSON.fromJson(judgeCaseStr, List.class);
+                for (Object o : judgeCaseList) {
+                    String json = GSON.toJson(o, Object.class);
+                    GSON.fromJson(json, JudgeCase.class);
+                }
+                // 如果转换成功，这里会执行
+                System.out.println("Conversion successful: " + judgeCaseStr);
+            } catch (JsonSyntaxException e) {
+                // 如果转换失败，这里会捕获异常并执行
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入判题用例格式错误");
+            }
+        }
+        question.setJudgeCase(GSON.toJson(judgeCaseList, List.class));
+        String judgeConfigStr = questionUpdateRequest.getJudgeConfig();
+        JudgeConfig judgeConfig = new JudgeConfig();
+        if (StringUtils.isNotBlank(judgeConfigStr)) {
+            try {
+                judgeConfig = GSON.fromJson(judgeConfigStr, JudgeConfig.class);
+                // 如果转换成功，这里会执行
+                System.out.println("Conversion successful: " + judgeConfig.toString());
+            } catch (JsonSyntaxException e) {
+                // 如果转换失败，这里会捕获异常并执行
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入判题配置格式错误");
+            }
+        }
+        question.setJudgeConfig(GSON.toJson(judgeConfig, JudgeConfig.class));
         // 参数校验
         questionService.validQuestion(question, false);
         long id = questionUpdateRequest.getId();
@@ -256,22 +376,46 @@ public class QuestionController {
     }
 
     /**
-     * 分页获取问题列表（仅管理员）
+     * 分页获取问题列表（Page）（仅管理员）
      *
      * @param questionQueryRequest
      * @param request
      * @return
      */
     @PostMapping("/list/page")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<Question>> listQuestionByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
                                                    HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String userRole = loginUser.getUserRole();
+        if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
                 questionService.getQueryWrapper(questionQueryRequest));
         return ResultUtils.success(questionPage);
     }
+
+    /**
+     * 分页获取问题列表（List）（仅管理员）
+     *
+     * @param questionQueryRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/list")
+    public BaseResponse<List<Question>> listQuestionByList(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                           HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String userRole = loginUser.getUserRole();
+        if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        List<Question> questionList = questionService.list(questionService.getQueryWrapper(questionQueryRequest));
+        return ResultUtils.success(questionList);
+    }
+
 
     /**
      * 根据 id 获取
@@ -332,6 +476,75 @@ public class QuestionController {
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUser));
     }
 
+    /**
+     * List取题目提交列表（管理员）
+     *
+     * @param questionSubmitQueryRequest
+     * @param request
+     * @return 提交记录 id
+     */
+    @PostMapping("/question_submit/list")
+    public BaseResponse<List<QuestionSubmit>> listQuestionSubmit(@RequestBody QuestionSubmitQueryAdminRequest questionSubmitQueryRequest,
+                                                                         HttpServletRequest request) {
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        questionSubmitQueryRequest.setPageSize(1);
+        List<QuestionSubmit> questionSubmitList = questionSubmitService.list(questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
+        return ResultUtils.success(questionSubmitList);
+    }
+
+
+    @PostMapping("/question_submit/delete")
+    public BaseResponse<Boolean> deleteQuestionSubmit(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getLoginUser(request);
+        long id = deleteRequest.getId();
+        // 判断是否存在
+        QuestionSubmit oldQuestionSubmit = questionSubmitService.getById(id);
+        ThrowUtils.throwIf(oldQuestionSubmit == null, ErrorCode.NOT_FOUND_ERROR);
+        // 仅本人或管理员可删除
+        if (!oldQuestionSubmit.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        boolean b = questionSubmitService.removeById(id);
+        return ResultUtils.success(b);
+    }
+
+    @PostMapping("question_submit/update/backend")
+    public BaseResponse<Boolean> updateQuestionSubmitBackend(@RequestBody QuestionSubmitUpdateAdminRequest questionSubmitUpdateRequest) {
+        if (questionSubmitUpdateRequest == null || questionSubmitUpdateRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QuestionSubmit questionSubmit = new QuestionSubmit();
+        BeanUtils.copyProperties(questionSubmitUpdateRequest, questionSubmit);
+        String judgeInfoStr = questionSubmitUpdateRequest.getJudgeInfo();
+        JudgeInfo judgeInfo = new JudgeInfo();
+        if (StringUtils.isNotBlank(judgeInfoStr)) {
+            try {
+                judgeInfo = GSON.fromJson(judgeInfoStr, JudgeInfo.class);
+                // 如果转换成功，这里会执行
+                System.out.println("Conversion successful: " + judgeInfoStr);
+            } catch (JsonSyntaxException e) {
+                // 如果转换失败，这里会捕获异常并执行
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入判题信息格式错误");
+            }
+        }
+        questionSubmit.setJudgeInfo(GSON.toJson(judgeInfo, JudgeInfo.class));
+        //校验
+        Integer status = questionSubmit.getStatus();
+        if (QuestionSubmitStatusEnum.getEnumByValue(status) == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "状态不存在");
+        }
+        long id = questionSubmitUpdateRequest.getId();
+        // 判断是否存在
+        QuestionSubmit oldQuestionSubmit = questionSubmitService.getById(id);
+        ThrowUtils.throwIf(oldQuestionSubmit == null, ErrorCode.NOT_FOUND_ERROR);
+        boolean result = questionSubmitService.updateById(questionSubmit);
+        return ResultUtils.success(result);
+    }
 
 
 }

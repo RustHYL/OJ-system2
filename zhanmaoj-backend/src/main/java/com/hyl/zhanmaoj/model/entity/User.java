@@ -9,13 +9,11 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.hyl.zhanmaoj.common.PageRequest;
+import com.hyl.zhanmaoj.model.enums.UserRoleEnum;
 import lombok.Data;
 
 /**
  * 用户
- *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
 @TableName(value = "user")
 @Data
@@ -63,6 +61,21 @@ public class User implements Serializable {
     private String userProfile;
 
     /**
+     * 电话
+     */
+    private String phone;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 性别
+     */
+    private Integer gender;
+
+    /**
      * 用户角色：user/admin/ban
      */
     private String userRole;
@@ -85,4 +98,8 @@ public class User implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+    public boolean isSuper() {
+        return UserRoleEnum.SUPER.getValue().equals(userRole);
+    }
 }

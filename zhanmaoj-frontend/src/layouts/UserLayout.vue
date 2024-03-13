@@ -2,9 +2,18 @@
   <div id="userLayout">
     <a-layout style="height: 400px;">
       <a-layout-header class="header">
-        <a-space>
-          <img src="../assets/oj-logo.jpg" class="logo">
-          <div class="title">战码OJ</div>
+        <a-space class="logos">
+          <img
+              alt="logo"
+              src="https://i.postimg.cc/ZqVbxPgh/ojlogo.jpg"
+              style="width: 50px"
+          />
+          <a-typography-title
+              :style="{ margin: 0, fontSize: '18px', color: 'black' }"
+              :heading="5"
+          >
+            战码 OJ
+          </a-typography-title>
         </a-space>
       </a-layout-header>
       <a-layout-content class="content">
@@ -20,34 +29,38 @@
   text-align: center;
 }
 
-#userLayout .title {
-  color: #444;
-  margin-left: 16px;
-}
-
-#userLayout .logo {
-  width: 48px;
+#userLayout .logos {
+  position: fixed;
+  top: 24px;
+  left: 22px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
 }
 
 #userLayout .header {
-  margin-top: 16px;
-  box-shadow: #eee 1px 1px 5px;
-  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  height: 25%;
+  border-bottom: 1px solid var(--color-border);
 }
 
 #userLayout .content {
-  margin-bottom: 16px;
+  margin-top: 40px;
 }
 
 #userLayout .footer {
-  margin-bottom: 16px;
-  padding: 16px;
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
   text-align: center;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 100%;
 }
+
 </style>
 <script setup lang="ts">
 </script>

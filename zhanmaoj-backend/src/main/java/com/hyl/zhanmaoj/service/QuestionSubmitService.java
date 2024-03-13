@@ -3,7 +3,9 @@ package com.hyl.zhanmaoj.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitAddRequest;
+import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryRequest;
+import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hyl.zhanmaoj.model.entity.User;
@@ -16,6 +18,7 @@ import com.hyl.zhanmaoj.model.vo.QuestionSubmitVO;
 * @createDate 2023-11-24 02:03:47
 */
 public interface QuestionSubmitService extends IService<QuestionSubmit> {
+
 
     /**
      * 题目提交信息
@@ -33,6 +36,14 @@ public interface QuestionSubmitService extends IService<QuestionSubmit> {
      * @return
      */
     QueryWrapper<QuestionSubmit> getQueryWrapper(QuestionSubmitQueryRequest questionSubmitQueryRequest);
+
+    /**
+     * 获取查询条件
+     *
+     * @param questionSubmitQueryAdminRequest
+     * @return
+     */
+    QueryWrapper<QuestionSubmit> getQueryWrapper(QuestionSubmitQueryAdminRequest questionSubmitQueryAdminRequest);
 
     /**
      * 获取题目封装

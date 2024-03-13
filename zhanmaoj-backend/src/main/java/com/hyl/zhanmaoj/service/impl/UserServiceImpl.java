@@ -11,11 +11,16 @@ import com.hyl.zhanmaoj.model.dto.user.UserQueryRequest;
 import com.hyl.zhanmaoj.model.entity.User;
 import com.hyl.zhanmaoj.model.enums.UserRoleEnum;
 import com.hyl.zhanmaoj.model.vo.LoginUserVO;
+import com.hyl.zhanmaoj.model.vo.UserAdminVO;
 import com.hyl.zhanmaoj.model.vo.UserVO;
 import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,11 +32,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import static com.hyl.zhanmaoj.common.DateUtils.convertStringToDate;
+
 /**
  * 用户服务实现
  *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
 @Service
 @Slf4j
@@ -72,6 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             User user = new User();
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
+            user.setGender(0);
             boolean saveResult = this.save(user);
             if (!saveResult) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
@@ -103,6 +109,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user == null) {
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        // 3. 记录用户的登录态
+        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        return this.getLoginUserVO(user);
+    }
+
+    @Override
+    public LoginUserVO userAdminLogin(String userAccount, String userPassword, HttpServletRequest request) {
+        // 1. 校验
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (userAccount.length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
+        }
+        if (userPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+        }
+        // 2. 加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        // 查询用户是否存在
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount", userAccount);
+        queryWrapper.eq("userPassword", encryptPassword);
+        User user = this.baseMapper.selectOne(queryWrapper);
+        // 用户不存在
+        if (user == null) {
+            log.info("user login failed, userAccount cannot match userPassword");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        // 判断是否为普通用户，普通用户无法登陆
+        if (Objects.equals(UserRoleEnum.USER.getValue(), user.getUserRole())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "用户权限不足");
         }
         // 3. 记录用户的登录态
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
@@ -184,7 +223,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 是否为管理员
+     * 是否为管理员或者超级管理员
      *
      * @param request
      * @return
@@ -199,7 +238,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public boolean isAdmin(User user) {
-        return user != null && UserRoleEnum.ADMIN.getValue().equals(user.getUserRole());
+        return user != null && (UserRoleEnum.ADMIN.getValue().equals(user.getUserRole()) || UserRoleEnum.SUPER.getValue().equals(user.getUserRole()));
+    }
+
+
+
+    @Override
+    public boolean isSuper(HttpServletRequest request) {
+        // 仅超级管理员可查询
+        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return isSuper(user);
+    }
+
+    @Override
+    public boolean isSuper(User user) {
+        return user != null && (UserRoleEnum.SUPER.getValue().equals(user.getUserRole()));
     }
 
     /**
@@ -246,25 +300,64 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public UserAdminVO getUserAdminVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserAdminVO userAdminVO = new UserAdminVO();
+        BeanUtils.copyProperties(user, userAdminVO);
+        return userAdminVO;
+    }
+
+    @Override
+    public List<UserAdminVO> getUserAdminVO(List<User> userList) {
+        if (CollectionUtils.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream().map(this::getUserAdminVO).collect(Collectors.toList());
+    }
+
+    @Override
     public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
         if (userQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
         Long id = userQueryRequest.getId();
+        String userAccount = userQueryRequest.getUserAccount();
         String unionId = userQueryRequest.getUnionId();
         String mpOpenId = userQueryRequest.getMpOpenId();
         String userName = userQueryRequest.getUserName();
         String userProfile = userQueryRequest.getUserProfile();
+        String phone = userQueryRequest.getPhone();
+        String email = userQueryRequest.getEmail();
+        Integer gender = userQueryRequest.getGender();
         String userRole = userQueryRequest.getUserRole();
+        Date createTime = userQueryRequest.getCreateTime();
+        Date updateTime = userQueryRequest.getUpdateTime();
+        String createTimeStr = "";
+        String updateTimeStr = "";
+        //防止createTime updateTime为空造成空指针
+        if (createTime != null) {
+            createTimeStr = createTime.toString();
+        }
+        if (updateTime != null) {
+            updateTimeStr = updateTime.toString();
+        }
         String sortField = userQueryRequest.getSortField();
         String sortOrder = userQueryRequest.getSortOrder();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(id != null, "id", id);
+        queryWrapper.like(id != null, "id", id);
+        queryWrapper.like(StringUtils.isNotBlank(userAccount), "userAccount", userAccount);
         queryWrapper.eq(StringUtils.isNotBlank(unionId), "unionId", unionId);
         queryWrapper.eq(StringUtils.isNotBlank(mpOpenId), "mpOpenId", mpOpenId);
         queryWrapper.eq(StringUtils.isNotBlank(userRole), "userRole", userRole);
         queryWrapper.like(StringUtils.isNotBlank(userProfile), "userProfile", userProfile);
+        queryWrapper.like(StringUtils.isNotBlank(phone), "phone", phone);
+        queryWrapper.like(StringUtils.isNotBlank(email), "email", email);
+        queryWrapper.eq(gender != null, "gender", gender);
         queryWrapper.like(StringUtils.isNotBlank(userName), "userName", userName);
+        queryWrapper.between(StringUtils.isNotBlank(createTimeStr), "createTime", convertStringToDate(createTime, "00:00:00"), convertStringToDate(createTime, "23:59:59"));
+        queryWrapper.between(StringUtils.isNotBlank(updateTimeStr), "updateTime", convertStringToDate(updateTime, "00:00:00"), convertStringToDate(updateTime, "23:59:59"));
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.hyl.zhanmaoj.model.dto.user.UserQueryRequest;
 import com.hyl.zhanmaoj.model.entity.User;
 import com.hyl.zhanmaoj.model.vo.LoginUserVO;
+import com.hyl.zhanmaoj.model.vo.UserAdminVO;
 import com.hyl.zhanmaoj.model.vo.UserVO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +14,6 @@ import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 /**
  * 用户服务
  *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
  */
 public interface UserService extends IService<User> {
 
@@ -37,6 +36,16 @@ public interface UserService extends IService<User> {
      * @return 脱敏后的用户信息
      */
     LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
+
+    /**
+     * 用户登录(后台系统)
+     *
+     * @param userAccount  用户账户
+     * @param userPassword 用户密码
+     * @param request
+     * @return 脱敏后的用户信息
+     */
+    LoginUserVO userAdminLogin(String userAccount, String userPassword, HttpServletRequest request);
 
     /**
      * 用户登录（微信开放平台）
@@ -72,12 +81,21 @@ public interface UserService extends IService<User> {
     boolean isAdmin(HttpServletRequest request);
 
     /**
-     * 是否为管理员
+     * 是否为管理员或者超级管理员
      *
      * @param user
      * @return
      */
     boolean isAdmin(User user);
+
+    /**
+     * 是否是超级管理员
+     * @param user
+     * @return
+     */
+    boolean isSuper(User user);
+
+    boolean isSuper(HttpServletRequest request);
 
     /**
      * 用户注销
@@ -109,6 +127,22 @@ public interface UserService extends IService<User> {
      * @return
      */
     List<UserVO> getUserVO(List<User> userList);
+
+    /**
+     * 获取脱敏的用户信息
+     *
+     * @param user
+     * @return
+     */
+    UserAdminVO getUserAdminVO(User user);
+
+    /**
+     * 获取脱敏的用户信息（管理员）
+     *
+     * @param userList
+     * @return
+     */
+    List<UserAdminVO> getUserAdminVO(List<User> userList);
 
     /**
      * 获取查询条件

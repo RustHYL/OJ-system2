@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.hyl.zhanmaoj.common.DateUtils.convertStringToDate;
+
 /**
 * @author Alan
 * @description 针对表【question(题目)】的数据库操作Service实现
@@ -95,6 +97,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         Long userId = questionQueryRequest.getUserId();
         String sortField = questionQueryRequest.getSortField();
         String sortOrder = questionQueryRequest.getSortOrder();
+        Date createTime = questionQueryRequest.getCreateTime();
+        Date updateTime = questionQueryRequest.getUpdateTime();
         // 拼接查询条件
         queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
         queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
@@ -107,6 +111,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
         queryWrapper.eq("isDelete", false);
+        queryWrapper.between(createTime != null, "createTime", convertStringToDate(createTime, "00:00:00"), convertStringToDate(createTime, "23:59:59"));
+        queryWrapper.between(updateTime != null, "updateTime", convertStringToDate(updateTime, "00:00:00"), convertStringToDate(updateTime, "23:59:59"));
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;

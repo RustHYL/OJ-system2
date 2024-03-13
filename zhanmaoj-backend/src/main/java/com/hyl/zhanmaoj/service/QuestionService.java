@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hyl.zhanmaoj.model.dto.question.QuestionQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
 import com.hyl.zhanmaoj.model.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;

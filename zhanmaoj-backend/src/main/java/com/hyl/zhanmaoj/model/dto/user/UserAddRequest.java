@@ -6,8 +6,7 @@ import lombok.Data;
 /**
  * 用户创建请求
  *
- * @author <a href="https://github.com/lihyl">程序员鱼皮</a>
- * @from <a href="https://hyl.icu">编程导航知识星球</a>
+
  */
 @Data
 public class UserAddRequest implements Serializable {
@@ -27,8 +26,9 @@ public class UserAddRequest implements Serializable {
      */
     private String userAvatar;
 
+
     /**
-     * 用户角色: user, admin
+     * 用户角色: user, admin, super, ban
      */
     private String userRole;
 

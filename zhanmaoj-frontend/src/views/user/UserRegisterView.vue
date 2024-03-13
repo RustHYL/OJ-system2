@@ -1,6 +1,6 @@
 <template>
   <div id="userRegister">
-    <h2 style="margin-bottom: 32px">用户注册</h2>
+    <h1 style="margin-bottom: 32px">用户注册</h1>
     <a-form label-align="left" auto-label-width style="max-width: 480px; margin: 0 auto" :model="form" @submit="handleSubmit">
       <a-form-item field="userAccount" label="账号"
                    :rules="[{required:true,message:'账号是必填项'},{minLength:4,message:'账号至少4位'}]"
