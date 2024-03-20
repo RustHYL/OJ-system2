@@ -1,7 +1,6 @@
 package com.hyl.zhanmaoj.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.google.gson.reflect.TypeToken;
 import com.hyl.zhanmaoj.model.dto.question.JudgeConfig;
 import com.hyl.zhanmaoj.model.entity.Question;
 import lombok.Data;
@@ -81,6 +80,7 @@ public class QuestionVO implements Serializable {
      * 创建人信息
      */
     private UserVO userVO;
+
 
     /**
      * 包装类转对象

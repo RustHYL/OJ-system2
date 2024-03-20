@@ -134,6 +134,149 @@ declare namespace API {
   };
 
   /**
+   * 判断题
+   */
+  type TrueOrFalseAdminVo = {
+    id?: number;
+    content?: string;
+    tags?: string;
+    answer?: string;
+    submitNum?: number;
+    acceptedNum?: number;
+    userId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+  };
+
+
+  type TrueOrFalseSearchRequest = {
+    id?: number;
+    content?: string;
+    tags?: string;
+    userId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+    current?: number;
+    size?: number;
+  };
+
+
+  type TrueOrFalseUpdateRequest = {
+    id?: number;
+    content?: string;
+    tags?: string;
+    answer?: string;
+  };
+
+  /**
+   * 判断题提交
+   */
+  type TrueOrFalseSubmitAdminVo = {
+    id?: number;
+    status?: number;
+    answer?: number;
+    questionId?: number;
+    userId?: number;
+    testId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+  };
+
+  type TrueOrFalseSubmitSearchRequest = {
+    id?: number;
+    status?: number;
+    questionId?: number;
+    userId?: number;
+    testId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+    current?: number;
+    size?: number;
+  };
+
+  type TrueOrFalseSubmitUpdateRequest = {
+    id?: number;
+    status?: number;
+    answer?: number;
+  };
+
+  /**
+   * 选择题
+   */
+  type ChoiceQuestionAdminVo = {
+    id?: number;
+    content?: string;
+    tags?: string;
+    optionA?: string;
+    optionB?: string;
+    optionC?: string;
+    optionD?: string;
+    answer?: string;
+    submitNum?: number;
+    acceptedNum?: number;
+    userId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+  };
+
+
+  type ChoiceQuestionSearchRequest = {
+    id?: number;
+    content?: string;
+    tags?: string;
+    userId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+    current?: number;
+    size?: number;
+  };
+
+
+  type ChoiceQuestionUpdateRequest = {
+    id?: number;
+    content?: string;
+    optionA?: string;
+    optionB?: string;
+    optionC?: string;
+    optionD?: string;
+    tags?: string;
+    answer?: string;
+  };
+
+  /**
+   * 选择题提交
+   */
+  type ChoiceQuestionSubmitAdminVo = {
+    id?: number;
+    answer?: number;
+    status?: number;
+    questionId?: number;
+    userId?: number;
+    testId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+  };
+
+  type ChoiceQuestionSubmitSearchRequest = {
+    id?: number;
+    status?: number;
+    questionId?: number;
+    userId?: number;
+    testId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+    current?: number;
+    size?: number;
+  };
+
+  type ChoiceQuestionSubmitUpdateRequest = {
+    id?: number;
+    status?: number;
+    answer?: number;
+  };
+
+
+  /**
    * 用户条件搜索
    */
   type UserInfoBySearchVO = {
@@ -214,5 +357,65 @@ declare namespace API {
     checkPassword?: string;
     type?: string;
   };
+
+  /**
+   * 试卷
+   */
+  type TestAdminVo = {
+    id?: number;
+    title?: string;
+    status?: number;
+    password?: string;
+    content?: string;
+    questionNum?: number;
+    beginTime?: Date;
+    expiredTime?: Date;
+    examTime?: number;
+    totalScore?: number;
+    userId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+  };
+
+  type TestAddRequest = {
+    title?: string;
+    status?: number;
+    password?: string;
+    content?: string;
+    beginTime?: Date;
+    expiredTime?: Date;
+    examTime?: number;
+    trueOrFalseNum?: number;
+    trueOrFalsePerScore?: number;
+    choiceQuestionNum?: number;
+    choicePerScore?: number;
+    questionList?: string;
+  };
+
+
+  type TestSearchRequest = {
+    id?: number;
+    title?: string;
+    status?: number;
+    content?: string;
+    userId?: number;
+    createTime?: Date;
+    updateTime?: Date;
+    current?: number;
+    size?: number;
+  };
+
+
+  type TestUpdateRequest = {
+    id?: number;
+    title?: string;
+    status?: number;
+    password?: string;
+    content?: string;
+    beginTime?: Date;
+    expiredTime?: Date;
+    examTime?: number;
+  };
+
 
 }

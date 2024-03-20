@@ -7,12 +7,14 @@ import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.constant.CommonConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
+import com.hyl.zhanmaoj.model.dto.question.QuestionQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.question.QuestionQueryRequest;
 import com.hyl.zhanmaoj.model.entity.*;
 import com.hyl.zhanmaoj.model.vo.QuestionVO;
 import com.hyl.zhanmaoj.model.vo.UserVO;
 import com.hyl.zhanmaoj.service.QuestionService;
 import com.hyl.zhanmaoj.mapper.QuestionMapper;
+import com.hyl.zhanmaoj.service.QuestionSubmitService;
 import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,6 +40,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private QuestionMapper questionMapper;
 
     /**
      * 校验题目是否合法
@@ -118,6 +123,48 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         return queryWrapper;
     }
 
+    /**
+     * 获取查询包装类
+     *
+     * @param questionQueryRequest
+     * @return queryWrapper
+     */
+    @Override
+    public QueryWrapper<Question> getQueryWrapper(QuestionQueryAdminRequest questionQueryRequest) {
+        QueryWrapper<Question> queryWrapper = new QueryWrapper<>();
+        if (questionQueryRequest == null) {
+            return queryWrapper;
+        }
+        Long id = questionQueryRequest.getId();
+        String title = questionQueryRequest.getTitle();
+        String content = questionQueryRequest.getContent();
+        String tags = questionQueryRequest.getTags();
+        String answer = questionQueryRequest.getAnswer();
+        Long userId = questionQueryRequest.getUserId();
+        String sortField = questionQueryRequest.getSortField();
+        String sortOrder = questionQueryRequest.getSortOrder();
+        Date createTime = questionQueryRequest.getCreateTime();
+        Date updateTime = questionQueryRequest.getUpdateTime();
+        // 拼接查询条件
+        queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
+        queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
+        queryWrapper.like(StringUtils.isNotBlank(answer), "answer", answer);
+        queryWrapper.like(StringUtils.isNotBlank(tags), "tags", tags);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
+        queryWrapper.eq("isDelete", false);
+        queryWrapper.between(createTime != null, "createTime", convertStringToDate(createTime, "00:00:00"), convertStringToDate(createTime, "23:59:59"));
+        queryWrapper.between(updateTime != null, "updateTime", convertStringToDate(updateTime, "00:00:00"), convertStringToDate(updateTime, "23:59:59"));
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
+        return queryWrapper;
+    }
+
+
+    @Override
+    public List<Question> getRandomQuestionList(Integer num) {
+        return questionMapper.getRandomQuestionList(num);
+    }
 
     @Override
     public QuestionVO getQuestionVO(Question question, HttpServletRequest request) {
@@ -158,6 +205,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         questionVOPage.setRecords(questionVOList);
         return questionVOPage;
     }
+
 
 }
 

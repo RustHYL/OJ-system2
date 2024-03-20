@@ -1,248 +1,436 @@
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ProTable, TableDropdown } from '@ant-design/pro-components';
-import {Image, message, Tag} from 'antd';
-import { useRef } from 'react';
-import {deleteUserInfo, searchUsers, updateUserInfo} from "@/services/ant-design-pro/user";
-export const waitTimePromise = async (time: number = 10) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
+import {PlusOutlined} from '@ant-design/icons';
+import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
+import {
+  ModalForm,
+  PageContainer,
+  ProDescriptions,
+  ProFormText,
+  ProFormTextArea,
+  ProTable, TableDropdown,
+} from '@ant-design/pro-components';
+import '@umijs/max';
+import {Button, Drawer, message} from 'antd';
+import React, { useRef, useState } from 'react';
+import UpdateForm from './components/UpdateForm';
+import {waitTime} from "@/pages/Admin/RoleManage";
+import {addTest, deleteTestInfo, searchTests, updateTestInfo} from "@/services/ant-design-pro/test";
+import {ProFormDigit, ProFormSelect} from "@ant-design/pro-form/lib";
+import {ProFormDateTimePicker} from "@ant-design/pro-form";
+import {Link} from "@umijs/max";
+
+
+
+const handleAdd = async (fields: API.TestAdminVo) => {
+  const hide = message.loading('正在添加');
+  try {
+    await addTest({
+       ...fields,
+    });
+    hide();
+    message.success('Added successfully');
+    return true;
+  } catch (error) {
+    console.log(error);
+    hide();
+    message.error('Adding failed, please try again!');
+    return false;
+  }
 };
 
-export const waitTime = async (time: number = 10) => {
-  await waitTimePromise(time);
+/**
+ * @en-US Update node
+ * @zh-CN 更新节点
+ *
+ * @param fields
+ */
+const handleUpdate = async (fields: API.TestAdminVo) => {
+  const hide = message.loading('Configuring');
+  try {
+    await updateTestInfo({
+      id: fields.id,
+      title: fields.title,
+      status: fields.status,
+      password: fields.password,
+      content: fields.content,
+      beginTime: fields.beginTime,
+      examTime: fields.examTime,
+      expiredTime: fields.expiredTime,
+    });
+    hide();
+    message.success('Configuration is successful');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('Configuration failed, please try again!');
+    return false;
+  }
 };
 
 
-const columns: ProColumns<API.UserAdminVo>[] = [
-  {
-    title: 'ID',
-    dataIndex: 'id',
-    width: 48,
-    ellipsis: true,
-    fixed: 'left',
-  },
-  {
-    title: '用户头像',
-    dataIndex: 'userAvatar',
-    width: 100,
-    search: false,
-    render: (_, record) => (
-        <div>
-          <Image src={record.userAvatar} width={80} height={80} />
-        </div>
-    ),
-  },
+
+const TableList: React.FC = () => {
+  /**
+   * @en-US Pop-up window of new window
+   * @zh-CN 新建窗口的弹窗
+   *  */
+  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
+  /**
+   * @en-US The pop-up window of the distribution update window
+   * @zh-CN 分布更新窗口的弹窗
+   * */
+  const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
+  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const actionRef = useRef<ActionType>();
+  const [currentRow, setCurrentRow] = useState<API.TestAdminVo>();
+  const columns: ProColumns<API.TestAdminVo>[] = [
     {
-        title: '用户名',
-        dataIndex: 'userName',
-        copyable: true,
-        align: 'center',
-        width: 90
-    },
-    {
-        title: '用户账号',
-        dataIndex: 'userAccount',
-        copyable: true,
-        align: 'center',
-        width: 110
-    },
-    {
-        title: '用户密码',
-        dataIndex: 'userPassword',
-        width: 80,
-        ellipsis: true,
-    },
-  {
-    title: '性别',
-    filters: true,
-    onFilter: true,
-    dataIndex: 'gender',
-    valueType: 'select',
-    width: 70 ,
-    valueEnum: {
-      0: {
-        text: '男',
-        status: 'Default',
-      },
-      1: {
-        text: '女',
-        status: 'Processing',
-      },
-    },
-  },
-  {
-    title: '电话',
-    dataIndex: 'phone',
-    align: 'center',
-    copyable: true,
-    ellipsis: true,
-    width: 100
-  },
-  {
-    title: '邮件',
-    dataIndex: 'email',
-    copyable: true,
-    align: 'center',
-    width: 100,
+      title: 'ID',
+      dataIndex: 'id',
+      width: 80,
       ellipsis: true,
-  },
-  {
-    title: '简介',
-    dataIndex: 'userProfile',
-    copyable: true,
-    align: 'center',
-    width: 120,
-    ellipsis: true,
-  },
-  {
-    dataIndex: 'userRole',
-    title: '用户角色',
-    align: 'center',
-    width: 120,
-    valueType: 'select',
-    filters: true,
-    onFilter: true,
-    valueEnum: {
-      "user": { text: <Tag color="success">普通用户</Tag>, status: 'Success' },
-      "admin": { text: <Tag color="warning">管理员</Tag>, status: 'Default' },
-      "super": { text: <Tag color="error">超级管理员</Tag>, status: 'Error' },
+      align: 'center',
+      copyable: true,
+      editable: false,
+      fixed: 'left',
+      tip: 'The rule name is the unique key',
+      render: (dom, entity) => {
+        return (
+          <a
+            onClick={() => {
+              setCurrentRow(entity);
+              setShowDetail(true);
+            }}
+          >
+            {dom}
+          </a>
+        );
+      },
     },
-  },
-  {
-    title: '注册时间',
-    key: 'createTime',
-    dataIndex: 'createTime',
-    valueType: 'date',
-    align: 'center',
-    width: 100,
-  },
-  {
-    title: '更新时间',
-    key: 'updateTime',
-    dataIndex: 'updateTime',
-    valueType: 'date',
-    align: 'center',
-    width: 100,
-  },
-  {
-    title: '操作',
-    valueType: 'option',
-    key: 'option',
-    fixed: 'right',
-    width: 100,
-    render: (text, record, _, action) => [
-      <a
-          key="editable"
-          onClick={() => {
-            action?.startEditable?.(record.id);
-          }}
-      >
-        编辑
-      </a>,
-      <TableDropdown
-          key="actionGroup"
-          onSelect={async key => {
+    {
+      title: '标题',
+      dataIndex: 'title',
+      width: 80,
+      align: 'center',
+      copyable: true,
+      ellipsis: true,
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 60,
+      align: 'center',
+      valueType: 'select',
+      ellipsis: true,
+      filters: true,
+      onFilter: true,
+      valueEnum: {
+        0: { text: '公开', status: 'Default' },
+        1: { text: '加密', status: 'Error' },
+      },
+    },
+    {
+      title: '密码',
+      dataIndex: 'password',
+      width: 80,
+      align: 'center',
+      search:false,
+      copyable: true,
+      ellipsis: true,
+    },
+    {
+      title: '内容',
+      dataIndex: 'content',
+      copyable: true,
+      align: 'center',
+      ellipsis: true,
+      width: 80
+    },
+    {
+      title: '题目数',
+      dataIndex: 'questionNum',
+      width: 80,
+      search:false,
+      align: 'center',
+      editable:false,
+      copyable: true,
+    },
+    {
+      title: '开始时间',
+      dataIndex: 'beginTime',
+      valueType: 'dateTime',
+      width: 90,
+      search:false,
+      align: 'center',
+      copyable: true,
+    },
+    {
+      title: '结束时间',
+      dataIndex: 'expiredTime',
+      valueType: 'dateTime',
+      width: 90,
+      search:false,
+      align: 'center',
+      copyable: true,
+    },
+    {
+      title: '答题时间/毫秒',
+      dataIndex: 'examTime',
+      width: 70,
+      search:false,
+      align: 'center',
+      copyable: true,
+    },
+    {
+      title: '总分',
+      dataIndex: 'totalScore',
+      width: 70,
+      search:false,
+      editable:false,
+      align: 'center',
+      copyable: true,
+    },
+    {
+      title: '用户ID',
+      dataIndex: 'userId',
+      width: 80,
+      align: 'center',
+      editable:false,
+      copyable: true,
+      ellipsis: true,
+    },
+    {
+      title: '创建时间',
+      key: 'createTime',
+      dataIndex: 'createTime',
+      valueType: 'date',
+      align: 'center',
+      editable:false,
+      ellipsis: true,
+      width: 70 ,
+    },
+    {
+      title: '更新时间',
+      key: 'updateTime',
+      dataIndex: 'updateTime',
+      valueType: 'date',
+      align: 'center',
+      editable:false,
+      ellipsis: true,
+      width: 70,
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      key: 'option',
+      fixed: 'right',
+      width: 90,
+      render: (text, record, _, action) => [
+          <a
+            key="config"
+            onClick={() => {
+              handleUpdateModalOpen(true);
+              setCurrentRow(record);
+            }}
+        >
+          更新
+        </a>,
+        <Link
+            key="detail"
+            to={{
+              pathname: '/admin/test/detail', // 指定目标页面的路径
+              search: `?id=${record.id}`, // 将record.id作为查询参数传递
+            }}
+        >
+          详情
+        </Link>,
+        <TableDropdown
+            key="actionGroup"
+            onSelect={async key => {
               if (key === 'copy') {
-                  await navigator.clipboard.writeText(JSON.stringify(record));
-                  message.success('复制成功');
+                await navigator.clipboard.writeText(JSON.stringify(record));
+                message.success('复制成功');
               } else if (key === 'delete') {
                 console.log(record)
-                  const res = await deleteUserInfo(record.id);
-                  if (res.code === 0) {
-                      message.success('删除成功');
-                      action?.reload();
-                  } else {
-                      message.error('删除失败');
-                  }
+                const res = await deleteTestInfo(record.id);
+                if (res.code === 0) {
+                  message.success('删除成功');
+                  action?.reload();
+                } else {
+                  message.error('删除失败');
+                }
               }
-          }}
-          menus={[
+            }}
+            menus={[
               { key: 'copy', name: '复制' },
               { key: 'delete', name: '删除' }
-          ]}
-      />,
-    ],
-  },
-];
-
-export default () => {
-  const actionRef = useRef<ActionType>();
-
-  const saveData = async (key: any, row: API.UserAdminVo) => {
-    const res = await updateUserInfo(row);
-    if (res.code === 0) {
-      message.success('保存成功');
-      return true;
-    } else {
-      message.error('保存失败');
-      return false;
-    }
-  };
-
+            ]}
+        />,
+      ],
+    },
+  ];
 
   return (
-      <ProTable<API.UserAdminVo>
-          columns={columns}
-          actionRef={actionRef}
-          cardBordered
-          request={async (params = {}, sort, filter) => {
+    <PageContainer>
+      <ProTable<API.TestAdminVo, API.PageParams>
+        headerTitle={'题目信息'}
+        actionRef={actionRef}
+        rowKey="key"
+        search={{
+          labelWidth: 120,
+        }}
+        toolBarRender={() => [
+          <Button
+            type="primary"
+            key="primary"
+            onClick={() => {
+              handleModalOpen(true);
+            }}
+          >
+            <PlusOutlined /> 新建
+          </Button>,
+        ]}
+        columnsState={{
+          persistenceKey: 'pro-table-singe-demos',
+          persistenceType: 'localStorage',
+          onChange(value) {
+            console.log('value: ', value);
+          },
+        }}
+        request={
+          async (params = {}, sort, filter) => {
             console.log(sort, filter);
             await waitTime(1000);
             const param = {
-                userAdminVO: {
-                    ...params
-                },
-                pageVO: {
-                    size: params.pageSize,
-                    current: params.current
-                }
+              ...params,
             };
-            const res = await searchUsers(param);
+            // @ts-ignore
+            const res = await searchTests(param);
             return {
-              data: res.data
+              data: res.data,
             }
-          }}
-          editable={{
-            type: 'multiple',
-            onSave: saveData,
-          }}
-          columnsState={{
-            persistenceKey: 'pro-table-singe-demos',
-            persistenceType: 'localStorage',
-            onChange(value) {
-              console.log('value: ', value);
-            },
-          }}
-          rowKey="id"
-          search={{
-            // labelWidth: 'auto',
-          }}
-          options={{
-            setting: {
-              listsHeight: 400,
-            },
-          }}
-          form={{
-            // 由于配置了 transform，提交的参与与定义的不同这里需要转化一下
-            syncToUrl: (values, type) => {
-              if (type === 'get') {
-                return {
-                  ...values,
-                  created_at: [values.startTime, values.endTime],
-                };
-              }
-              return values;
-            },
-          }}
-          pagination={{
-            pageSize: 5,
-            onChange: (page) => console.log(page),
-          }}
-          dateFormatter="string"
-          headerTitle="高级表格"
+          }
+        }
+        pagination={{
+          pageSize: 5,
+          onChange: (page) => console.log(page),
+        }}
+        columns={columns}
       />
+      <ModalForm
+        title={'新建题目'}
+        width="400px"
+        open={createModalOpen}
+        onOpenChange={handleModalOpen}
+        onFinish={async (value) => {
+          const success = await handleAdd(value as API.TestAddRequest);
+          if (success) {
+            handleModalOpen(false);
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
+        }}
+      >
+        <ProFormText width="md" label={"标题"} name="title"/>
+        <ProFormSelect
+            width="md"
+            label={"状态"}
+            valueEnum={{
+              0: '公开',
+              1: '加密',
+            }}
+            rules={[{ required: true, message: 'Please select status!' }]}
+            name="status"/>
+        <ProFormText.Password width="md" label={"密码"} name="password"/>
+        <ProFormTextArea width="md" label={"简介"} name="content"/>
+        <ProFormDateTimePicker
+            name="beginTime"
+            label="开始时间"
+        />
+        <ProFormDateTimePicker
+            name="expiredTime"
+            label="结束时间"
+        />
+        <ProFormText width="md" label={"做题时间"} name="examTime"/>
+        <ProFormDigit
+            label="判断题数"
+            name="trueOrFalseNum"
+            width="sm"
+            min={0}
+            max={1000}
+        />
+        <ProFormDigit
+            label="判断题单题分数"
+            name="trueOrFalsePerScore"
+            width="sm"
+            min={0}
+            max={10}
+        />
+        <ProFormDigit
+            label="选择题数"
+            name="choiceQuestionNum"
+            width="sm"
+            min={0}
+            max={1000}
+        />
+        <ProFormDigit
+            label="选择题单题分数"
+            name="choiceQuestionPerScore"
+            width="sm"
+            min={0}
+            max={10}
+        />
+        <ProFormTextArea
+            name="questionList"
+            width="md"
+            label={'编程题'}
+        />
+      </ModalForm>
+      <UpdateForm
+        onSubmit={async (value) => {
+          const success = await handleUpdate(value);
+          if (success) {
+            handleUpdateModalOpen(false);
+            setCurrentRow(undefined);
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
+        }}
+        onCancel={() => {
+          handleUpdateModalOpen(false);
+          if (!showDetail) {
+            setCurrentRow(undefined);
+          }
+        }}
+        updateModalOpen={updateModalOpen}
+        values={currentRow || {}}
+      />
+
+      <Drawer
+        width={600}
+        open={showDetail}
+        onClose={() => {
+          setCurrentRow(undefined);
+          setShowDetail(false);
+        }}
+        closable={false}
+      >
+        {currentRow?.id&& (
+          <ProDescriptions<API.TrueOrFalseAdminVo>
+            column={2}
+            title={currentRow?.title}
+            request={async () => ({
+              data: currentRow || {},
+            })}
+            params={{
+              id: currentRow?.id
+            }}
+            columns={columns as ProDescriptionsItemProps<API.TrueOrFalseAdminVo>[]}
+          />
+        )}
+      </Drawer>
+    </PageContainer>
   );
 };
+export default TableList;

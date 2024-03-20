@@ -3,18 +3,27 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BaseResponse_boolean_ } from '../models/BaseResponse_boolean_';
+import type { BaseResponse_List_Question_ } from '../models/BaseResponse_List_Question_';
+import type { BaseResponse_List_QuestionSubmit_ } from '../models/BaseResponse_List_QuestionSubmit_';
+import type { BaseResponse_List_QuestionVO_ } from '../models/BaseResponse_List_QuestionVO_';
 import type { BaseResponse_long_ } from '../models/BaseResponse_long_';
 import type { BaseResponse_Page_Question_ } from '../models/BaseResponse_Page_Question_';
+import type { BaseResponse_Page_QuestionSubmit_ } from '../models/BaseResponse_Page_QuestionSubmit_';
 import type { BaseResponse_Page_QuestionSubmitVO_ } from '../models/BaseResponse_Page_QuestionSubmitVO_';
 import type { BaseResponse_Page_QuestionVO_ } from '../models/BaseResponse_Page_QuestionVO_';
 import type { BaseResponse_Question_ } from '../models/BaseResponse_Question_';
 import type { BaseResponse_QuestionVO_ } from '../models/BaseResponse_QuestionVO_';
 import type { DeleteRequest } from '../models/DeleteRequest';
+import type { QuestionAddAdminRequest } from '../models/QuestionAddAdminRequest';
 import type { QuestionAddRequest } from '../models/QuestionAddRequest';
 import type { QuestionEditRequest } from '../models/QuestionEditRequest';
+import type { QuestionQueryAdminRequest } from '../models/QuestionQueryAdminRequest';
 import type { QuestionQueryRequest } from '../models/QuestionQueryRequest';
 import type { QuestionSubmitAddRequest } from '../models/QuestionSubmitAddRequest';
+import type { QuestionSubmitQueryAdminRequest } from '../models/QuestionSubmitQueryAdminRequest';
 import type { QuestionSubmitQueryRequest } from '../models/QuestionSubmitQueryRequest';
+import type { QuestionSubmitUpdateAdminRequest } from '../models/QuestionSubmitUpdateAdminRequest';
+import type { QuestionUpdateAdminRequest } from '../models/QuestionUpdateAdminRequest';
 import type { QuestionUpdateRequest } from '../models/QuestionUpdateRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -36,6 +45,28 @@ questionAddRequest: QuestionAddRequest,
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/question/add',
+            body: questionAddRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * addQuestionBackend
+     * @param questionAddRequest questionAddRequest
+     * @returns BaseResponse_long_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static addQuestionBackendUsingPost(
+questionAddRequest: QuestionAddAdminRequest,
+): CancelablePromise<BaseResponse_long_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/add/backend',
             body: questionAddRequest,
             errors: {
                 401: `Unauthorized`,
@@ -136,6 +167,28 @@ id?: number,
     }
 
     /**
+     * listQuestionByList
+     * @param questionQueryRequest questionQueryRequest
+     * @returns BaseResponse_List_Question_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static listQuestionByListUsingPost(
+questionQueryRequest: QuestionQueryAdminRequest,
+): CancelablePromise<BaseResponse_List_Question_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/list',
+            body: questionQueryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * listQuestionByPage
      * @param questionQueryRequest questionQueryRequest
      * @returns BaseResponse_Page_Question_ OK
@@ -202,6 +255,46 @@ questionQueryRequest: QuestionQueryRequest,
     }
 
     /**
+     * getMyErrorQuestion
+     * @returns BaseResponse_List_QuestionVO_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static getMyErrorQuestionUsingPost(): CancelablePromise<BaseResponse_List_QuestionVO_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/question/my/error',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * deleteQuestionSubmit
+     * @param deleteRequest deleteRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static deleteQuestionSubmitUsingPost(
+deleteRequest: DeleteRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/question_submit/delete',
+            body: deleteRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * doQuestionSubmit
      * @param questionSubmitAddRequest questionSubmitAddRequest
      * @returns BaseResponse_long_ OK
@@ -215,6 +308,28 @@ questionSubmitAddRequest: QuestionSubmitAddRequest,
             method: 'POST',
             url: '/api/question/question_submit/do',
             body: questionSubmitAddRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * listQuestionSubmit
+     * @param questionSubmitQueryRequest questionSubmitQueryRequest
+     * @returns BaseResponse_List_QuestionSubmit_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static listQuestionSubmitUsingPost(
+questionSubmitQueryRequest: QuestionSubmitQueryAdminRequest,
+): CancelablePromise<BaseResponse_List_QuestionSubmit_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/question_submit/list',
+            body: questionSubmitQueryRequest,
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,
@@ -246,6 +361,50 @@ questionSubmitQueryRequest: QuestionSubmitQueryRequest,
     }
 
     /**
+     * listMyQuestionSubmitByPage
+     * @param questionSubmitQueryRequest questionSubmitQueryRequest
+     * @returns BaseResponse_Page_QuestionSubmit_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static listMyQuestionSubmitByPageUsingPost(
+questionSubmitQueryRequest: QuestionSubmitQueryRequest,
+): CancelablePromise<BaseResponse_Page_QuestionSubmit_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/question_submit/my/list/page',
+            body: questionSubmitQueryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * updateQuestionSubmitBackend
+     * @param questionSubmitUpdateRequest questionSubmitUpdateRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static updateQuestionSubmitBackendUsingPost(
+questionSubmitUpdateRequest: QuestionSubmitUpdateAdminRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/question_submit/update/backend',
+            body: questionSubmitUpdateRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * updateQuestion
      * @param questionUpdateRequest questionUpdateRequest
      * @returns BaseResponse_boolean_ OK
@@ -258,6 +417,28 @@ questionUpdateRequest: QuestionUpdateRequest,
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/question/update',
+            body: questionUpdateRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * updateQuestionBackend
+     * @param questionUpdateRequest questionUpdateRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static updateQuestionBackendUsingPost(
+questionUpdateRequest: QuestionUpdateAdminRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/update/backend',
             body: questionUpdateRequest,
             errors: {
                 401: `Unauthorized`,

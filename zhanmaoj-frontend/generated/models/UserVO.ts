@@ -5,7 +5,10 @@
 
 export type UserVO = {
     createTime?: string;
+    email?: string;
+    gender?: number;
     id?: number;
+    phone?: string;
     userAvatar?: string;
     userName?: string;
     userProfile?: string;

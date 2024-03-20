@@ -1,5 +1,6 @@
 package com.hyl.zhanmaoj.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hyl.zhanmaoj.common.PageRequest;
 import lombok.Data;
 

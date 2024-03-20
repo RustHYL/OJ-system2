@@ -20,7 +20,7 @@ import {
 } from "@/services/ant-design-pro/question";
 
 import TagsComponent from "@/components/Tags";
-import {waitTime} from "@/pages/Test/TestManage";
+import {waitTime} from "@/pages/Admin/RoleManage";
 
 
 /**
@@ -133,7 +133,6 @@ const TableList: React.FC = () => {
       dataIndex: 'tags',
       width: 120,
       align: 'center',
-      search:false,
       render: (_, record) => (
           <div>
             <TagsComponent tags={JSON.parse(record.tags as string)}/>

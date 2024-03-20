@@ -6,6 +6,7 @@
 export type QuestionQueryRequest = {
     answer?: string;
     content?: string;
+    createTime?: string;
     current?: number;
     id?: number;
     pageSize?: number;
@@ -13,5 +14,6 @@ export type QuestionQueryRequest = {
     sortOrder?: string;
     tags?: Array<string>;
     title?: string;
+    updateTime?: string;
     userId?: number;
 };

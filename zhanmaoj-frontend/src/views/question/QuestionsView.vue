@@ -105,6 +105,15 @@ const columns = [
     slotName: "passingRate",
   },
   {
+    title: "点赞数",
+    dataIndex: "thumbNum",
+  },
+  {
+    title: "收藏数",
+    dataIndex: "favourNum",
+  },
+
+  {
     title: "创建时间",
     slotName: "createTime",
   },
@@ -139,7 +148,8 @@ const onSearch = () => {
 
 <style scoped>
 #questionsView {
-  max-width: 1360px;
+  max-width: 1600px;
+  min-width: 1360px;
   margin: 0 auto;
 }
 </style>

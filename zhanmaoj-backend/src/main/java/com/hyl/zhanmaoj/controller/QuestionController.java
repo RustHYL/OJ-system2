@@ -1,5 +1,6 @@
 package com.hyl.zhanmaoj.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -32,7 +33,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 题目接口
@@ -111,6 +115,8 @@ public class QuestionController {
                 // 如果转换失败，这里会捕获异常并执行
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入标签格式错误");
             }
+        }  else {
+            question.setTags(tagsList.toString());
         }
         String judgeCaseStr = questionAddRequest.getJudgeCase();
         List<Object> judgeCaseList = new ArrayList<>();
@@ -405,7 +411,7 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/list")
-    public BaseResponse<List<Question>> listQuestionByList(@RequestBody QuestionQueryRequest questionQueryRequest,
+    public BaseResponse<List<Question>> listQuestionByList(@RequestBody QuestionQueryAdminRequest questionQueryRequest,
                                                            HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         String userRole = loginUser.getUserRole();
@@ -477,6 +483,26 @@ public class QuestionController {
     }
 
     /**
+     * 分页获取题目提交列表（管理员可以看到全部，普通用户只能看到非答案、提交代码等公开信息）
+     *
+     * @param questionSubmitQueryRequest
+     * @param request
+     * @return 提交记录 id
+     */
+    @PostMapping("/question_submit/my/list/page")
+    public BaseResponse<Page<QuestionSubmit>> listMyQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
+                                                                         HttpServletRequest request) {
+        long current = questionSubmitQueryRequest.getCurrent();
+        long size = questionSubmitQueryRequest.getPageSize();
+        final User loginUser = userService.getLoginUser(request);
+        QueryWrapper<QuestionSubmit> queryWrapper = questionSubmitService.getQueryWrapper(questionSubmitQueryRequest);
+        queryWrapper.eq("userId", loginUser.getId());
+        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
+               queryWrapper);
+        return ResultUtils.success(questionSubmitPage);
+    }
+
+    /**
      * List取题目提交列表（管理员）
      *
      * @param questionSubmitQueryRequest
@@ -489,7 +515,6 @@ public class QuestionController {
         if (!userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
-        questionSubmitQueryRequest.setPageSize(1);
         List<QuestionSubmit> questionSubmitList = questionSubmitService.list(questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
         return ResultUtils.success(questionSubmitList);
     }
@@ -545,6 +570,23 @@ public class QuestionController {
         boolean result = questionSubmitService.updateById(questionSubmit);
         return ResultUtils.success(result);
     }
+
+    @PostMapping("question/my/error")
+    public BaseResponse<List<QuestionVO>> getMyErrorQuestion(HttpServletRequest request) {
+        Long id = userService.getLoginUser(request).getId();
+        QueryWrapper<QuestionSubmit> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", id);
+        List<QuestionVO> list = questionSubmitService.list(queryWrapper).stream().map(questionSubmit -> {
+            return questionService.getQuestionVO(questionService.getById(questionSubmit.getQuestionId()),request);
+        }).collect(Collectors.toList());
+        Set<QuestionVO> set = new HashSet<>(list);
+        list = new ArrayList<>(set);
+        return ResultUtils.success(list);
+    }
+
+
+
+
 
 
 }

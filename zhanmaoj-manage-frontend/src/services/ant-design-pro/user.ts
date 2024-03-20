@@ -31,6 +31,20 @@ export async function updateUserInfo(
     });
 }
 
+/** 更新用户信息  POST /api/user/update/my */
+export async function updateMyInfo(
+  userInfo?: API.UserAdminVo,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/user/update/my', {
+    method: 'POST',
+    data: {
+      ...userInfo
+    },
+    ...(options || {})
+  });
+}
+
 /** 删除用户信息  POST /api/user/delete */
 export async function deleteUserInfo(
     id?: number,

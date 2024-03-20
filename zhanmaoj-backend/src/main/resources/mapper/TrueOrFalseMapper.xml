@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hyl.zhanmaoj.mapper.TrueOrFalseMapper">
+
+    <resultMap id="BaseResultMap" type="com.hyl.zhanmaoj.model.entity.TrueOrFalse">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="content" column="content" jdbcType="VARCHAR"/>
+            <result property="answer" column="answer" jdbcType="TINYINT"/>
+            <result property="submitNum" column="submitNum" jdbcType="INTEGER"/>
+            <result property="acceptedNum" column="acceptedNum" jdbcType="INTEGER"/>
+            <result property="tags" column="tags" jdbcType="VARCHAR"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,content,answer,
+        submitNum,acceptedNum,tags,
+        userId,createTime,updateTime,
+        isDelete
+    </sql>
+</mapper>

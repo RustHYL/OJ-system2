@@ -18,7 +18,7 @@ const checkAccess = (loginUser: any, needAccess = ACCESS_ENUM.NOT_LOGIN) =>{
     }
     //需要管理员权限
     if (needAccess === ACCESS_ENUM.ADMIN){
-        return loginUserAccess === ACCESS_ENUM.ADMIN;
+        return loginUserAccess === ACCESS_ENUM.ADMIN || loginUserAccess === ACCESS_ENUM.SUPER;
     }
     //需要超级管理员
     if (needAccess === ACCESS_ENUM.SUPER){

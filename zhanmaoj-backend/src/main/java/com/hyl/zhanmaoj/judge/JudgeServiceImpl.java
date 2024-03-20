@@ -13,6 +13,7 @@ import com.hyl.zhanmaoj.model.dto.question.JudgeCase;
 import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
+import com.hyl.zhanmaoj.model.enums.JudgeInfoMessageEnum;
 import com.hyl.zhanmaoj.model.enums.QuestionSubmitStatusEnum;
 import com.hyl.zhanmaoj.service.QuestionService;
 import com.hyl.zhanmaoj.service.QuestionSubmitService;
@@ -95,6 +96,16 @@ public class JudgeServiceImpl implements JudgeService {
         boolean update = questionSubmitService.updateById(questionSubmitUpdate);
         if (!update){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新失败");
+        }
+        Question updateQuestion = new Question();
+        updateQuestion.setId(questionId);
+        updateQuestion.setSubmitNum(question.getSubmitNum() + 1);
+        if (judgeInfo.getMessage().equals(JudgeInfoMessageEnum.ACCEPTED.getValue())){
+            updateQuestion.setAcceptedNum(question.getAcceptedNum() + 1);
+        }
+        boolean updateQuestionResult = questionService.updateById(updateQuestion);
+        if (!updateQuestionResult){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目提交数量更新失败");
         }
         QuestionSubmit questionSubmitResult = questionSubmitService.getById(questionSubmitId);
         return questionSubmitResult;

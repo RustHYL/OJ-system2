@@ -2,12 +2,15 @@ package com.hyl.zhanmaoj.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hyl.zhanmaoj.model.dto.question.QuestionQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.question.QuestionQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
 import com.hyl.zhanmaoj.model.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author Alan
@@ -30,6 +33,21 @@ public interface QuestionService extends IService<Question> {
      * @return
      */
     QueryWrapper<Question> getQueryWrapper(QuestionQueryRequest questionQueryRequest);
+
+    /**
+     * 获取查询条件
+     *
+     * @param questionQueryAdminRequest
+     * @return
+     */
+    QueryWrapper<Question> getQueryWrapper(QuestionQueryAdminRequest questionQueryAdminRequest);
+
+    /**
+     * 随机获取n条数据
+     * @param num
+     * @return
+     */
+    List<Question> getRandomQuestionList(Integer num);
 
     /**
      * 获取题目封装

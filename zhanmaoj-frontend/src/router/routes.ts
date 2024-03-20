@@ -1,16 +1,20 @@
 import {RouteRecordRaw} from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import AdminView from "@/views/AdminView.vue";
 import NoAuthView from "@/views/NoAuthView.vue";
 import ACCESS_ENUM from "@/access/accessEnum";
 import UserLayout from "@/layouts/UserLayout.vue";
 import UserLoginView from "@/views/user/UserLoginView.vue";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
+import UserSettingView from "@/views/user/UserSettingView.vue";
+import UserCenterView from "@/views/user/UserCenterView.vue";
 import AddQuestionView from "@/views/question/AddQuestionView.vue";
 import ManageQuestionView from "@/views/question/ManageQuestionView.vue";
 import QuestionsView from "@/views/question/QuestionsView.vue";
 import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
+import QuestionSubmitMyView from "@/views/question/QuestionSubmitMineView.vue";
 import AnswerQuestionView from "@/views/question/AnswerQuestionView.vue";
+import TestView from "@/views/test/TestCardView.vue";
+import TestDoView from "@/views/test/TestDoView.vue";
 
 
 export const routes: Array<RouteRecordRaw> = [
@@ -44,7 +48,7 @@ export const routes: Array<RouteRecordRaw> = [
         name: '创建题目',
         component: AddQuestionView,
         meta: {
-            access: ACCESS_ENUM.USER,
+            access: ACCESS_ENUM.ADMIN,
         }
     },
     {
@@ -69,6 +73,14 @@ export const routes: Array<RouteRecordRaw> = [
         }
     },
     {
+        path: '/question_submit/my',
+        name: '我的提交列表',
+        component: QuestionSubmitMyView,
+        meta: {
+            access: ACCESS_ENUM.USER,
+        }
+    },
+    {
         path: '/question/update',
         name: '更新题目',
         component: AddQuestionView,
@@ -87,19 +99,36 @@ export const routes: Array<RouteRecordRaw> = [
         }
     },
     {
-        path: '/hide',
-        name: '隐藏页面',
-        component: HomeView,
+        path: '/question/user/setting',
+        name: '用户设置',
+        component: UserSettingView,
         meta: {
-            hideInMenu: true,
-        },
+            access: ACCESS_ENUM.USER,
+            hideInMenu: true
+        }
     },
     {
-        path: '/admin',
-        name: '管理员页面',
-        component: AdminView,
+        path: '/question/user/center',
+        name: '用户中心',
+        component: UserCenterView,
         meta: {
-            access: ACCESS_ENUM.ADMIN,
+            hideInMenu: true
+        }
+    },
+    {
+        path: '/question/test/list',
+        name: '试卷信息',
+        component: TestView,
+        meta: {
+            access: ACCESS_ENUM.USER,
+        }
+    },
+    {
+        path: '/question/test/do/:id',
+        name: '开始考试',
+        component: TestDoView,
+        meta: {
+            hideInMenu: true
         }
     },
     {
@@ -109,5 +138,5 @@ export const routes: Array<RouteRecordRaw> = [
         meta: {
             hideInMenu: true
         }
-    }
+    },
 ]

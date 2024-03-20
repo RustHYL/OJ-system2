@@ -67,14 +67,20 @@ const columns = [
   {
     title: "id",
     dataIndex: "id",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "标题",
     dataIndex: "title",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "内容",
     dataIndex: "content",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "标签",
@@ -83,26 +89,36 @@ const columns = [
   {
     title: "答案",
     dataIndex: "answer",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "提交数",
     dataIndex: "submitNum",
+    width: 80,
   },
   {
     title: "通过数",
     dataIndex: "acceptedNum",
+    width: 80,
   },
   {
     title: "判题配置",
     dataIndex: "judgeConfig",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "判题用例",
     dataIndex: "judgeCase",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "用户id",
     dataIndex: "userId",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "创建时间",

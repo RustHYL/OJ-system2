@@ -72,10 +72,10 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
         loginOut();
         return;
       }
+        if (key === 'settings') {
+            history.push('/admin/user/settings');
+        }
       if (key === 'center') {
-        flushSync(() => {
-            setInitialState((s) => ({ ...s, currentUser: undefined }));
-        });
           // history.replace({
           //     pathname: '/user/login',
           //     search: stringify({
@@ -83,7 +83,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
           //     }),
           // });
       }
-      history.push(`/account/${key}`);
     },
     [setInitialState],
   );
@@ -133,6 +132,11 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
       icon: <UserOutlined />,
       label: '个人中心',
     },
+      {
+          key: 'settings',
+          icon: <SettingOutlined />,
+          label: '个人设置',
+      },
     {
       key: 'logout',
       icon: <LogoutOutlined />,

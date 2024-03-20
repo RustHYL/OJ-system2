@@ -24,9 +24,9 @@
 }
 
 #basicLayout .content {
-  background: linear-gradient(to right, #fefefe, #fff);
-  margin-bottom: 16px;
-  padding: 20px;
+  background-color: var(--color-fill-2);
+  padding: 16px 20px 0;
+  display: flex;
 }
 
 #basicLayout .footer {

@@ -2,6 +2,11 @@ package com.hyl.zhanmaoj.mapper;
 
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
 * @author Alan
@@ -10,6 +15,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.hyl.zhanmaoj.model.entity.Question
 */
 public interface QuestionMapper extends BaseMapper<Question> {
+
+    @Select("SELECT * FROM question ORDER BY RAND() LIMIT #{num}")
+    List<Question> getRandomQuestionList(@Param("num") Integer num);
 
 }
 

@@ -24,6 +24,7 @@ const columns: ProColumns<API.UserAdminVo>[] = [
     ellipsis: true,
     fixed: 'left',
     editable:false,
+      copyable: true,
   },
   {
     title: '用户头像',
@@ -59,6 +60,7 @@ const columns: ProColumns<API.UserAdminVo>[] = [
         width: 80,
         editable:false,
         ellipsis: true,
+        search: false,
     },
   {
     title: '性别',

@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.constant.CommonConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
-import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.judge.JudgeService;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitAddRequest;
 import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryAdminRequest;

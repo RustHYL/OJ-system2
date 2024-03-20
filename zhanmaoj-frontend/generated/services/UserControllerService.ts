@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BaseResponse_boolean_ } from '../models/BaseResponse_boolean_';
+import type { BaseResponse_List_UserAdminVO_ } from '../models/BaseResponse_List_UserAdminVO_';
 import type { BaseResponse_LoginUserVO_ } from '../models/BaseResponse_LoginUserVO_';
 import type { BaseResponse_long_ } from '../models/BaseResponse_long_';
 import type { BaseResponse_Page_User_ } from '../models/BaseResponse_Page_User_';
@@ -14,6 +15,7 @@ import type { UserAddRequest } from '../models/UserAddRequest';
 import type { UserLoginRequest } from '../models/UserLoginRequest';
 import type { UserQueryRequest } from '../models/UserQueryRequest';
 import type { UserRegisterRequest } from '../models/UserRegisterRequest';
+import type { UserSearchAdminRequest } from '../models/UserSearchAdminRequest';
 import type { UserUpdateMyRequest } from '../models/UserUpdateMyRequest';
 import type { UserUpdateRequest } from '../models/UserUpdateRequest';
 
@@ -131,6 +133,28 @@ id?: number,
     }
 
     /**
+     * listUserVO
+     * @param userSearchAdminRequest userSearchAdminRequest
+     * @returns BaseResponse_List_UserAdminVO_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static listUserVoUsingPost(
+userSearchAdminRequest: UserSearchAdminRequest,
+): CancelablePromise<BaseResponse_List_UserAdminVO_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/list/admin/vo',
+            body: userSearchAdminRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * listUserByPage
      * @param userQueryRequest userQueryRequest
      * @returns BaseResponse_Page_User_ OK
@@ -187,6 +211,28 @@ userLoginRequest: UserLoginRequest,
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/user/login',
+            body: userLoginRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * userAdminLogin
+     * @param userLoginRequest userLoginRequest
+     * @returns BaseResponse_LoginUserVO_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static userAdminLoginUsingPost(
+userLoginRequest: UserLoginRequest,
+): CancelablePromise<BaseResponse_LoginUserVO_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/login/admin',
             body: userLoginRequest,
             errors: {
                 401: `Unauthorized`,

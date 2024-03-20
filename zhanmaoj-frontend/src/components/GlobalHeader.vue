@@ -4,7 +4,7 @@
       <a-menu mode="horizontal" :selected-keys="selectedKeys" @menu-item-click="doMenuClick">
         <a-menu-item key="0" :style="{ padding: 0, marginRight: '38px' }" disabled>
           <div class="title-bar">
-            <img class="logo" src="../assets/oj-logo.jpg"/>
+            <img class="logo" src="../assets/oj-logo.jpg" alt="OJSystem"/>
             <div class="title">战码OJ</div>
           </div>
         </a-menu-item>
@@ -16,14 +16,14 @@
     <a-col flex="100px">
         <a-dropdown trigger="click">
           <a-avatar
-              :size="32"
+              :size="40"
               :style="{ marginRight: '8px', cursor: 'pointer' }"
           >
             <img alt="avatar" :src="store.state.user?.loginUser?.userAvatar || defaultUserAvatar" />
           </a-avatar>
           <template #content>
             <a-doption v-if="store.state.user?.loginUser.id">
-              <a-space @click="$router.push({ name: 'Info' })">
+              <a-space @click="$router.push('/question/user/center')">
                 <icon-user />
                 <span>
                   用户中心
@@ -31,7 +31,7 @@
               </a-space>
             </a-doption>
             <a-doption v-if="store.state.user?.loginUser.id">
-              <a-space @click="$router.push({ name: 'Setting' })">
+              <a-space @click="$router.push('/question/user/setting')">
                 <icon-settings />
                 <span>
                   设置中心
@@ -114,6 +114,16 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+#globalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 64px;
+  padding: 0 24px;
+  color: #444;
+}
+
 .title-bar {
   display: flex;
   align-items: center;

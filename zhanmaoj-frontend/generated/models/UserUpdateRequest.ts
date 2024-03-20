@@ -4,7 +4,10 @@
 /* eslint-disable */
 
 export type UserUpdateRequest = {
+    email?: string;
+    gender?: number;
     id?: number;
+    phone?: string;
     userAvatar?: string;
     userName?: string;
     userProfile?: string;

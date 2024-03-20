@@ -5,8 +5,11 @@
 
 export type LoginUserVO = {
     createTime?: string;
+    email?: string;
+    gender?: number;
     id?: number;
-    updateTime?: string;
+    phone?: string;
+    userAccount?: string;
     userAvatar?: string;
     userName?: string;
     userProfile?: string;
