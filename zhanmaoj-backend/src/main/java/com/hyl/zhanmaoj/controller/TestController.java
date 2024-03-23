@@ -9,23 +9,17 @@ import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.common.ResultUtils;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
-import com.hyl.zhanmaoj.model.dto.test.TestAddRequest;
-import com.hyl.zhanmaoj.model.dto.test.TestJoinRequest;
-import com.hyl.zhanmaoj.model.dto.test.TestQueryRequest;
-import com.hyl.zhanmaoj.model.dto.test.TestUpdateRequest;
+import com.hyl.zhanmaoj.model.dto.test.*;
 import com.hyl.zhanmaoj.model.dto.testSubmit.TestSubmitAddRequest;
 import com.hyl.zhanmaoj.model.entity.*;
 import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
 import com.hyl.zhanmaoj.model.enums.TestStatusEnum;
-import com.hyl.zhanmaoj.model.vo.QuestionTestVO;
+import com.hyl.zhanmaoj.model.vo.*;
 import com.hyl.zhanmaoj.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +44,9 @@ public class TestController {
 
     @Resource
     private TestQuestionService testQuestionService;
+
+    @Resource
+    private QuestionService questionService;
 
     @Resource
     private UserService userService;
@@ -100,14 +97,14 @@ public class TestController {
         }
         List<Object> questionListObject = new ArrayList<>();
         String questionListStr = testAddRequest.getQuestionList();
-        List<QuestionTestVO> questionList = new ArrayList<>();
+        List<QuestionTestAddVO> questionList = new ArrayList<>();
         if (StringUtils.isNotBlank(questionListStr)) {
             try {
                 questionListObject = GSON.fromJson(questionListStr, List.class);
                 for (Object o : questionListObject) {
                     String json = GSON.toJson(o, Object.class);
-                    QuestionTestVO questionTestVO = GSON.fromJson(json, QuestionTestVO.class);
-                    questionList.add(questionTestVO);
+                    QuestionTestAddVO questionTestAddVO = GSON.fromJson(json, QuestionTestAddVO.class);
+                    questionList.add(questionTestAddVO);
                 }
                 // 如果转换成功，这里会执行
                 System.out.println("Conversion successful: " + questionListStr);
@@ -117,8 +114,8 @@ public class TestController {
             }
         }
         int sumScoreNow = 0;
-        for (QuestionTestVO questionTestVO : questionList) {
-            sumScoreNow += questionTestVO.getScore();
+        for (QuestionTestAddVO questionTestAddVO : questionList) {
+            sumScoreNow += questionTestAddVO.getScore();
         }
         Test test = new Test();
         BeanUtils.copyProperties(testAddRequest, test);
@@ -151,10 +148,10 @@ public class TestController {
             testQuestion.setType(QuestionTypeEnum.CHOICE_QUESTION.getValue());
             testQuestionList.add(testQuestion);
         }
-        for (QuestionTestVO questionTestVO : questionList) {
+        for (QuestionTestAddVO questionTestAddVO : questionList) {
             TestQuestion testQuestionProgram = new TestQuestion();
             testQuestionProgram.setTestId(testId);
-            BeanUtils.copyProperties(questionTestVO, testQuestionProgram);
+            BeanUtils.copyProperties(questionTestAddVO, testQuestionProgram);
             testQuestionProgram.setType(QuestionTypeEnum.PROGRAMMING_QUESTION.getValue());
             testQuestionList.add(testQuestionProgram);
         }
@@ -260,13 +257,62 @@ public class TestController {
         return ResultUtils.success(null);
     }
 
-    @PostMapping("/test/join")
+    @PostMapping("/join")
     public BaseResponse<Boolean> JoinTest(@RequestBody TestJoinRequest testJoinRequest,
                                                   HttpServletRequest request) {
         if (testJoinRequest == null || testJoinRequest.getTestId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean result = testService.joinTest(testJoinRequest.getTestId(), testJoinRequest.getPassword());
-        return ResultUtils.success(result);
+        boolean result = testService.joinTest(testJoinRequest);
+        if (!result) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+        TestUser testUser = new TestUser();
+        testUser.setUserId(userId);
+        testUser.setTestId(testJoinRequest.getTestId());
+        boolean save = testUserService.save(testUser);
+        if (!save) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"用户试卷关系创建失败");
+        }
+        return ResultUtils.success(true);
+    }
+
+    @GetMapping("/get/detail")
+    public BaseResponse<TestVO> GetTestDetail(long testId,
+                                              HttpServletRequest request) {
+        if (testId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        TestVO testVO = new TestVO();
+        Test test = testService.getById(testId);
+        //
+        BeanUtils.copyProperties(test, testVO);
+        List<ChoiceQuestionTestDetailVO> choiceQuestionTestDetailVOList = choiceQuestionService.getChoiceQuestonTestDetailList(testId);
+        List<TrueOrFalseTestDetailVO> trueOrFalseTestDetailVOList = trueOrFalseService.getTrueOrFalseTestDetailList(testId);
+        List<QuestionTestDetailVO> questionTestDetailVOList = questionService.getQuestionTestDetailList(testId, request);
+        testVO.setQuestionTestDetailVOS(questionTestDetailVOList);
+        testVO.setTrueOrFalseTestDetailVOS(trueOrFalseTestDetailVOList);
+        testVO.setChoiceQuestionTestDetailVOS(choiceQuestionTestDetailVOList);
+        return ResultUtils.success(testVO);
+    }
+
+    @GetMapping("/test/title")
+    public BaseResponse<TestTitleVO> GetTestTitle(long testId,
+                                              HttpServletRequest request) {
+        if (testId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        TestTitleVO testTitleVO = new TestTitleVO();
+        Test test = testService.getById(testId);
+        BeanUtils.copyProperties(test, testTitleVO);
+        List<ChoiceQuestionTitleVO> choiceQuestionTitleVOList = choiceQuestionService.getChoiceQuestonTitleList(testId);
+        List<TrueOrFalseTitleVO> trueOrFalseTitleVOList = trueOrFalseService.getTrueOrFalseTitleList(testId);
+        List<QuestionTitleVO> questionTitleVOList = questionService.getQuestionTitleList(testId);
+        testTitleVO.setTrueOrFalseTitleVOS(trueOrFalseTitleVOList);
+        testTitleVO.setChoiceQuestionTitleVOS(choiceQuestionTitleVOList);
+        testTitleVO.setQuestionTitleVOS(questionTitleVOList);
+        return ResultUtils.success(testTitleVO);
     }
 }

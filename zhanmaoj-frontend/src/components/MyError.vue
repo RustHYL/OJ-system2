@@ -15,7 +15,7 @@
         :xxl="8"
         class="my-project-item"
       >
-        <a-card>
+        <a-card size="small">
           <a-space direction="vertical">
             <a-typography-text bold>{{ question.id }}</a-typography-text>
             <a-typography-text type="secondary">
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import {QuestionControllerService} from "../../../../generated";
+import {QuestionControllerService} from "../../generated";
 import message from "@arco-design/web-vue/es/message";
 import {onMounted, ref} from "vue";
 
@@ -64,7 +64,7 @@ const loadData = async () => {
 
 <style scoped lang="less">
   :deep(.arco-card-body) {
-    min-height: 128px;
+    min-height: 100px;
     padding-bottom: 0;
   }
   .my-project {

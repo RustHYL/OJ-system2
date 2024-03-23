@@ -18,7 +18,8 @@
           </div>
           <div>
             <icon-location />
-            <a-typography-text>{{ userInfo.gender }}</a-typography-text>
+            <a-typography-text v-if="userInfo.gender === 0">男</a-typography-text>
+            <a-typography-text v-if="userInfo.gender === 1">女</a-typography-text>
           </div>
         </a-space>
       </div>
@@ -29,7 +30,7 @@
 <script lang="ts" setup>
 
   import {useStore} from "vuex";
-  import {UserVO} from "../../../../generated";
+  import {UserVO} from "../../generated";
 
   const store = useStore();
 

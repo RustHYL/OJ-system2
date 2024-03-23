@@ -10,26 +10,42 @@ export default [
   { path: '/welcome', name: '欢迎', icon: 'smile', component: './Welcome' },
   {
     path: '/admin',
-    name: '管理页',
+    name: '用户管理',
     icon: 'crown',
     access: 'canAdmin',
     routes: [
       { path: '/admin', redirect: '/admin/sub-page' },
       { path: '/admin/user-manage', name: '用户管理', icon: 'smile', component: './Admin/UserManage' },
-      { path: '/admin/trueOrFalse', name: '判断题目管理', icon: 'smile', component: './Question/TrueOrFalseManage' },
-      { path: '/admin/trueOrFalse-submit-manage', name: '判断题目提交信息管理', icon: 'smile', component: './Question/TrueOrFalseSubmitManage' },
-      { path: '/admin/choiceQuestion-manage', name: '选择题目管理', icon: 'smile', component: './Question/ChoiceQuestionManage' },
-      { path: '/admin/choiceQuestion-submit-manage', name: '选择题目提交信息管理', icon: 'smile', component: './Question/ChoiceQuestionSubmitManage' },
-      { path: '/admin/question-manage', name: '编程题目管理', icon: 'smile', component: './Question/QuestionManageNew' },
-      { path: '/admin/question-submit-manage', name: '编程题目提交信息管理', icon: 'smile', component: './Question/QuestionSubmitManage' },
-      { path: '/admin/test-manage', name: '试卷管理', icon: 'smile', component: './Test/TestManage' },
-      { path: '/admin/test-submit-manage', name: '试卷提交信息管理', icon: 'smile', component: './Test/TestSubmitManage' },
       { path: '/admin/test/detail', component: './Test/TestDetailManage' },
       { path: '/admin/user/settings', component: './User/settings' },
       { path: '/admin/sub-page', name: '二级管理页', component: './Admin' },
     ],
   },
-  { name: '查询表格', icon: 'table', path: '/list', component: './TableList' },
+  {
+    path: '/question',
+    name: '题库管理',
+    icon: 'table',
+    access: 'canAdmin',
+    routes: [
+      { path: '/question/trueOrFalse', name: '判断题目管理', icon: 'smile', component: './Question/TrueOrFalseManage' },
+      { path: '/question/trueOrFalse-submit-manage', name: '判断题目提交信息管理', icon: 'smile', component: './Question/TrueOrFalseSubmitManage' },
+      { path: '/question/choiceQuestion-manage', name: '选择题目管理', icon: 'smile', component: './Question/ChoiceQuestionManage' },
+      { path: '/question/choiceQuestion-submit-manage', name: '选择题目提交信息管理', icon: 'smile', component: './Question/ChoiceQuestionSubmitManage' },
+      { path: '/question/question-manage', name: '编程题目管理', icon: 'smile', component: './Question/QuestionManageNew' },
+      { path: '/question/question-submit-manage', name: '编程题目提交信息管理', icon: 'smile', component: './Question/QuestionSubmitManage' },
+    ]
+  },
+  {
+    path: '/test',
+    name: '试卷管理',
+    icon: 'table',
+    access: 'canAdmin',
+    routes: [
+      { path: '/test/test-manage', name: '试卷管理', icon: 'smile', component: './Test/TestManage' },
+      { path: '/test/test-submit-manage', name: '试卷提交信息管理', icon: 'smile', component: './Test/TestSubmitManage' },
+      { path: '/test/detail', icon: 'smile', component: './Test/TestDetailManage' },
+    ]
+  },
   { path: '/', redirect: '/welcome' },
   { path: '*', layout: false, component: './404' },
 ];

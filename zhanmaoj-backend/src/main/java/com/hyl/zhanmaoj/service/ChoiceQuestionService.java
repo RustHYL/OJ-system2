@@ -7,6 +7,8 @@ import com.hyl.zhanmaoj.model.dto.choicequestion.ChoiceQuestionQueryRequest;
 import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
+import com.hyl.zhanmaoj.model.vo.ChoiceQuestionTestDetailVO;
+import com.hyl.zhanmaoj.model.vo.ChoiceQuestionTitleVO;
 import com.hyl.zhanmaoj.model.vo.ChoiceQuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,4 +64,12 @@ public interface ChoiceQuestionService extends IService<ChoiceQuestion> {
      */
     Page<ChoiceQuestionVO> getChoiceQuestionVOPage(Page<ChoiceQuestion> choiceQuestionPage, HttpServletRequest request);
 
+    /**
+     * 获取试卷中选择题信息
+     * @param testId
+     * @return
+     */
+    List<ChoiceQuestionTestDetailVO> getChoiceQuestonTestDetailList(long testId);
+
+    List<ChoiceQuestionTitleVO> getChoiceQuestonTitleList(long testId);
 }

@@ -467,5 +467,23 @@ public class TrueOrFalseController {
         return ResultUtils.success(result);
     }
 
+    /**
+     * 根据 id 获取
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/get/score/vo")
+    public BaseResponse<TrueOrFalseVO> getTrueOrFalseScoreVOById(long id, HttpServletRequest request) {
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        TrueOrFalse trueOrFalse = trueOrFalseService.getById(id);
+        if (trueOrFalse == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        return ResultUtils.success(trueOrFalseService.getTrueOrFalseVO(trueOrFalse, request));
+    }
+
 
 }

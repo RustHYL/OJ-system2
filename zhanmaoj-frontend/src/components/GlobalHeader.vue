@@ -57,7 +57,6 @@
           </template>
         </a-dropdown>
     </a-col>
-<!--    <div>{{ store.state.user?.loginUser?.userName ?? '未登录' }}</div>-->
   </a-row>
 </template>
 

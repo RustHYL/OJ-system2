@@ -5,6 +5,8 @@
 import type { BaseResponse_boolean_ } from '../models/BaseResponse_boolean_';
 import type { BaseResponse_List_Test_ } from '../models/BaseResponse_List_Test_';
 import type { BaseResponse_long_ } from '../models/BaseResponse_long_';
+import type { BaseResponse_TestTitleVO_ } from '../models/BaseResponse_TestTitleVO_';
+import type { BaseResponse_TestVO_ } from '../models/BaseResponse_TestVO_';
 import type { DeleteRequest } from '../models/DeleteRequest';
 import type { TestAddRequest } from '../models/TestAddRequest';
 import type { TestJoinRequest } from '../models/TestJoinRequest';
@@ -54,6 +56,51 @@ deleteRequest: DeleteRequest,
             method: 'POST',
             url: '/api/test/delete',
             body: deleteRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * GetTestDetail
+     * @param testId testId
+     * @returns BaseResponse_TestVO_ OK
+     * @throws ApiError
+     */
+    public static getTestDetailUsingGet(
+testId?: number,
+): CancelablePromise<BaseResponse_TestVO_> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/test/get/detail',
+            query: {
+                'testId': testId,
+            },
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * JoinTest
+     * @param testJoinRequest testJoinRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static joinTestUsingPost(
+testJoinRequest: TestJoinRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/test/join',
+            body: testJoinRequest,
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,
@@ -121,19 +168,20 @@ testQueryRequest: TestQueryRequest,
     }
 
     /**
-     * JoinTest
-     * @param testJoinRequest testJoinRequest
-     * @returns BaseResponse_boolean_ OK
-     * @returns any Created
+     * GetTestTitle
+     * @param testId testId
+     * @returns BaseResponse_TestTitleVO_ OK
      * @throws ApiError
      */
-    public static joinTestUsingPost(
-testJoinRequest: TestJoinRequest,
-): CancelablePromise<BaseResponse_boolean_ | any> {
+    public static getTestTitleUsingGet(
+testId?: number,
+): CancelablePromise<BaseResponse_TestTitleVO_> {
         return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/test/test/join',
-            body: testJoinRequest,
+            method: 'GET',
+            url: '/api/test/test/title',
+            query: {
+                'testId': testId,
+            },
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,

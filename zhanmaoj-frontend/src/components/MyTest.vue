@@ -20,7 +20,7 @@
             </a-col>
           </a-row>
         <a-list-item-meta :title="test.title">
-          <template #description> 共{{ test.questionNum }}人 </template>
+          <template #description> 共{{ test.questionNum }}题 </template>
         </a-list-item-meta>
       </a-list-item>
     </a-list>
@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-  import {TestControllerService} from "../../../../generated";
+  import {TestControllerService} from "../../generated";
   import message from "@arco-design/web-vue/es/message";
   import {ref, onMounted} from "vue";
 

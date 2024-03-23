@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.hyl.zhanmaoj.model.dto.test.TestJoinRequest;
 import com.hyl.zhanmaoj.model.dto.test.TestQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Test;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 
 /**
@@ -21,5 +23,5 @@ public interface TestService extends IService<Test> {
 
     QueryWrapper<Test> getQueryWrapper(TestQueryRequest testQueryRequest);
 
-    boolean joinTest(Long testId, String password);
+    boolean joinTest(TestJoinRequest testJoinRequest);
 }

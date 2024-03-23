@@ -1,14 +1,21 @@
 <template>
   <div id="addQuestionView">
-    <h2 v-if="!updatePage">创建题目</h2>
-    <h2 v-else>编辑题目</h2>
+    <div class="header">
+      <a-breadcrumb>
+        <a-breadcrumb-item>题目</a-breadcrumb-item>
+        <a-breadcrumb-item>创建题目</a-breadcrumb-item>
+      </a-breadcrumb>
+      <h2 v-if="!updatePage">创建题目</h2>
+      <h2 v-else>编辑题目</h2>
+    </div>
+    <div class="container">
     <div class="layout">
       <a-form :model="form" label-align="left" style="max-width: 640px">
         <a-form-item field="title" label="标题">
           <a-input v-model="form.title" placeholder="请输入标题" />
         </a-form-item>
         <a-form-item field="tags" label="标签">
-          <a-input-tag v-model="form.tags" placeholder="请选择标签" allow-clear />
+          <a-input-tag v-model="form.tags" placeholder="请输入标签，回车键生成标签" allow-clear />
         </a-form-item>
         <a-form-item field="content" label="题目内容">
           <MarkdownEditor :value="form.content" :handle-change="onContentChange" />
@@ -18,7 +25,7 @@
         </a-form-item>
         <a-form-item label="判题配置" :content-flex="false" :merge-props="false">
           <a-space direction="vertical" style="min-width: 480px">
-            <a-form-item field="judgeConfig.timeLimit" label="时间限制">
+            <a-form-item field="judgeConfig.timeLimit" label="时间限制" style="width: 350px">
               <a-input-number
                   v-model="form.judgeConfig.timeLimit"
                   placeholder="请输入时间限制"
@@ -28,7 +35,7 @@
                   size="large"
               />
             </a-form-item>
-            <a-form-item field="judgeConfig.memoryLimit" label="内存限制">
+            <a-form-item field="judgeConfig.memoryLimit" label="内存限制" style="width: 350px">
               <a-input-number
                   v-model="form.judgeConfig.memoryLimit"
                   placeholder="请输入内存限制"
@@ -38,7 +45,7 @@
                   size="large"
               />
             </a-form-item>
-            <a-form-item field="judgeConfig.stackLimit" label="堆栈限制">
+            <a-form-item field="judgeConfig.stackLimit" label="堆栈限制" style="width: 350px">
               <a-input-number
                   v-model="form.judgeConfig.stackLimit"
                   placeholder="请输入堆栈限制"
@@ -69,6 +76,7 @@
                 <a-input
                     v-model="judgeCaseItem.input"
                     placeholder="请输入测试输入用例"
+                    style="width: 300px"
                 />
               </a-form-item>
               <a-form-item
@@ -79,6 +87,7 @@
                 <a-input
                     v-model="judgeCaseItem.output"
                     placeholder="请输入测试输出用例"
+                    style="width: 300px"
                 />
               </a-form-item>
               <a-button status="danger" @click="handleDelete(index)">
@@ -99,6 +108,7 @@
           </a-button>
         </a-form-item>
       </a-form>
+    </div>
     </div>
   </div>
 </template>
@@ -133,7 +143,6 @@ let form = ref({
   ],
 });
 
-//todo 接口优化直接放回前端能显示，不需要在处理
 
 /**
  * 根据题目 id 获取老的数据
@@ -236,6 +245,25 @@ const onAnswerChange = (value: string) => {
 
 <style scoped>
 #addQuestionView {
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#addQuestionView .header {
+  width: 100%;
+  height: 5%;
+}
+
+#addQuestionView .container {
+  max-width: 800px;
+  display: flex;
+  justify-content: center;
+  margin: 10px auto 0;
+  padding: 70px;
+  background-color: #FFFFFF;
 }
 
 #addQuestionView .layout {

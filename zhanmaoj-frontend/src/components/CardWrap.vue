@@ -41,6 +41,7 @@
   import { ref } from 'vue';
   import message from "@arco-design/web-vue/es/message";
   import {TestControllerService} from "../../generated";
+  import {useRouter} from "vue-router";
 
   const props = defineProps({
     title: {
@@ -79,16 +80,22 @@
 
   const nowTime = ref(new Date());
 
+  const router = useRouter();
+
   const showPasswordDialog = ref(false);
 
   const isExpires = ref(props.expire);
 
-  const handleToggle = () => {
-    console.log("开始时间:"+props.beginTime,"结束时间："+ props.expiredTime, nowTime.value)
+  const handleToggle = async () => {
+    console.log("开始时间:" + props.beginTime, "结束时间：" + props.expiredTime, nowTime.value)
     if (props.beginTime > nowTime.value) {
       message.info('考试未开始');
-    }else if (props.expiredTime < nowTime.value) {
+    } else if (props.expiredTime < nowTime.value) {
       message.info('考试已结束');
+    } else if (props.status === 0) {
+      await router.push({
+        path: `/collect/test/do/${props.id}`, // 使用模板字符串来插入参数
+      })
     } else if (props.status === 1) {
       //打开弹窗
       showPasswordDialog.value = true;
@@ -106,7 +113,9 @@
     })
     if (res.code === 0) {
       password.value = '';
-
+      await router.push({
+        path: `/collect/test/do/${props.id}`, // 使用模板字符串来插入参数
+      })
     } else {
       message.error('加入失败' + (res.message ? `，${res.message}` : ''))
     }

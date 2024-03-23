@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-  import CardWrap from './card-wrap.vue';
+  import CardWrap from './CardWrap.vue';
   import {onMounted, ref} from "vue";
   import {
     TestControllerService,

@@ -1,26 +1,34 @@
 <template>
-  <div class="container" style="width: 100%; height: 100%">
-    <Breadcrumb :items="['menu.list', 'menu.list.cardList']" />
-    <a-row :gutter="20" align="stretch">
-      <a-col :span="24">
-        <a-card class="general-card" title="试卷列表">
-          <a-row justify="space-between">
-            <a-col :span="24">
-              <a-tabs :default-active-tab="1" type="rounded">
-                <a-tab-pane key="1" title="试卷">
-                  <TheService />
-                </a-tab-pane>
-              </a-tabs>
-            </a-col>
-          </a-row>
-        </a-card>
-      </a-col>
-    </a-row>
+  <div id="testCardView">
+    <div class="header">
+      <a-breadcrumb>
+        <a-breadcrumb-item>试卷</a-breadcrumb-item>
+        <a-breadcrumb-item>试卷列表</a-breadcrumb-item>
+      </a-breadcrumb>
+    </div>
+    <div class="container" style="width: 100%; height: 100%">
+      <Breadcrumb :items="['menu.list', 'menu.list.cardList']" />
+      <a-row :gutter="20" align="stretch">
+        <a-col :span="24">
+          <a-card class="general-card" title="试卷列表">
+            <a-row justify="space-between">
+              <a-col :span="24">
+                <a-tabs :default-active-tab="1" type="rounded">
+                  <a-tab-pane key="1" title="试卷">
+                    <TheService />
+                  </a-tab-pane>
+                </a-tabs>
+              </a-col>
+            </a-row>
+          </a-card>
+        </a-col>
+      </a-row>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-  import TheService from '../../components/the-service.vue';
+  import TheService from '../../components/TheService.vue';
 </script>
 
 <script lang="ts">

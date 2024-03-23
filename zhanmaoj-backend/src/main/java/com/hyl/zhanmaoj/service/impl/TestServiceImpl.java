@@ -6,16 +6,22 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hyl.zhanmaoj.constant.CommonConstant;
+import com.hyl.zhanmaoj.model.dto.test.TestJoinRequest;
 import com.hyl.zhanmaoj.model.dto.test.TestQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Test;
+import com.hyl.zhanmaoj.model.entity.TestUser;
 import com.hyl.zhanmaoj.model.enums.TestStatusEnum;
 import com.hyl.zhanmaoj.service.TestService;
 import com.hyl.zhanmaoj.mapper.TestMapper;
+import com.hyl.zhanmaoj.service.TestUserService;
+import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -30,6 +36,12 @@ import static com.hyl.zhanmaoj.common.DateUtils.convertStringToDate;
 public class TestServiceImpl extends ServiceImpl<TestMapper, Test>
     implements TestService{
 
+
+    @Resource
+    private TestUserService testUserService;
+
+    @Resource
+    private UserService userService;
 
     private ObjectMapper configureObjectMapper(ObjectMapper objectMapper) {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -69,12 +81,14 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test>
     }
 
     @Override
-    public boolean joinTest(Long testId, String password) {
+    public boolean joinTest(TestJoinRequest testJoinRequest) {
+        Long testId = testJoinRequest.getTestId();
+        String password = testJoinRequest.getPassword();
         Test test = this.getById(testId);
-        if (test == null) {
+        if (test == null || !test.getPassword().equals(password)) {
             return false;
         }
-        return test.getPassword().equals(password);
+        return true;
 
     }
 }

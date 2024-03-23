@@ -1,45 +1,53 @@
 <template>
   <div id="questionsView">
-    <a-form :model="searchParams" layout="inline">
-      <a-form-item field="title" label="名称" style="min-width: 240px">
-        <a-input v-model="searchParams.title" />
-      </a-form-item>
-      <a-form-item field="tags" label="标签" style="min-width: 240px">
-        <a-input-tag v-model="searchParams.tags" />
-      </a-form-item>
-      <a-form-item>
-        <a-button type="primary" @click="onSearch">搜索</a-button>
-      </a-form-item>
-    </a-form>
-    <a-table
-        :ref="tableRef"
-        :columns="columns"
-        :data="dataList"
-        :pagination="{
+    <div class="header">
+      <a-breadcrumb>
+        <a-breadcrumb-item>题目</a-breadcrumb-item>
+        <a-breadcrumb-item>题目列表</a-breadcrumb-item>
+      </a-breadcrumb>
+    </div>
+    <div class="container">
+      <a-form :model="searchParams" layout="inline">
+        <a-form-item field="title" label="名称" style="min-width: 240px">
+          <a-input v-model="searchParams.title" />
+        </a-form-item>
+        <a-form-item field="tags" label="标签" style="min-width: 240px">
+          <a-input-tag v-model="searchParams.tags" />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="onSearch">搜索</a-button>
+        </a-form-item>
+      </a-form>
+      <a-table
+          :ref="tableRef"
+          :columns="columns"
+          :data="dataList"
+          :pagination="{
         showTotal: true,
         pageSize: searchParams.pageSize,
         current: searchParams.current,
         total,
       }"
-        @page-change="onPageChange"
-    >
-      <template #optional="{ record }">
-        <a-space>
-          <a-button type="primary" @click="toQuestionPage(record)"> 做题</a-button>
-        </a-space>
-      </template>
-      <template #tags="{ record }">
-        <a-space wrap>
-          <a-tag v-for="(tag, index) of record.tags" :key="index" color="green">{{ tag }}</a-tag>
-        </a-space>
-      </template>
-      <template #passingRate="{ record }">
-        {{`${record.submitNum ? (record.acceptedNum / record.submitNum * 100) : '0'}%(${record.acceptedNum}/${record.submitNum})`}}
-      </template>
-      <template #createTime="{ record }">
-        {{moment(record.createTime).format("YYYY-MM-DD")}}
-      </template>
-    </a-table>
+          @page-change="onPageChange"
+      >
+        <template #optional="{ record }">
+          <a-space>
+            <a-button type="primary" @click="toQuestionPage(record)"> 做题</a-button>
+          </a-space>
+        </template>
+        <template #tags="{ record }">
+          <a-space wrap>
+            <a-tag v-for="(tag, index) of record.tags" :key="index" color="green">{{ tag }}</a-tag>
+          </a-space>
+        </template>
+        <template #passingRate="{ record }">
+          {{`${record.submitNum ? (record.acceptedNum / record.submitNum * 100) : '0'}%(${record.acceptedNum}/${record.submitNum})`}}
+        </template>
+        <template #createTime="{ record }">
+          {{moment(record.createTime).format("YYYY-MM-DD")}}
+        </template>
+      </a-table>
+    </div>
   </div>
 </template>
 
@@ -148,8 +156,13 @@ const onSearch = () => {
 
 <style scoped>
 #questionsView {
-  max-width: 1600px;
-  min-width: 1360px;
+  width: 100%;
   margin: 0 auto;
 }
+
+#questionsView .container{
+  width: 80%;
+  margin: 0 auto;
+}
+
 </style>

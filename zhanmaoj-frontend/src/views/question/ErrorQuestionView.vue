@@ -1,39 +1,30 @@
 <template>
   <div id="manageQuestionView">
-    <div class="header">
-      <a-breadcrumb>
-        <a-breadcrumb-item>题目</a-breadcrumb-item>
-        <a-breadcrumb-item>题目管理</a-breadcrumb-item>
-      </a-breadcrumb>
-    </div>
-    <div class="container">
-      <a-table
-          :ref="tableRef"
-          :columns="columns"
-          :data="dataList"
-          :scroll="scroll"
-          :expandable="expandable"
-          :pagination="{
+    <a-table
+        :ref="tableRef"
+        :columns="columns"
+        :data="dataList"
+        :scroll="scroll"
+        :expandable="expandable"
+        :pagination="{
         showTotal: true,
         pageSize: searchParams.pageSize,
         current: searchParams.current,
         total,
       }"
-          @page-change="onPageChange"
-      >
-        <template #tags="{ record }">
-          <a-space wrap>
-            <a-tag v-for="(tag, index) in record.tags" :key="index" color="green">{{ tag }}</a-tag>
-          </a-space>
-        </template>
-        <template #optional="{ record }">
-          <a-space>
-            <a-button type="primary" @click="doUpdate(record)"> 修改</a-button>
-            <a-button status="danger" @click="doDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </div>
+        @page-change="onPageChange"
+    >
+      <template #tags="{ record }">
+        <a-space wrap>
+          <a-tag v-for="(tag, index) in record.tags" :key="index" color="green">{{ tag }}</a-tag>
+        </a-space>
+      </template>
+      <template #optional="{ record }">
+        <a-space>
+          <a-button type="primary" @click="doUpdate(record)"> 做题</a-button>
+        </a-space>
+      </template>
+    </a-table>
   </div>
 </template>
 
@@ -193,12 +184,8 @@ const doUpdate = (question: Question) => {
 
 <style scoped>
 #manageQuestionView {
-  width: 100%;
-  margin: 0 auto;
-}
-
-#manageQuestionView .container{
-  width: 80%;
+  max-width: 90%;
+  min-width: 85%;
   margin: 0 auto;
 }
 </style>

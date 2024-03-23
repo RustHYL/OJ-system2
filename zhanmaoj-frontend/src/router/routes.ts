@@ -124,8 +124,8 @@ export const routes: Array<RouteRecordRaw> = [
         }
     },
     {
-        path: '/question/test/do/:id',
-        name: '开始考试',
+        path: '/collect/test/do/:id',
+        name: '试题汇总',
         component: TestDoView,
         meta: {
             hideInMenu: true

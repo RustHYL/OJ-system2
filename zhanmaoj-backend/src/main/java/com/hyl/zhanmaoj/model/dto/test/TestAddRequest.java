@@ -2,15 +2,10 @@ package com.hyl.zhanmaoj.model.dto.test;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.hyl.zhanmaoj.model.dto.question.JudgeCase;
-import com.hyl.zhanmaoj.model.dto.question.JudgeConfig;
-import com.hyl.zhanmaoj.model.entity.TestQuestion;
-import com.hyl.zhanmaoj.model.vo.QuestionTestVO;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 创建请求

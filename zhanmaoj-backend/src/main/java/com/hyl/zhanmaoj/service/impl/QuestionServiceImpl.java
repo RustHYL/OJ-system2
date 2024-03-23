@@ -10,16 +10,18 @@ import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.model.dto.question.QuestionQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.question.QuestionQueryRequest;
 import com.hyl.zhanmaoj.model.entity.*;
-import com.hyl.zhanmaoj.model.vo.QuestionVO;
-import com.hyl.zhanmaoj.model.vo.UserVO;
+import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
+import com.hyl.zhanmaoj.model.vo.*;
 import com.hyl.zhanmaoj.service.QuestionService;
 import com.hyl.zhanmaoj.mapper.QuestionMapper;
 import com.hyl.zhanmaoj.service.QuestionSubmitService;
+import com.hyl.zhanmaoj.service.TestQuestionService;
 import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,6 +45,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
 
     @Resource
     private QuestionMapper questionMapper;
+
+    @Resource
+    private TestQuestionService testQuestionService;
 
     /**
      * 校验题目是否合法
@@ -204,6 +209,54 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         }).collect(Collectors.toList());
         questionVOPage.setRecords(questionVOList);
         return questionVOPage;
+    }
+
+    /**
+     * 获取试卷编程题列表
+     * @param testId
+     * @return
+     */
+    @Override
+    public List<QuestionTestDetailVO> getQuestionTestDetailList(long testId, HttpServletRequest request) {
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", testId);
+        queryWrapper.eq("type", QuestionTypeEnum.TRUE_OR_FALSE.getValue());
+        List<QuestionTestDetailVO> questionTestDetailVOList = new ArrayList<>();
+        List<TestQuestion> testQuestionList = testQuestionService.list(queryWrapper);
+        if (CollectionUtils.isEmpty(testQuestionList)) {
+            return questionTestDetailVOList;
+        }
+        testQuestionList.forEach(testQuestion -> {
+            QuestionVO questionVO = new QuestionVO();
+            QuestionTestDetailVO questionTestDetailVO = new QuestionTestDetailVO();
+            Question question = this.getById(testQuestion.getQuestionId());
+            questionVO = this.getQuestionVO(question, request);
+            BeanUtils.copyProperties(questionVO, questionTestDetailVO);
+            questionTestDetailVO.setScore(testQuestion.getScore());
+            questionTestDetailVOList.add(questionTestDetailVO);
+        });
+
+        return questionTestDetailVOList;
+    }
+
+    @Override
+    public List<QuestionTitleVO> getQuestionTitleList(long testId) {
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", testId);
+        queryWrapper.eq("type", QuestionTypeEnum.CHOICE_QUESTION.getValue());
+        List<QuestionTitleVO> questionTitleVOList = new ArrayList<>();
+        questionTitleVOList = testQuestionService.list(queryWrapper).stream().map(testQuestion -> {
+            Long questionId = testQuestion.getQuestionId();
+            Question question = this.getById(questionId);
+            if (question == null) {
+                return null;
+            }
+            QuestionTitleVO questionTitleVO = new QuestionTitleVO();
+            BeanUtils.copyProperties(question, questionTitleVO);
+            questionTitleVO.setType(QuestionTypeEnum.PROGRAMMING_QUESTION.getValue());
+            return questionTitleVO;
+        }).collect(Collectors.toList());
+        return questionTitleVOList;
     }
 
 

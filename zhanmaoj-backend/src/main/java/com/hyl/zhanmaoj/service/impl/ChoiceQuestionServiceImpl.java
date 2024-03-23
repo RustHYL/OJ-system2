@@ -11,26 +11,29 @@ import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.model.dto.choicequestion.ChoiceQuestionQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.choicequestion.ChoiceQuestionQueryRequest;
 import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
+import com.hyl.zhanmaoj.model.entity.TestQuestion;
 import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
 import com.hyl.zhanmaoj.model.entity.User;
+import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
 import com.hyl.zhanmaoj.model.enums.TrueOrFalseAnswerEnum;
+import com.hyl.zhanmaoj.model.vo.ChoiceQuestionTestDetailVO;
+import com.hyl.zhanmaoj.model.vo.ChoiceQuestionTitleVO;
 import com.hyl.zhanmaoj.model.vo.ChoiceQuestionVO;
 import com.hyl.zhanmaoj.model.vo.UserVO;
 import com.hyl.zhanmaoj.service.ChoiceQuestionService;
 import com.hyl.zhanmaoj.mapper.ChoiceQuestionMapper;
+import com.hyl.zhanmaoj.service.TestQuestionService;
 import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hyl.zhanmaoj.common.DateUtils.convertStringToDate;
@@ -49,6 +52,9 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
 
     @Resource
     private ChoiceQuestionMapper choiceQuestionMapper;
+
+    @Resource
+    private TestQuestionService testQuestionService;
 
     /**
      * 校验题目是否合法
@@ -195,7 +201,49 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
         choiceQuestionVOPage.setRecords(choiceQuestionVOList);
         return choiceQuestionVOPage;
     }
-    
+
+    @Override
+    public List<ChoiceQuestionTestDetailVO> getChoiceQuestonTestDetailList(long testId) {
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", testId);
+        queryWrapper.eq("type", QuestionTypeEnum.CHOICE_QUESTION.getValue());
+        List<ChoiceQuestionTestDetailVO> choiceQuestionTestDetailVOList = new ArrayList<>();
+        List<TestQuestion> testQuestionList = testQuestionService.list(queryWrapper);
+        if (CollectionUtils.isEmpty(testQuestionList)) {
+            return choiceQuestionTestDetailVOList;
+        }
+        testQuestionList.forEach(testQuestion -> {
+            ChoiceQuestionTestDetailVO choiceQuestionTestDetailVO = new ChoiceQuestionTestDetailVO();
+            ChoiceQuestion choiceQuestion = this.getById(testQuestion.getQuestionId());
+            BeanUtils.copyProperties(choiceQuestion, choiceQuestionTestDetailVO);
+            choiceQuestionTestDetailVO.setScore(testQuestion.getScore());
+            choiceQuestionTestDetailVO.setAnswer(0);
+            choiceQuestionTestDetailVOList.add(choiceQuestionTestDetailVO);
+        });
+
+        return choiceQuestionTestDetailVOList;
+    }
+
+    @Override
+    public List<ChoiceQuestionTitleVO> getChoiceQuestonTitleList(long testId) {
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", testId);
+        queryWrapper.eq("type", QuestionTypeEnum.CHOICE_QUESTION.getValue());
+        List<ChoiceQuestionTitleVO> choiceQuestionTitleVOList = new ArrayList<>();
+        choiceQuestionTitleVOList = testQuestionService.list(queryWrapper).stream().map(testQuestion -> {
+            Long questionId = testQuestion.getQuestionId();
+            ChoiceQuestion choiceQuestion = this.getById(questionId);
+            if (choiceQuestion == null) {
+                return null;
+            }
+            ChoiceQuestionTitleVO choiceQuestionTitleVO = new ChoiceQuestionTitleVO();
+            BeanUtils.copyProperties(choiceQuestion, choiceQuestionTitleVO);
+            choiceQuestionTitleVO.setType(QuestionTypeEnum.CHOICE_QUESTION.getValue());
+            return choiceQuestionTitleVO;
+        }).collect(Collectors.toList());
+        return choiceQuestionTitleVOList;
+    }
+
 }
 
 

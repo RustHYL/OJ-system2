@@ -237,7 +237,7 @@ const TableList: React.FC = () => {
         <Link
             key="detail"
             to={{
-              pathname: '/admin/test/detail', // 指定目标页面的路径
+              pathname: '/test/detail', // 指定目标页面的路径
               search: `?id=${record.id}`, // 将record.id作为查询参数传递
             }}
         >

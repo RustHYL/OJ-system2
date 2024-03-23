@@ -571,7 +571,7 @@ public class QuestionController {
         return ResultUtils.success(result);
     }
 
-    @PostMapping("question/my/error")
+    @PostMapping("my/error")
     public BaseResponse<List<QuestionVO>> getMyErrorQuestion(HttpServletRequest request) {
         Long id = userService.getLoginUser(request).getId();
         QueryWrapper<QuestionSubmit> queryWrapper = new QueryWrapper<>();

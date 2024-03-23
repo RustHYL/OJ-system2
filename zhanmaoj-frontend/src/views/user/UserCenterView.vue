@@ -6,14 +6,14 @@
       <div class="content-left">
         <a-grid :cols="24" :col-gap="16" :row-gap="16">
           <a-grid-item :span="24">
-            <MyProject />
+            <MyError />
           </a-grid-item>
         </a-grid>
       </div>
       <div class="content-right">
         <a-grid :cols="24" :row-gap="16">
           <a-grid-item :span="24">
-            <MyTeam />
+            <MyTest />
           </a-grid-item>
         </a-grid>
       </div>
@@ -22,9 +22,9 @@
 </template>
 
 <script lang="ts" setup>
-import UserInfoHeader from './components/user-info-header.vue';
-import MyProject from './components/my-error.vue';
-import MyTeam from './components/my-test.vue';
+import UserInfoHeader from '../../components/UserInfoHeader.vue';
+import MyError from '../../components/MyError.vue';
+import MyTest from '../../components/MyTest.vue';
 </script>
 
 <script lang="ts">

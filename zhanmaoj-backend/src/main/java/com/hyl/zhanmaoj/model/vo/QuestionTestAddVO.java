@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class QuestionTestVO implements Serializable {
+public class QuestionTestAddVO implements Serializable {
 
     private Long questionId;
 

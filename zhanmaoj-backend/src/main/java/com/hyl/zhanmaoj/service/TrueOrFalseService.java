@@ -9,6 +9,8 @@ import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hyl.zhanmaoj.model.vo.QuestionVO;
+import com.hyl.zhanmaoj.model.vo.TrueOrFalseTestDetailVO;
+import com.hyl.zhanmaoj.model.vo.TrueOrFalseTitleVO;
 import com.hyl.zhanmaoj.model.vo.TrueOrFalseVO;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,4 +66,17 @@ public interface TrueOrFalseService extends IService<TrueOrFalse> {
      */
     Page<TrueOrFalseVO> getTrueOrFalseVOPage(Page<TrueOrFalse> trueOrFalsePage, HttpServletRequest request);
 
+    /**
+     * 获取试卷判断题题目信息列表
+     * @param testId
+     * @return
+     */
+    List<TrueOrFalseTestDetailVO> getTrueOrFalseTestDetailList(long testId);
+
+    /**
+     * 获取题目id type title列表
+     * @param testId
+     * @return
+     */
+    List<TrueOrFalseTitleVO> getTrueOrFalseTitleList(long testId);
 }

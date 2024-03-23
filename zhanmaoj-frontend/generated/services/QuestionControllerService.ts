@@ -233,6 +233,24 @@ questionQueryRequest: QuestionQueryRequest,
     }
 
     /**
+     * getMyErrorQuestion
+     * @returns BaseResponse_List_QuestionVO_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static getMyErrorQuestionUsingPost(): CancelablePromise<BaseResponse_List_QuestionVO_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/question/my/error',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * listMyQuestionVOByPage
      * @param questionQueryRequest questionQueryRequest
      * @returns BaseResponse_Page_QuestionVO_ OK
@@ -246,24 +264,6 @@ questionQueryRequest: QuestionQueryRequest,
             method: 'POST',
             url: '/api/question/my/list/page/vo',
             body: questionQueryRequest,
-            errors: {
-                401: `Unauthorized`,
-                403: `Forbidden`,
-                404: `Not Found`,
-            },
-        });
-    }
-
-    /**
-     * getMyErrorQuestion
-     * @returns BaseResponse_List_QuestionVO_ OK
-     * @returns any Created
-     * @throws ApiError
-     */
-    public static getMyErrorQuestionUsingPost(): CancelablePromise<BaseResponse_List_QuestionVO_ | any> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/question/question/my/error',
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,

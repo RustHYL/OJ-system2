@@ -7,6 +7,8 @@ import com.hyl.zhanmaoj.model.dto.question.QuestionQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
+import com.hyl.zhanmaoj.model.vo.QuestionTestDetailVO;
+import com.hyl.zhanmaoj.model.vo.QuestionTitleVO;
 import com.hyl.zhanmaoj.model.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
@@ -67,4 +69,17 @@ public interface QuestionService extends IService<Question> {
      */
     Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage, HttpServletRequest request);
 
+    /**
+     * 获取试卷题目信息列表
+     * @param testId
+     * @return
+     */
+    List<QuestionTestDetailVO> getQuestionTestDetailList(long testId, HttpServletRequest request);
+
+    /**
+     * 获取题目id title type列表
+     * @param testId
+     * @return
+     */
+    List<QuestionTitleVO> getQuestionTitleList(long testId);
 }

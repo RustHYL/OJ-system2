@@ -142,6 +142,29 @@ id?: number,
     }
 
     /**
+     * getTrueOrFalseScoreVOById
+     * @param id id
+     * @returns BaseResponse_TrueOrFalseVO_ OK
+     * @throws ApiError
+     */
+    public static getTrueOrFalseScoreVoByIdUsingGet(
+id?: number,
+): CancelablePromise<BaseResponse_TrueOrFalseVO_> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/trueOrFalse/get/score/vo',
+            query: {
+                'id': id,
+            },
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * getTrueOrFalseVOById
      * @param id id
      * @returns BaseResponse_TrueOrFalseVO_ OK

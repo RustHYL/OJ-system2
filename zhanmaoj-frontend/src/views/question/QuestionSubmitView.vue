@@ -1,49 +1,57 @@
 <!--todo 每间隔一定时间刷新提交状态-->
 <template>
   <div id="questionSubmitView">
-    <a-form :model="searchParams" layout="inline">
-<!--      todo 题目id可以作为跳转 插槽实现-->
-      <a-form-item field="questionId" label="题号" style="min-width: 240px">
-        <a-input v-model="searchParams.questionId" />
-      </a-form-item>
-      <a-form-item
-          field="language"
-          label="编程语言"
-          style="min-width: 240px"
-      >
-        <a-select
-            v-model="searchParams.language"
-            :style="{ width: '320px' }"
-            placeholder="选择编程语言"
+    <div class="header">
+      <a-breadcrumb>
+        <a-breadcrumb-item>题目</a-breadcrumb-item>
+        <a-breadcrumb-item>提交列表</a-breadcrumb-item>
+      </a-breadcrumb>
+    </div>
+    <div class="container">
+      <a-form :model="searchParams" layout="inline">
+        <!--      todo 题目id可以作为跳转 插槽实现-->
+        <a-form-item field="questionId" label="题号" style="min-width: 240px">
+          <a-input v-model="searchParams.questionId" />
+        </a-form-item>
+        <a-form-item
+            field="language"
+            label="编程语言"
+            style="min-width: 240px"
         >
-          <a-option>java</a-option>
-          <a-option>cpp</a-option>
-          <a-option>go</a-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item>
-        <a-button type="primary" @click="onSearch">搜索</a-button>
-      </a-form-item>
-    </a-form>
-    <a-table
-        :ref="tableRef"
-        :columns="columns"
-        :data="dataList"
-        :pagination="{
+          <a-select
+              v-model="searchParams.language"
+              :style="{ width: '320px' }"
+              placeholder="选择编程语言"
+          >
+            <a-option>java</a-option>
+            <a-option>cpp</a-option>
+            <a-option>go</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="onSearch">搜索</a-button>
+        </a-form-item>
+      </a-form>
+      <a-table
+          :ref="tableRef"
+          :columns="columns"
+          :data="dataList"
+          :pagination="{
         showTotal: true,
         pageSize: searchParams.pageSize,
         current: searchParams.current,
         total,
       }"
-        @page-change="onPageChange"
-    >
-      <template #judgeInfo="{ record }">
-        {{JSON.stringify(record.judgeInfo)}}
-      </template>
-      <template #createTime="{ record }">
-        {{moment(record.createTime).format("YYYY-MM-DD")}}
-      </template>
-    </a-table>
+          @page-change="onPageChange"
+      >
+        <template #judgeInfo="{ record }">
+          {{JSON.stringify(record.judgeInfo)}}
+        </template>
+        <template #createTime="{ record }">
+          {{moment(record.createTime).format("YYYY-MM-DD")}}
+        </template>
+      </a-table>
+    </div>
   </div>
 </template>
 
@@ -157,7 +165,13 @@ const onSearch = () => {
 
 <style scoped>
 #questionSubmitView {
-  max-width: 1360px;
+  width: 100%;
   margin: 0 auto;
 }
+
+#questionSubmitView .container{
+  width: 80%;
+  margin: 0 auto;
+}
+
 </style>
