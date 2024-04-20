@@ -41,7 +41,7 @@
           </a-space>
         </template>
         <template #passingRate="{ record }">
-          {{`${record.submitNum ? (record.acceptedNum / record.submitNum * 100) : '0'}%(${record.acceptedNum}/${record.submitNum})`}}
+          {{`${record.submitNum ? (record.acceptedNum / record.submitNum * 100).toFixed(2) : '0.00'}%(${record.acceptedNum}/${record.submitNum})`}}
         </template>
         <template #createTime="{ record }">
           {{moment(record.createTime).format("YYYY-MM-DD")}}
@@ -112,15 +112,6 @@ const columns = [
     title: "通过率",
     slotName: "passingRate",
   },
-  {
-    title: "点赞数",
-    dataIndex: "thumbNum",
-  },
-  {
-    title: "收藏数",
-    dataIndex: "favourNum",
-  },
-
   {
     title: "创建时间",
     slotName: "createTime",

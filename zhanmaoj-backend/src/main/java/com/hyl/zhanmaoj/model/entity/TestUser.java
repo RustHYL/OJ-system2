@@ -18,7 +18,7 @@ public class TestUser implements Serializable {
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
@@ -30,6 +30,11 @@ public class TestUser implements Serializable {
      * 用户 id
      */
     private Long userId;
+
+    /**
+     * 分数
+     */
+    private Integer score;
 
     /**
      * 创建时间

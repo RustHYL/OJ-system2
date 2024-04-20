@@ -6,7 +6,6 @@
 export type ChoiceQuestion = {
     acceptedNum?: number;
     answer?: number;
-    content?: string;
     createTime?: string;
     id?: number;
     isDelete?: number;
@@ -16,6 +15,7 @@ export type ChoiceQuestion = {
     optionD?: string;
     submitNum?: number;
     tags?: string;
+    title?: string;
     updateTime?: string;
     userId?: number;
 };

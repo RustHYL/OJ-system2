@@ -1,11 +1,11 @@
 <template>
   <a-card class="general-card" title="我的错题">
     <template #extra>
-      <a-link>显示更多</a-link>
+      <router-link to="/question/question_wrong/list/page">显示更多</router-link>
     </template>
     <a-row :gutter="16">
       <a-col
-        v-for="(question, index) in dataList"
+        v-for="(questionWrong, index) in dataList"
         :key="index"
         :xs="12"
         :sm="12"
@@ -15,14 +15,14 @@
         :xxl="8"
         class="my-project-item"
       >
-        <a-card size="small">
+        <a-card size="small" @click="goToQuestion(questionWrong.questionId)">
           <a-space direction="vertical">
-            <a-typography-text bold>{{ question.id }}</a-typography-text>
+            <a-typography-text bold>{{ questionWrong.submitId }}</a-typography-text>
             <a-typography-text type="secondary">
-              {{ question.title }}
+              {{ questionWrong.title }}
             </a-typography-text>
             <a-space>
-              <a-tag v-for="(tag, index) of question.tags" :key="index" color="orange">{{ tag }}</a-tag>
+              <a-tag v-for="(tag, index) of questionWrong.tags" :key="index" color="orange">{{ tag }}</a-tag>
             </a-space>
           </a-space>
         </a-card>
@@ -32,24 +32,27 @@
 </template>
 
 <script lang="ts" setup>
-import {QuestionControllerService} from "../../generated";
+import {QuestionWrongControllerService} from "../../generated";
 import message from "@arco-design/web-vue/es/message";
 import {onMounted, ref} from "vue";
+import {useRouter} from "vue-router";
+
+const router = useRouter();
 
 const dataList = ref([]);
   const total = ref(0);
   const searchParams = ref({
     pageSize: 10,
     current: 1,
+    num: 6,
   });
 
-
-
 const loadData = async () => {
-    const res = await QuestionControllerService.getMyErrorQuestionUsingPost();
+    const res = await QuestionWrongControllerService.listMyQuestionWrongVoByPageUsingPost(searchParams.value);
     if (res.code === 0) {
-      dataList.value = res.data;
+      dataList.value = res.data.records;
       total.value = res.data.total;
+      console.log(JSON.stringify(res.data))
     } else {
       message.error("加载失败，" + res.message);
     }
@@ -58,6 +61,10 @@ const loadData = async () => {
   onMounted(() => {
     loadData();
   });
+
+  const goToQuestion = (id: number) => {
+    router.push({path: `/question/answer/${id}`})
+  }
 
 
 </script>

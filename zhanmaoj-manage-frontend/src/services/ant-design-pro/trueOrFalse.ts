@@ -58,3 +58,59 @@ export async function addTrueOrFalseBackend(
     ...(options || {})
   });
 }
+
+
+
+
+export async function searchTestTrueOrFalse(
+  trueOrFalseTestSearchVO?: API.TrueOrFalseTestSearchRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<API.TrueOrFalseTestAdminVo[]>>('/api/trueOrFalse/test/list', {
+    method: 'POST',
+    data: {
+      ...trueOrFalseTestSearchVO,
+    },
+    ...(options || {})
+  });
+}
+
+export async function deleteTestTrueOrFalse(
+  id?: number,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/trueOrFalse/test/delete', {
+    method: 'POST',
+    data: {
+      id
+    },
+    ...(options || {})
+  });
+}
+
+export async function updateTestTrueOrFalse(
+  trueOrFalseTestUpdateRequest?: API.TrueOrFalseTestUpdateRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/trueOrFalse/test/update', {
+    method: 'POST',
+    data: {
+      trueOrFalseTestUpdateRequest
+    },
+    ...(options || {})
+  });
+}
+
+
+export async function addTestTrueOrFalse(
+  trueOrFalseTestAddRequest?: API.TrueOrFalseTestAddRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/trueOrFalse/test/add', {
+    method: 'POST',
+    data: {
+      trueOrFalseTestAddRequest
+    },
+    ...(options || {})
+  });
+}

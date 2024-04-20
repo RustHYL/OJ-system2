@@ -3,10 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Page_QuestionSubmit_ } from './Page_QuestionSubmit_';
+import type { TestSubmit } from './TestSubmit';
 
-export type BaseResponse_Page_QuestionSubmit_ = {
+export type BaseResponse_List_TestSubmit_ = {
     code?: number;
-    data?: Page_QuestionSubmit_;
+    data?: Array<TestSubmit>;
     message?: string;
 };

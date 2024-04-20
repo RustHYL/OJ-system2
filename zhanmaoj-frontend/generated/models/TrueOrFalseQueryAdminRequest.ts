@@ -4,7 +4,6 @@
 /* eslint-disable */
 
 export type TrueOrFalseQueryAdminRequest = {
-    content?: string;
     createTime?: string;
     current?: number;
     id?: number;
@@ -12,6 +11,7 @@ export type TrueOrFalseQueryAdminRequest = {
     sortField?: string;
     sortOrder?: string;
     tags?: string;
+    title?: string;
     updateTime?: string;
     userId?: number;
 };

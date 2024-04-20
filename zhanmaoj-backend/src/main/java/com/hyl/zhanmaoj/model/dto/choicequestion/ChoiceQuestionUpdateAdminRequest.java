@@ -20,7 +20,7 @@ public class ChoiceQuestionUpdateAdminRequest implements Serializable {
     /**
      * 内容
      */
-    private String content;
+    private String title;
 
     /**
      * 标签列表

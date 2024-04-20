@@ -21,7 +21,7 @@ public class TrueOrFalseVO implements Serializable {
     /**
      * 内容
      */
-    private String content;
+    private String title;
 
     /**
      * 题目提交数

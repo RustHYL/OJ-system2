@@ -175,6 +175,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     public QuestionVO getQuestionVO(Question question, HttpServletRequest request) {
         QuestionVO questionVO = QuestionVO.objToVo(question);
         // 1. 关联查询用户信息
+        if (questionVO == null) {
+            return null;
+        }
         Long userId = question.getUserId();
         User user = null;
         if (userId != null && userId > 0) {
@@ -220,7 +223,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     public List<QuestionTestDetailVO> getQuestionTestDetailList(long testId, HttpServletRequest request) {
         QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("testId", testId);
-        queryWrapper.eq("type", QuestionTypeEnum.TRUE_OR_FALSE.getValue());
+        queryWrapper.eq("type", QuestionTypeEnum.PROGRAMMING_QUESTION.getValue());
         List<QuestionTestDetailVO> questionTestDetailVOList = new ArrayList<>();
         List<TestQuestion> testQuestionList = testQuestionService.list(queryWrapper);
         if (CollectionUtils.isEmpty(testQuestionList)) {
@@ -231,6 +234,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
             QuestionTestDetailVO questionTestDetailVO = new QuestionTestDetailVO();
             Question question = this.getById(testQuestion.getQuestionId());
             questionVO = this.getQuestionVO(question, request);
+            if (questionVO == null) {
+                return;
+            }
             BeanUtils.copyProperties(questionVO, questionTestDetailVO);
             questionTestDetailVO.setScore(testQuestion.getScore());
             questionTestDetailVOList.add(questionTestDetailVO);

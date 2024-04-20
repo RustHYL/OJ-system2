@@ -5,6 +5,6 @@
 
 export type TrueOrFalseAddAdminRequest = {
     answer?: number;
-    content?: string;
     tags?: string;
+    title?: string;
 };

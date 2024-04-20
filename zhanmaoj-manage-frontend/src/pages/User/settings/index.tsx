@@ -3,11 +3,17 @@ import { Menu } from 'antd';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import BaseView from './components/base';
 import SecurityView from './components/security';
+import TestManage from "@/pages/Test/TestManage";
 import useStyles from './style.style';
+import {waitTimePromise} from "@/pages/Admin/UserManage";
 type SettingsStateKeys = 'base' | 'security' | 'binding' | 'notification';
 type SettingsState = {
   mode: 'inline' | 'horizontal';
   selectKey: SettingsStateKeys;
+};
+
+export const waitTime = async (time: number = 10) => {
+  await waitTimePromise(time);
 };
 const Settings: React.FC = () => {
   const { styles } = useStyles();

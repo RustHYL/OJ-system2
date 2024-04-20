@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Data
 public class QuestionTestAddVO implements Serializable {
 
-    private Long questionId;
+    private Long id;
 
     private Integer type;
 

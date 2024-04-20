@@ -5,7 +5,7 @@
 
 export type TrueOrFalseUpdateRequest = {
     answer?: number;
-    content?: string;
     id?: number;
     tags?: Array<string>;
+    title?: string;
 };

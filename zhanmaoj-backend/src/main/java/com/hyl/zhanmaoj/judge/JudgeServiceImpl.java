@@ -13,10 +13,12 @@ import com.hyl.zhanmaoj.model.dto.question.JudgeCase;
 import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
 import com.hyl.zhanmaoj.model.entity.Question;
 import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
+import com.hyl.zhanmaoj.model.entity.QuestionWrong;
 import com.hyl.zhanmaoj.model.enums.JudgeInfoMessageEnum;
 import com.hyl.zhanmaoj.model.enums.QuestionSubmitStatusEnum;
 import com.hyl.zhanmaoj.service.QuestionService;
 import com.hyl.zhanmaoj.service.QuestionSubmitService;
+import com.hyl.zhanmaoj.service.QuestionWrongService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,9 @@ public class JudgeServiceImpl implements JudgeService {
 
     @Resource
     private QuestionSubmitService questionSubmitService;
+
+    @Resource
+    private QuestionWrongService questionWrongService;
 
     @Resource JudgeManager judgeManager;
 
@@ -108,6 +113,27 @@ public class JudgeServiceImpl implements JudgeService {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目提交数量更新失败");
         }
         QuestionSubmit questionSubmitResult = questionSubmitService.getById(questionSubmitId);
+        if (!judgeInfo.getMessage().equals(JudgeInfoMessageEnum.ACCEPTED.getValue())){
+            Long questionId1 = questionSubmitResult.getQuestionId();
+            String language1 = questionSubmitResult.getLanguage();
+            String code1 = questionSubmitResult.getCode();
+            String judgeInfo1 = questionSubmitResult.getJudgeInfo();
+            Long userId = questionSubmitResult.getUserId();
+            QuestionWrong questionWrong = new QuestionWrong();
+            questionWrong.setLanguage(language1);
+            questionWrong.setCode(code1);
+            questionWrong.setJudgeInfo(judgeInfo1);
+            questionWrong.setQuestionId(questionId1);
+            questionWrong.setUserId(userId);
+            questionWrong.setTags(question.getTags());
+            questionWrong.setSubmitId(questionSubmitResult.getId());
+            Question question1 = questionService.getById(questionId1);
+            questionWrong.setTitle(question1.getTitle());
+            boolean save = questionWrongService.save(questionWrong);
+            if (!save){
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "错题记录保存失败");
+            }
+        }        
         return questionSubmitResult;
     }
 }

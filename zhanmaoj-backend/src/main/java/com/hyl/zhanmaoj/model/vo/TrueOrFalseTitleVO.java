@@ -15,7 +15,7 @@ public class TrueOrFalseTitleVO implements Serializable {
     /**
      * 题目
      */
-    private String content;
+    private String title;
 
     /**
      * 类型

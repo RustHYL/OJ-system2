@@ -6,22 +6,20 @@
 
     <resultMap id="BaseResultMap" type="com.hyl.zhanmaoj.model.entity.TestSubmit">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="trueOrFalseAnswers" column="trueOrFalseAnswers" jdbcType="VARCHAR"/>
-            <result property="choiceQuestionAnswers" column="choiceQuestionAnswers" jdbcType="VARCHAR"/>
-            <result property="questionAnswers" column="questionAnswers" jdbcType="VARCHAR"/>
             <result property="status" column="status" jdbcType="TINYINT"/>
             <result property="score" column="score" jdbcType="INTEGER"/>
             <result property="testId" column="testId" jdbcType="BIGINT"/>
             <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="beginTime" column="beginTime" jdbcType="TIMESTAMP"/>
+            <result property="endTime" column="endTime" jdbcType="TIMESTAMP"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,trueOrFalseAnswers,choiceQuestionAnswers,
-        questionAnswers,status,score,
-        testId,userId,createTime,
+        id,status,score,
+        testId,userId,beginTime,endTime,createTime,
         updateTime,isDelete
     </sql>
 </mapper>

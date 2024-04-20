@@ -1,6 +1,7 @@
 // @ts-ignore
 /* eslint-disable */
 
+
 declare namespace API {
   type CurrentUser = {
     id?: number;
@@ -59,12 +60,39 @@ declare namespace API {
     acceptedNum?: number;
     judgeCase?: string;
     judgeConfig?: string;
-    thumbNum?: number;
-    favourNum?: number;
     userId?: number;
     createTime?: Date;
     updateTime?: Date;
   };
+
+  type QuestionTestAdminVo = {
+    id?: number;
+    questionId?: number;
+    title?: string;
+    tags?: string;
+    answer?: string;
+    judgeCase?: string;
+    judgeConfig?: string;
+    score?: number;
+  };
+
+  type QuestionTestSearchRequest = {
+    testId?: number;
+    current?: number;
+    size?: number;
+  };
+
+  type QuestionTestUpdateRequest = {
+    id?: number;
+    score?: number;
+  };
+
+  type QuestionTestAddRequest = {
+    id?: string;
+    score?: number;
+    testId?: string;
+  };
+
 
 
   type QuestionSearchRequest = {
@@ -89,8 +117,6 @@ declare namespace API {
     acceptedNum?: number;
     judgeCase?: string;
     judgeConfig?: string;
-    thumbNum?: number;
-    favourNum?: number;
     userId?: number;
   };
 
@@ -138,7 +164,7 @@ declare namespace API {
    */
   type TrueOrFalseAdminVo = {
     id?: number;
-    content?: string;
+    title?: string;
     tags?: string;
     answer?: string;
     submitNum?: number;
@@ -151,7 +177,7 @@ declare namespace API {
 
   type TrueOrFalseSearchRequest = {
     id?: number;
-    content?: string;
+    title?: string;
     tags?: string;
     userId?: number;
     createTime?: Date;
@@ -163,10 +189,39 @@ declare namespace API {
 
   type TrueOrFalseUpdateRequest = {
     id?: number;
-    content?: string;
+    title?: string;
     tags?: string;
     answer?: string;
   };
+
+
+  type TrueOrFalseTestAdminVo = {
+    id?: number;
+    questionId?: number;
+    title?: string;
+    tags?: string;
+    answer?: string;
+    score?: number;
+  };
+
+
+  type TrueOrFalseTestSearchRequest = {
+    testId?: number;
+    current?: number;
+    size?: number;
+  };
+
+  type TrueOrFalseTestUpdateRequest = {
+    id?: number;
+    score?: number;
+  };
+
+  type TrueOrFalseTestAddRequest = {
+    id?: string;
+    score?: number;
+    testId?: string;
+  };
+
 
   /**
    * 判断题提交
@@ -205,7 +260,7 @@ declare namespace API {
    */
   type ChoiceQuestionAdminVo = {
     id?: number;
-    content?: string;
+    title?: string;
     tags?: string;
     optionA?: string;
     optionB?: string;
@@ -222,7 +277,7 @@ declare namespace API {
 
   type ChoiceQuestionSearchRequest = {
     id?: number;
-    content?: string;
+    title?: string;
     tags?: string;
     userId?: number;
     createTime?: Date;
@@ -234,13 +289,44 @@ declare namespace API {
 
   type ChoiceQuestionUpdateRequest = {
     id?: number;
-    content?: string;
+    title?: string;
     optionA?: string;
     optionB?: string;
     optionC?: string;
     optionD?: string;
     tags?: string;
     answer?: string;
+  };
+
+  type ChoiceQuestionTestAdminVo = {
+    id?: number;
+    questionId?: number;
+    title?: string;
+    tags?: string;
+    answer?: string;
+    score?: number;
+    optionA?: string;
+    optionB?: string;
+    optionC?: string;
+    optionD?: string;
+  };
+
+
+  type ChoiceQuestionTestSearchRequest = {
+    testId?: number;
+    current?: number;
+    size?: number;
+  };
+
+  type ChoiceQuestionTestUpdateRequest = {
+    id?: number;
+    score?: number;
+  };
+
+  type ChoiceQuestionTestAddRequest = {
+    id?: string;
+    score?: number;
+    testId?: string;
   };
 
   /**
@@ -416,6 +502,42 @@ declare namespace API {
     expiredTime?: Date;
     examTime?: number;
   };
+  /**
+   * 试卷提交
+   */
+  type TestSubmitAdminVo = {
+    id?: number;
+    status?: number;
+    score?: number;
+    userId?: number;
+    testId?: number;
+    beginTime?: Date;
+    endTime?: Date;
+    createTime?: Date;
+    updateTime?: Date;
+  };
 
+  type TestSubmitSearchRequest = {
+    id?: number;
+    status?: number;
+    userId?: number;
+    testId?: number;
+    beginTime?: Date;
+    endTime?: Date;
+    createTime?: Date;
+    updateTime?: Date;
+    current?: number;
+    size?: number;
+  };
 
+  type TestSubmitUpdateRequest = {
+    id?: number;
+    status?: number;
+    score?: number;
+  };
+
+  type IdTitleVO = {
+    id?: number;
+    title?: string;
+  };
 }

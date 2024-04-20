@@ -75,14 +75,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
         if (key === 'settings') {
             history.push('/admin/user/settings');
         }
-      if (key === 'center') {
-          // history.replace({
-          //     pathname: '/user/login',
-          //     search: stringify({
-          //         redirect: pathname + search,
-          //     }),
-          // });
-      }
     },
     [setInitialState],
   );
@@ -127,11 +119,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
           },
         ]
       : []),
-    {
-      key: 'center',
-      icon: <UserOutlined />,
-      label: '个人中心',
-    },
       {
           key: 'settings',
           icon: <SettingOutlined />,

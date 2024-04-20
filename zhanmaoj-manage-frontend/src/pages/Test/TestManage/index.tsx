@@ -12,11 +12,11 @@ import '@umijs/max';
 import {Button, Drawer, message} from 'antd';
 import React, { useRef, useState } from 'react';
 import UpdateForm from './components/UpdateForm';
-import {waitTime} from "@/pages/Admin/RoleManage";
 import {addTest, deleteTestInfo, searchTests, updateTestInfo} from "@/services/ant-design-pro/test";
 import {ProFormDigit, ProFormSelect} from "@ant-design/pro-form/lib";
 import {ProFormDateTimePicker} from "@ant-design/pro-form";
-import {Link} from "@umijs/max";
+import {waitTime} from "@/pages/Test/TestSubmitManage";
+import {history} from "@umijs/max";
 
 
 
@@ -27,12 +27,12 @@ const handleAdd = async (fields: API.TestAdminVo) => {
        ...fields,
     });
     hide();
-    message.success('Added successfully');
+    message.success('添加成功');
     return true;
   } catch (error) {
     console.log(error);
     hide();
-    message.error('Adding failed, please try again!');
+    message.error('添加失败,请重新添加！');
     return false;
   }
 };
@@ -44,7 +44,7 @@ const handleAdd = async (fields: API.TestAdminVo) => {
  * @param fields
  */
 const handleUpdate = async (fields: API.TestAdminVo) => {
-  const hide = message.loading('Configuring');
+  const hide = message.loading('修改中');
   try {
     await updateTestInfo({
       id: fields.id,
@@ -57,11 +57,11 @@ const handleUpdate = async (fields: API.TestAdminVo) => {
       expiredTime: fields.expiredTime,
     });
     hide();
-    message.success('Configuration is successful');
+    message.success('修改成功');
     return true;
   } catch (error) {
     hide();
-    message.error('Configuration failed, please try again!');
+    message.error('修改失败！');
     return false;
   }
 };
@@ -173,7 +173,7 @@ const TableList: React.FC = () => {
       copyable: true,
     },
     {
-      title: '答题时间/毫秒',
+      title: '答题时间/分钟',
       dataIndex: 'examTime',
       width: 70,
       search:false,
@@ -190,7 +190,7 @@ const TableList: React.FC = () => {
       copyable: true,
     },
     {
-      title: '用户ID',
+      title: '创建用户ID',
       dataIndex: 'userId',
       width: 80,
       align: 'center',
@@ -234,35 +234,48 @@ const TableList: React.FC = () => {
         >
           更新
         </a>,
-        <Link
-            key="detail"
-            to={{
-              pathname: '/test/detail', // 指定目标页面的路径
-              search: `?id=${record.id}`, // 将record.id作为查询参数传递
+        // <Link
+        //     key="detail"
+        //     to={{
+        //       pathname: '/test/detail', // 指定目标页面的路径
+        //       search: `?id=${record.id}`, // 将record.id作为查询参数传递
+        //     }}
+        // >
+        //   详情
+        // </Link>,
+        <a
+            key="delete"
+            onClick={async () => {
+              const res = await deleteTestInfo(record.id);
+              if (res.code === 0) {
+                message.success('删除成功');
+                action?.reload();
+              } else {
+                message.error('删除失败');
+              }
             }}
         >
-          详情
-        </Link>,
+          删除
+        </a>,
         <TableDropdown
             key="actionGroup"
             onSelect={async key => {
               if (key === 'copy') {
                 await navigator.clipboard.writeText(JSON.stringify(record));
                 message.success('复制成功');
-              } else if (key === 'delete') {
-                console.log(record)
-                const res = await deleteTestInfo(record.id);
-                if (res.code === 0) {
-                  message.success('删除成功');
-                  action?.reload();
-                } else {
-                  message.error('删除失败');
-                }
+              } else if (key === 'trueOrFalse') {
+                history.push(`/test/detail/trueOrFalse/${record.id}`)
+              } else if (key === 'choiceQuestion') {
+                history.push(`/test/detail/choiceQuestion/${record.id}`)
+              } else if (key === 'question') {
+                history.push(`/test/detail/question/${record.id}`)
               }
             }}
             menus={[
               { key: 'copy', name: '复制' },
-              { key: 'delete', name: '删除' }
+              { key: 'trueOrFalse', name: '判断题' },
+              { key: 'choiceQuestion', name: '选择题' },
+              { key: 'question', name: '编程题' },
             ]}
         />,
       ],
@@ -351,7 +364,13 @@ const TableList: React.FC = () => {
             name="expiredTime"
             label="结束时间"
         />
-        <ProFormText width="md" label={"做题时间"} name="examTime"/>
+        <ProFormDigit
+          label="做题时间"
+          name="examTIme"
+          width="sm"
+          min={0}
+          max={1000}
+        />
         <ProFormDigit
             label="判断题数"
             name="trueOrFalseNum"
@@ -364,7 +383,7 @@ const TableList: React.FC = () => {
             name="trueOrFalsePerScore"
             width="sm"
             min={0}
-            max={10}
+            max={20}
         />
         <ProFormDigit
             label="选择题数"
@@ -378,11 +397,15 @@ const TableList: React.FC = () => {
             name="choiceQuestionPerScore"
             width="sm"
             min={0}
-            max={10}
+            max={20}
         />
         <ProFormTextArea
             name="questionList"
             width="md"
+            tooltip={"[  \n" +
+              "  {\"id\": 1730853831375450113, \"score\": 20},\n" +
+              "  {\"id\": 1730853941824057345, \"score\": 30}\n" +
+              "]"}
             label={'编程题'}
         />
       </ModalForm>

@@ -5,10 +5,10 @@
 
 export type ChoiceQuestionAddRequest = {
     answer?: number;
-    content?: string;
     optionA?: string;
     optionB?: string;
     optionC?: string;
     optionD?: string;
     tags?: Array<string>;
+    title?: string;
 };

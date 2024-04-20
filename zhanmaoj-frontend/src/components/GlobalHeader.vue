@@ -5,7 +5,7 @@
         <a-menu-item key="0" :style="{ padding: 0, marginRight: '38px' }" disabled>
           <div class="title-bar">
             <img class="logo" src="../assets/oj-logo.jpg" alt="OJSystem"/>
-            <div class="title">战码OJ</div>
+            <div class="title">战码-Java练题网站</div>
           </div>
         </a-menu-item>
         <a-menu-item v-for="item in visibleRoutes" :key="item.path">

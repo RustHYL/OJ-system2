@@ -5,11 +5,11 @@
 
 export type ChoiceQuestionEditRequest = {
     answer?: number;
-    content?: string;
     id?: number;
     optionA?: string;
     optionB?: string;
     optionC?: string;
     optionD?: string;
     tags?: Array<string>;
+    title?: string;
 };

@@ -6,7 +6,7 @@
 
     <resultMap id="BaseResultMap" type="com.hyl.zhanmaoj.model.entity.TrueOrFalse">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="content" column="content" jdbcType="VARCHAR"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
             <result property="answer" column="answer" jdbcType="TINYINT"/>
             <result property="submitNum" column="submitNum" jdbcType="INTEGER"/>
             <result property="acceptedNum" column="acceptedNum" jdbcType="INTEGER"/>
@@ -18,7 +18,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,content,answer,
+        id,title,answer,
         submitNum,acceptedNum,tags,
         userId,createTime,updateTime,
         isDelete

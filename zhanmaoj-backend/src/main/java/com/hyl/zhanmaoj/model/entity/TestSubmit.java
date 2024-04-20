@@ -18,23 +18,8 @@ public class TestSubmit implements Serializable {
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
-
-    /**
-     * 判断题答案（json 对象）
-     */
-    private String trueOrFalseAnswers;
-
-    /**
-     * 选择题答案（json 对象）
-     */
-    private String choiceQuestionAnswers;
-
-    /**
-     * 编程题答案（json 对象）
-     */
-    private String questionAnswers;
 
     /**
      * 判题状态（0 - 待判题、1 - 判题中、2 -已判题）
@@ -55,6 +40,18 @@ public class TestSubmit implements Serializable {
      * 创建用户 id
      */
     private Long userId;
+
+    /**
+     * 做题开始时间
+     */
+    private Date beginTime;
+
+
+    /**
+     * 做题结束时间
+     */
+    private Date endTime;
+
 
     /**
      * 创建时间

@@ -16,9 +16,7 @@ export default [
     routes: [
       { path: '/admin', redirect: '/admin/sub-page' },
       { path: '/admin/user-manage', name: '用户管理', icon: 'smile', component: './Admin/UserManage' },
-      { path: '/admin/test/detail', component: './Test/TestDetailManage' },
       { path: '/admin/user/settings', component: './User/settings' },
-      { path: '/admin/sub-page', name: '二级管理页', component: './Admin' },
     ],
   },
   {
@@ -43,7 +41,10 @@ export default [
     routes: [
       { path: '/test/test-manage', name: '试卷管理', icon: 'smile', component: './Test/TestManage' },
       { path: '/test/test-submit-manage', name: '试卷提交信息管理', icon: 'smile', component: './Test/TestSubmitManage' },
-      { path: '/test/detail', icon: 'smile', component: './Test/TestDetailManage' },
+      // { path: '/test/detail', icon: 'smile', component: './Test/TestDetailManage' },
+      { path: '/test/detail/trueOrFalse/:id', icon: 'smile', component: './Question/TestTrueOrFalseManage' },
+      { path: '/test/detail/choiceQuestion/:id', icon: 'smile', component: './Question/TestChoiceQuestionManage' },
+      { path: '/test/detail/question/:id', icon: 'smile', component: './Question/TestQuestionManage' },
     ]
   },
   { path: '/', redirect: '/welcome' },

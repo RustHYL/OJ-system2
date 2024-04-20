@@ -62,15 +62,15 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
         if (trueOrFalse == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String content = trueOrFalse.getContent();
+        String title = trueOrFalse.getTitle();
         String tags = trueOrFalse.getTags();
         Integer answer = trueOrFalse.getAnswer();
         // 创建时，参数不能为空
         if (add) {
-            ThrowUtils.throwIf(StringUtils.isAnyBlank( content, tags), ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(StringUtils.isAnyBlank( title, tags), ErrorCode.PARAMS_ERROR);
         }
         // 有参数则校验
-        if (StringUtils.isNotBlank(content) && content.length() > 8192) {
+        if (StringUtils.isNotBlank(title) && title.length() > 8192) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "内容过长");
         }
         if (TrueOrFalseAnswerEnum.getEnumByValue(answer) == null) {
@@ -84,7 +84,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
             return queryWrapper;
         }
         Long id = trueOrFalseQueryRequest.getId();
-        String content = trueOrFalseQueryRequest.getContent();
+        String title = trueOrFalseQueryRequest.getTitle();
         List<String> tags = trueOrFalseQueryRequest.getTags();
         Long userId = trueOrFalseQueryRequest.getUserId();
         String sortField = trueOrFalseQueryRequest.getSortField();
@@ -92,7 +92,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
         Date createTime = trueOrFalseQueryRequest.getCreateTime();
         Date updateTime = trueOrFalseQueryRequest.getUpdateTime();
         // 拼接查询条件
-        queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
+        queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
         if (CollectionUtils.isNotEmpty(tags)) {
             for (String tag : tags) {
                 queryWrapper.like("tags", "\"" + tag + "\"");
@@ -120,7 +120,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
             return queryWrapper;
         }
         Long id = trueOrFalseQueryRequest.getId();
-        String content = trueOrFalseQueryRequest.getContent();
+        String title = trueOrFalseQueryRequest.getTitle();
         String tags = trueOrFalseQueryRequest.getTags();
         Long userId = trueOrFalseQueryRequest.getUserId();
         String sortField = trueOrFalseQueryRequest.getSortField();
@@ -128,7 +128,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
         Date createTime = trueOrFalseQueryRequest.getCreateTime();
         Date updateTime = trueOrFalseQueryRequest.getUpdateTime();
         // 拼接查询条件
-        queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
+        queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
         queryWrapper.like(StringUtils.isNotBlank(tags), "tags", tags);
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);

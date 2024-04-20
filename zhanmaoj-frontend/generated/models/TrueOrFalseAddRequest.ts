@@ -5,6 +5,6 @@
 
 export type TrueOrFalseAddRequest = {
     answer?: number;
-    content?: string;
     tags?: Array<string>;
+    title?: string;
 };

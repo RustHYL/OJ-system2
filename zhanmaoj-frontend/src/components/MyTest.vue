@@ -1,26 +1,29 @@
 <template>
   <a-card
     class="general-card"
-    title="我的试卷"
+    title="我的做卷记录"
     :header-style="{ paddingBottom: '18px' }"
     :body-style="{ paddingBottom: '12px' }"
   >
+    <template #extra>
+      <router-link to="/question/test/list/my/page">显示更多</router-link>
+    </template>
     <a-list :bordered="false">
       <a-list-item
-        v-for="test in testList"
+        v-for="test in testVOList"
         :key="test.id"
         action-layout="horizontal"
       >
-          <a-row :gutter="6">
-            <a-col :span="6">
-              <a-skeleton-shape shape="circle" />
-            </a-col>
-            <a-col :span="16">
-              <a-skeleton-line :widths="['100%', '40%']" :rows="2" />
-            </a-col>
-          </a-row>
+<!--          <a-row :gutter="6">-->
+<!--            <a-col :span="6">-->
+<!--              <a-skeleton-shape shape="circle" />-->
+<!--            </a-col>-->
+<!--            <a-col :span="16">-->
+<!--              <a-skeleton-line :widths="['100%', '40%']" :rows="2" />-->
+<!--            </a-col>-->
+<!--          </a-row>-->
         <a-list-item-meta :title="test.title">
-          <template #description> 共{{ test.questionNum }}题 </template>
+          <template #description> 共{{ test.questionNum }}题    得分:{{test.score}}</template>
         </a-list-item-meta>
       </a-list-item>
     </a-list>
@@ -32,11 +35,11 @@
   import message from "@arco-design/web-vue/es/message";
   import {ref, onMounted} from "vue";
 
-  const testList: any = ref([]);
+  const testVOList: any = ref([]);
   const loadData = async () => {
-    const res = await TestControllerService.listTestMineUsingPost();
+    const res = await TestControllerService.listTestVoMineUsingPost();
     if (res.code === 0) {
-      testList.value = res.data;
+      testVOList.value = res.data;
     } else {
       message.error("加载失败，" + res.message);
     }

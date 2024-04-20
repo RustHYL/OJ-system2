@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.hyl.zhanmaoj.common.BaseResponse;
-import com.hyl.zhanmaoj.common.DeleteRequest;
-import com.hyl.zhanmaoj.common.ErrorCode;
-import com.hyl.zhanmaoj.common.ResultUtils;
+import com.hyl.zhanmaoj.common.*;
 import com.hyl.zhanmaoj.constant.UserConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
@@ -16,15 +13,15 @@ import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitAddRe
 import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitQueryRequest;
 import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitUpdateAdminRequest;
-import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
-import com.hyl.zhanmaoj.model.entity.ChoiceQuestionSubmit;
-import com.hyl.zhanmaoj.model.entity.User;
+import com.hyl.zhanmaoj.model.dto.test.TestQuestionUpdateRequest;
+import com.hyl.zhanmaoj.model.entity.*;
+import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
 import com.hyl.zhanmaoj.model.enums.StatusEnum;
 import com.hyl.zhanmaoj.model.vo.ChoiceQuestionSubmitVO;
+import com.hyl.zhanmaoj.model.vo.ChoiceQuestionTestAdminVO;
 import com.hyl.zhanmaoj.model.vo.ChoiceQuestionVO;
-import com.hyl.zhanmaoj.service.ChoiceQuestionService;
-import com.hyl.zhanmaoj.service.ChoiceQuestionSubmitService;
-import com.hyl.zhanmaoj.service.UserService;
+import com.hyl.zhanmaoj.model.vo.QueryRequest;
+import com.hyl.zhanmaoj.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -53,6 +50,12 @@ public class ChoiceQuestionController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private TestQuestionService testQuestionService;
+
+    @Resource
+    private TestService testService;
 
     private final static Gson GSON = new Gson();
 
@@ -461,6 +464,141 @@ public class ChoiceQuestionController {
         boolean result = choiceQuestionSubmitService.updateById(choiceQuestionSubmit);
         return ResultUtils.success(result);
     }
+
+    @GetMapping("/idList")
+    public BaseResponse<List<IdTitleVO>> getTestQuestion(HttpServletRequest request) {
+        List<ChoiceQuestion> list = choiceQuestionService.list();
+        List<IdTitleVO> idTitleVOList = list.stream().map(question -> {
+            IdTitleVO idTitleVO = new IdTitleVO();
+            idTitleVO.setId(question.getId());
+            idTitleVO.setTitle(question.getTitle());
+            return idTitleVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(idTitleVOList);
+    }
+
+    @PostMapping("/test/list")
+    public BaseResponse<List<ChoiceQuestionTestAdminVO>> listChoiceQuestionTestByList(@RequestBody ChoiceQuestionQueryTestAdminRequest choiceQuestionQueryRequest,
+                                                                                      HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String userRole = loginUser.getUserRole();
+        if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", choiceQuestionQueryRequest.getTestId());
+        queryWrapper.eq("type", QuestionTypeEnum.CHOICE_QUESTION.getValue());
+        List<TestQuestion> list = testQuestionService.list(queryWrapper);
+        List<ChoiceQuestionTestAdminVO> choiceQuestionTestAdminVOList = list.stream().map(testQuestion -> {
+            ChoiceQuestionTestAdminVO choiceQuestionTestAdminVO = new ChoiceQuestionTestAdminVO();
+            ChoiceQuestion choiceQuestion = choiceQuestionService.getById(testQuestion.getQuestionId());
+            choiceQuestionTestAdminVO.setScore(testQuestion.getScore());
+            if (choiceQuestion == null) {
+                return null;
+            }
+            BeanUtils.copyProperties(choiceQuestion, choiceQuestionTestAdminVO);
+            choiceQuestionTestAdminVO.setId(testQuestion.getId());
+            choiceQuestionTestAdminVO.setQuestionId(choiceQuestion.getId());
+            return choiceQuestionTestAdminVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(choiceQuestionTestAdminVOList);
+    }
+
+    @PostMapping("/test/delete")
+    public BaseResponse<Boolean> deleteTestChoiceQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = deleteRequest.getId();
+        // 判断是否存在
+        TestQuestion oldQuestion = testQuestionService.getById(id);
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        Integer score = oldQuestion.getScore();
+        Long testId = oldQuestion.getTestId();
+        // 管理员可删除
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        boolean b = testQuestionService.removeById(id);
+        if (!b) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"删除失败");
+        } else {
+            Test test = testService.getById(testId);
+            test.setTotalScore(test.getTotalScore() - score);
+            test.setQuestionNum(test.getQuestionNum() - 1);
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/test/update")
+    public BaseResponse<Boolean> updateTestChoiceQuestion(@RequestBody TestQuestionUpdateRequest testQuestionUpdateRequest, HttpServletRequest request) {
+        if (testQuestionUpdateRequest == null || testQuestionUpdateRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = testQuestionUpdateRequest.getId();
+        // 判断是否存在
+        TestQuestion oldQuestion = testQuestionService.getById(id);
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        // 管理员可删除
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        oldQuestion.setScore(testQuestionUpdateRequest.getScore());
+        boolean b = testQuestionService.updateById(oldQuestion);
+        if (!b) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"修改失败");
+        } else {
+            Test test = testService.getById(oldQuestion.getTestId());
+            test.setTotalScore(test.getTotalScore() - oldQuestion.getScore() + testQuestionUpdateRequest.getScore());
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
+
+    @PostMapping("/test/add")
+    public BaseResponse<Boolean> addTestChoiceQuestion(@RequestBody QueryRequest queryRequest, HttpServletRequest request) {
+        ChoiceQuestionTestAddRequest addRequest = queryRequest.getChoiceQuestionTestAddRequest();
+        if (addRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = Long.valueOf(addRequest.getId());
+        // 判断是否存在
+        ChoiceQuestion oldChoiceQuestion = choiceQuestionService.getById(id);
+        Integer score = addRequest.getScore();
+        Long testId = Long.valueOf(addRequest.getTestId());
+        ThrowUtils.throwIf(oldChoiceQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        // 管理员判定
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        TestQuestion testQuestion = new TestQuestion();
+        testQuestion.setTestId(testId);
+        testQuestion.setQuestionId(id);
+        testQuestion.setType(QuestionTypeEnum.CHOICE_QUESTION.getValue());
+        testQuestion.setScore(score);
+        boolean save = testQuestionService.save(testQuestion);
+        if (!save) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"添加失败");
+        } else {
+            Test test = testService.getById(testId);
+            test.setTotalScore(test.getTotalScore() + score);
+            test.setQuestionNum(test.getQuestionNum() + 1);
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
 
 
 }

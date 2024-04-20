@@ -8,13 +8,14 @@
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="testId" column="testId" jdbcType="BIGINT"/>
             <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="score" column="score" jdbcType="INTEGER"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,testId,userId,
+        id,testId,userId,score
         createTime,updateTime,isDelete
     </sql>
 </mapper>

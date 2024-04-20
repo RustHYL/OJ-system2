@@ -3,14 +3,14 @@ import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-desi
 import {
   ModalForm,
   PageContainer,
-  ProDescriptions,
+  ProDescriptions, ProFormSelect,
   ProFormText,
   ProFormTextArea,
   ProTable, TableDropdown,
 } from '@ant-design/pro-components';
 import '@umijs/max';
 import {Button, Drawer, message} from 'antd';
-import React, { useRef, useState } from 'react';
+import React, {useRef, useState} from 'react';
 import UpdateForm from './components/UpdateForm';
 import TagsComponent from "@/components/Tags";
 import {
@@ -18,7 +18,8 @@ import {
   deleteTrueOrFalseInfo, searchTrueOrFalse,
   updateTrueOrFalseInfo
 } from "@/services/ant-design-pro/trueOrFalse";
-import {waitTime} from "@/pages/Admin/RoleManage";
+import {waitTime} from "@/pages/Test/TestSubmitManage";
+
 
 
 const handleAdd = async (fields: API.TrueOrFalseAdminVo) => {
@@ -28,12 +29,12 @@ const handleAdd = async (fields: API.TrueOrFalseAdminVo) => {
        ...fields,
     });
     hide();
-    message.success('Added successfully');
+    message.success('添加成功');
     return true;
   } catch (error) {
     console.log(error);
     hide();
-    message.error('Adding failed, please try again!');
+    message.error('添加失败,请重新添加！');
     return false;
   }
 };
@@ -45,20 +46,20 @@ const handleAdd = async (fields: API.TrueOrFalseAdminVo) => {
  * @param fields
  */
 const handleUpdate = async (fields: API.TrueOrFalseAdminVo) => {
-  const hide = message.loading('Configuring');
+  const hide = message.loading('修改中');
   try {
     await updateTrueOrFalseInfo({
       id: fields.id,
-      content: fields.content,
+      title: fields.title,
       tags: fields.tags,
       answer: fields.answer,
     });
     hide();
-    message.success('Configuration is successful');
+    message.success('修改成功');
     return true;
   } catch (error) {
     hide();
-    message.error('Configuration failed, please try again!');
+    message.error('修改失败！');
     return false;
   }
 };
@@ -80,6 +81,18 @@ const TableList: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<API.TrueOrFalseAdminVo>();
   const tagsTooltipContent = <>{`["示例1", "示例2"]`}</>;
+  const statusType = [
+    {
+      value: 1,
+      label: '正确',
+    },
+    {
+      value: 2,
+      label: '错误',
+    },
+  ];
+
+
   const columns: ProColumns<API.TrueOrFalseAdminVo>[] = [
     {
       title: 'ID',
@@ -117,7 +130,7 @@ const TableList: React.FC = () => {
     },
     {
       title: '题目',
-      dataIndex: 'content',
+      dataIndex: 'title',
       width: 150,
       align: 'center',
       copyable: true,
@@ -141,7 +154,7 @@ const TableList: React.FC = () => {
       },
     },
     {
-      title: '用户ID',
+      title: '创建用户ID',
       dataIndex: 'userId',
       width: 140,
       align: 'center',
@@ -289,12 +302,13 @@ const TableList: React.FC = () => {
           }
         }}
       >
-        <ProFormTextArea width="md" label={"题目"} name="content"/>
+        <ProFormTextArea width="md" label={"题目"} name="title"/>
         <ProFormText width="md" label={"标签"} name="tags" tooltip={tagsTooltipContent}/>
-        <ProFormTextArea
+        <ProFormSelect
             name="answer"
             width="md"
             label={'题目答案'}
+            options={statusType}
         />
       </ModalForm>
       <UpdateForm
@@ -330,7 +344,7 @@ const TableList: React.FC = () => {
         {currentRow?.id&& (
           <ProDescriptions<API.TrueOrFalseAdminVo>
             column={2}
-            title={currentRow?.content}
+            title={currentRow?.title}
             request={async () => ({
               data: currentRow || {},
             })}

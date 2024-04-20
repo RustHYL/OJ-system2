@@ -80,7 +80,10 @@ public class TrueOrFalseSubmitServiceImpl extends ServiceImpl<TrueOrFalseSubmitM
         TrueOrFalseSubmit trueOrFalseSubmit = new TrueOrFalseSubmit();
         trueOrFalseSubmit.setUserId(userId);
         trueOrFalseSubmit.setQuestionId(trueOrFalseId);
-        trueOrFalseSubmit.setTestId(trueOrFalseSubmitAddRequest.getTestId());
+        Long testId = trueOrFalseSubmitAddRequest.getTestId();
+        if (testId != null){
+            trueOrFalseSubmit.setTestId(testId);
+        }
         trueOrFalseSubmit.setAnswer(answer);
         //判题
         trueOrFalseSubmit.setStatus(StatusEnum.WAITING.getValue());

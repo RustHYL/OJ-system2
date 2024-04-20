@@ -45,10 +45,18 @@
           @page-change="onPageChange"
       >
         <template #judgeInfo="{ record }">
-          {{JSON.stringify(record.judgeInfo)}}
+          <div>判题信息:{{record.judgeInfo.message}}</div>
+          <div>内存消耗:{{record.judgeInfo.memory}}</div>
+          <div>时间消耗:{{record.judgeInfo.time}}</div>
         </template>
         <template #createTime="{ record }">
           {{moment(record.createTime).format("YYYY-MM-DD")}}
+        </template>
+        <template #status="{ record }">
+          <a-tag v-if="record.status === 0">待判题</a-tag>
+          <a-tag color="orange" v-else-if="record.status === 1">正在判题</a-tag>
+          <a-tag color="arcoblue" v-else-if="record.status === 2">成功</a-tag>
+          <a-tag color="red" v-else>失败</a-tag>
         </template>
       </a-table>
     </div>
@@ -60,7 +68,6 @@ import { onMounted, ref, watchEffect } from "vue";
 import {
   Question,
   QuestionControllerService,
-  QuestionQueryRequest,
   QuestionSubmitQueryRequest,
 } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
@@ -120,18 +127,17 @@ const columns = [
     title: "判题信息",
     slotName: "judgeInfo",
   },
-    // todo 状态切换为文字
   {
     title: "判题状态",
-    dataIndex: "status",
+    slotName: "status",
   },
   {
-    title: "题目编号",
-    dataIndex: "questionId",
+    title: "题目",
+    dataIndex: "questionVO.title",
   },
   {
     title: "提交用户",
-    dataIndex: "userId",
+    dataIndex: "userVO.userName",
   },
   {
     title: "创建时间",
@@ -149,11 +155,6 @@ const onPageChange = (page: number) => {
 
 const router = useRouter();
 
-const toQuestionPage = (question: Question) => {
-  router.push({
-    path: `/question/answer/${question.id}`,
-  });
-};
 
 const onSearch = () => {
   searchParams.value = {

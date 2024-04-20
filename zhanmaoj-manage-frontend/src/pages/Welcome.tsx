@@ -126,8 +126,7 @@ const Welcome: React.FC = () => {
               width: '65%',
             }}
           >
-            该系统XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-              XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            该系统用于管理战码OJ系统人员、题库、试卷库等数据，纠正错误数据
           </p>
           <div
             style={{
@@ -138,7 +137,7 @@ const Welcome: React.FC = () => {
           >
             <InfoCard
               index={1}
-              href="https://umijs.org/docs/introduce/introduce"
+              href="https://github.com/RustHYL/OJ-system2"
               title="了解 系统"
               desc="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               XXXXXXXXXXXXXXXXXXXXXXXX。"
@@ -146,14 +145,14 @@ const Welcome: React.FC = () => {
             <InfoCard
               index={2}
               title="了解 功能"
-              href="https://ant.design"
+              href="https://github.com/RustHYL/OJ-system2"
               desc="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               XXXXXXXXXXXXXXXXXXXXXXXX。"
             />
             <InfoCard
               index={3}
               title="了解 结构"
-              href="https://procomponents.ant.design"
+              href="https://github.com/RustHYL/OJ-system2"
               desc="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
               XXXXXXXXXXXXXXXXXXXXXXXX。"
             />

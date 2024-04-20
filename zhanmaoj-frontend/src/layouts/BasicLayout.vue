@@ -7,7 +7,7 @@
       <a-layout-content class="content">
         <router-view />
       </a-layout-content>
-      <a-layout-footer class="footer">xxx网站</a-layout-footer>
+      <a-layout-footer class="footer">战码-Java练题网站</a-layout-footer>
     </a-layout>
   </div>
 </template>

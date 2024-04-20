@@ -6,7 +6,7 @@
 
     <resultMap id="BaseResultMap" type="com.hyl.zhanmaoj.model.entity.ChoiceQuestion">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="content" column="content" jdbcType="VARCHAR"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
             <result property="tags" column="tags" jdbcType="VARCHAR"/>
             <result property="optionA" column="optionA" jdbcType="VARCHAR"/>
             <result property="optionB" column="optionB" jdbcType="VARCHAR"/>
@@ -22,7 +22,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,content,
+        id,title,
         tags,optionA,optionB,
         optionC,optionD,answer,
         submitNum,acceptedNum,userId,

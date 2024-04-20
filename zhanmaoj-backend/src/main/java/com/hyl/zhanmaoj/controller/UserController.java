@@ -29,6 +29,7 @@ import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +50,10 @@ public class UserController {
 
     @Resource
     private WxOpenConfig wxOpenConfig;
+
+    private static final String SALT = "hyl";
+
+    private static final String PASSWORD = "12345678";
 
     // region 登录相关
 
@@ -370,6 +375,24 @@ public class UserController {
         user.setId(loginUser.getId());
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/reset/password")
+    @AuthCheck(mustRole = UserConstant.SUPER_ROLE)
+    public BaseResponse<Boolean> resetUserPassword(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + PASSWORD).getBytes());
+        Long id = deleteRequest.getId();
+        User user = new User();
+        user.setId(id);
+        user.setUserPassword(encryptPassword);
+        boolean reset = userService.updateById(user);
+        if (!reset) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
         return ResultUtils.success(true);
     }
 }

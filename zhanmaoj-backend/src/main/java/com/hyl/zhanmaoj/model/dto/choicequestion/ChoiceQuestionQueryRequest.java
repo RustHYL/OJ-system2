@@ -26,7 +26,7 @@ public class ChoiceQuestionQueryRequest extends PageRequest implements Serializa
     /**
      * 内容
      */
-    private String content;
+    private String title;
 
     /**
      * 标签列表

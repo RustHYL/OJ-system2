@@ -33,11 +33,11 @@
 //       ...fields,
 //     });
 //     hide();
-//     message.success('Added successfully');
+//     message.success('添加成功');
 //     return true;
 //   } catch (error) {
 //     hide();
-//     message.error('Adding failed, please try again!');
+//     message.error('添加失败,请重新添加！');
 //     return false;
 //   }
 // };
@@ -49,7 +49,7 @@
 //  * @param fields
 //  */
 // const handleUpdate = async (fields: API.QuestionAdminVo) => {
-//   const hide = message.loading('Configuring');
+//   const hide = message.loading('修改中');
 //   try {
 //     await updateQuestionInfo({
 //       id: fields.id,
@@ -65,11 +65,11 @@
 //       userId: fields.userId,
 //     });
 //     hide();
-//     message.success('Configuration is successful');
+//     message.success('修改成功');
 //     return true;
 //   } catch (error) {
 //     hide();
-//     message.error('Configuration failed, please try again!');
+//     message.error('修改失败！');
 //     return false;
 //   }
 // };

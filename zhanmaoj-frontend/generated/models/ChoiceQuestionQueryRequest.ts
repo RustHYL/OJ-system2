@@ -4,7 +4,6 @@
 /* eslint-disable */
 
 export type ChoiceQuestionQueryRequest = {
-    content?: string;
     createTime?: string;
     current?: number;
     id?: number;
@@ -12,6 +11,7 @@ export type ChoiceQuestionQueryRequest = {
     sortField?: string;
     sortOrder?: string;
     tags?: Array<string>;
+    title?: string;
     updateTime?: string;
     userId?: number;
 };

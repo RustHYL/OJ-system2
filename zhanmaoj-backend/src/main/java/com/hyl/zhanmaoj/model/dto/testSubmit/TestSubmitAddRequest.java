@@ -1,28 +1,24 @@
 package com.hyl.zhanmaoj.model.dto.testSubmit;
 
+import com.hyl.zhanmaoj.model.dto.test.TestSingleAnswer;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class TestSubmitAddRequest implements Serializable {
 
 
     /**
-     * List<addRequest> JSON(answer, questionId, testId?)
+     * List<TestSingleAnswer> id answer
      */
-    private String trueOrFalseRequest;
+    private List<TestSingleAnswer> trueOrFalseAnswerList;
 
     /**
-     * List<addRequest> JSON(answer, questionId, testId?)
+     * List<TestSingleAnswer> id answer
      */
-    private String choiceRequest;
-
-    /**
-     * List<Long> submitId
-     */
-    private String questionAnswer;
-
+    private List<TestSingleAnswer> choiceAnswerList;
 
     /**
      * 试卷 id

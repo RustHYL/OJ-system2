@@ -32,9 +32,9 @@ public class TestVO implements Serializable {
     private Integer questionNum;
 
     /**
-     * 过期时间
+     * 考试时间
      */
-    private Integer expiredTime;
+    private Long examTime;
 
     /**
      * 总分

@@ -22,7 +22,7 @@ public class TrueOrFalse implements Serializable {
     /**
      * 内容
      */
-    private String content;
+    private String title;
 
     /**
      * 题目答案

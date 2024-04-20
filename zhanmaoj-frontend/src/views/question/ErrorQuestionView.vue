@@ -1,5 +1,5 @@
 <template>
-  <div id="manageQuestionView">
+  <div id="errorQuestionView">
     <a-table
         :ref="tableRef"
         :columns="columns"
@@ -21,7 +21,7 @@
       </template>
       <template #optional="{ record }">
         <a-space>
-          <a-button type="primary" @click="doUpdate(record)"> 做题</a-button>
+          <a-button type="primary" @click="toQuestionPage(record)"> 做题</a-button>
         </a-space>
       </template>
     </a-table>
@@ -49,7 +49,6 @@ const scroll = {
 }
 
 const expandable = reactive({
-  title: '更多',
   width: 80,
   expandedRowRender: (record) => {
     return `判题规则（ 时间限制:${record.judgeConfig.timeLimit}    内存限制:${record.judgeConfig.memoryLimit}    时间限制:${record.judgeConfig.stackLimit}）`
@@ -158,21 +157,10 @@ const onPageChange = (page: number) => {
   };
 };
 
-const doDelete = async (question: Question) => {
-  const res = await QuestionControllerService.deleteQuestionUsingPost({
-    id: question.id,
-  });
-  if (res.code === 0) {
-    message.success("删除成功");
-    loadData();
-  } else {
-    message.error("删除失败");
-  }
-};
 
 const router = useRouter();
 
-const doUpdate = (question: Question) => {
+const toQuestionPage = (question: Question) => {
   router.push({
     path: "/question/update",
     query: {
@@ -183,7 +171,7 @@ const doUpdate = (question: Question) => {
 </script>
 
 <style scoped>
-#manageQuestionView {
+#errorQuestionView {
   max-width: 90%;
   min-width: 85%;
   margin: 0 auto;

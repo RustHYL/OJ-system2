@@ -58,3 +58,57 @@ export async function addQuestionsBackend(
     ...(options || {})
   });
 }
+
+
+export async function searchTestQuestions(
+  questionTestSearchVO?: API.QuestionTestSearchRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<API.QuestionTestAdminVo[]>>('/api/question/test/list', {
+    method: 'POST',
+    data: {
+      ...questionTestSearchVO,
+    },
+    ...(options || {})
+  });
+}
+
+export async function deleteTestQuestion(
+  id?: number,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/question/test/delete', {
+    method: 'POST',
+    data: {
+      id
+    },
+    ...(options || {})
+  });
+}
+
+export async function updateTestQuestion(
+  questionTestUpdateRequest?: API.QuestionTestUpdateRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/question/test/update', {
+    method: 'POST',
+    data: {
+      questionTestUpdateRequest
+    },
+    ...(options || {})
+  });
+}
+
+export async function addTestQuestion(
+  questionTestAddRequest?: API.QuestionTestAddRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/question/test/add', {
+    method: 'POST',
+    data: {
+      questionTestAddRequest
+    },
+    ...(options || {})
+  });
+}
+

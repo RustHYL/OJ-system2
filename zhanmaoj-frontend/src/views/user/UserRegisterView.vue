@@ -52,7 +52,7 @@ const handleSubmit = async () => {
       form.userAccount = '';
       form.userPassword = '';
       form.checkPassword = '';
-      message.error("注册失败" + res.msg)
+      message.error("注册失败" + res.message)
     }
   }
 }

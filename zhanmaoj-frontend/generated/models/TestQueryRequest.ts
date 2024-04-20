@@ -8,6 +8,7 @@ export type TestQueryRequest = {
     createTime?: string;
     current?: number;
     id?: number;
+    num?: number;
     pageSize?: number;
     sortField?: string;
     sortOrder?: string;

@@ -15,7 +15,7 @@ public class TrueOrFalseTestDetailVO implements Serializable {
     /**
      * 题目
      */
-    private String content;
+    private String title;
 
     /**
      * 题目分数

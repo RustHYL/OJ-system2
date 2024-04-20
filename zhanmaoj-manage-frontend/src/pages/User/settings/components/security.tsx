@@ -1,6 +1,7 @@
-import { List } from 'antd';
+import {Input, List, message, Modal} from 'antd';
 import React, {useEffect, useState} from 'react';
 import {queryCurrent} from "@/pages/User/settings/service";
+import {EyeInvisibleOutlined, EyeTwoTone} from '@ant-design/icons';
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 
@@ -9,6 +10,7 @@ const passwordStrength = {
   medium: <span className="medium">中</span>,
   weak: <span className="weak">弱 Weak</span>,
 };
+
 
 // const [currentUser, setCurrentUser] = useState<API.CurrentUser | null>(null);
 
@@ -30,6 +32,7 @@ const passwordStrength = {
 
 
 const SecurityView: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const getData = () => [
     {
       title: '账户密码',
@@ -39,23 +42,49 @@ const SecurityView: React.FC = () => {
           {passwordStrength.strong}
         </>
       ),
-      actions: [<a key="Modify">修改</a>],
+      actions: [<a key="Modify" onClick={openBox}>修改</a>],
     },
-    // {
-    //   title: '密保手机',
-    //   description: `已绑定手机：138****8293`,
-    //   actions: [<a key="Modify">修改</a>],
-    // },
-    // {
-    //   title: '备用邮箱',
-    //   description: `已绑定邮箱：ant***sign.com`,
-    //   actions: [<a key="Modify">修改</a>],
-    // },
   ];
+
+  const passwordData = {
+      password: '',
+      editPassword: '',
+      checkPassword: '',
+  };
+  const openBox = () => {
+    setIsModalOpen(true);
+    message.info('修改密码');
+  };
+
+    const handleOk = () => {
+      console.log()
+        setIsModalOpen(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
   const data = getData();
   return (
     <>
+      <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+          <Input.Password
+              placeholder="原密码"
+              name="password"
+              iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+          />
+          <Input.Password
+              placeholder="修改密码"
+              name="editPassword"
+              iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+          />
+          <Input.Password
+              placeholder="确认密码"
+              name="checkPassword"
+              iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+          />
+      </Modal>
       <List<Unpacked<typeof data>>
         itemLayout="horizontal"
         dataSource={data}

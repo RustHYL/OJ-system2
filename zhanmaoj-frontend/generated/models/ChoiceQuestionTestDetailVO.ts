@@ -5,11 +5,11 @@
 
 export type ChoiceQuestionTestDetailVO = {
     answer?: number;
-    content?: string;
     id?: number;
     optionA?: string;
     optionB?: string;
     optionC?: string;
     optionD?: string;
     score?: number;
+    title?: string;
 };

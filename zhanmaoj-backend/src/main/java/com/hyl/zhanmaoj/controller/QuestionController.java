@@ -4,28 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.hyl.zhanmaoj.common.BaseResponse;
-import com.hyl.zhanmaoj.common.DeleteRequest;
-import com.hyl.zhanmaoj.common.ErrorCode;
-import com.hyl.zhanmaoj.common.ResultUtils;
+import com.hyl.zhanmaoj.common.*;
 import com.hyl.zhanmaoj.constant.UserConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
 import com.hyl.zhanmaoj.model.dto.question.*;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitAddRequest;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryAdminRequest;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryRequest;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitUpdateAdminRequest;
-import com.hyl.zhanmaoj.model.entity.Question;
-import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
-import com.hyl.zhanmaoj.model.entity.User;
+import com.hyl.zhanmaoj.model.dto.questionsbumit.*;
+import com.hyl.zhanmaoj.model.dto.test.TestQuestionUpdateRequest;
+import com.hyl.zhanmaoj.model.entity.*;
 import com.hyl.zhanmaoj.model.enums.QuestionSubmitStatusEnum;
+import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
 import com.hyl.zhanmaoj.model.vo.*;
-import com.hyl.zhanmaoj.service.QuestionService;
-import com.hyl.zhanmaoj.service.QuestionSubmitService;
-import com.hyl.zhanmaoj.service.UserService;
+import com.hyl.zhanmaoj.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -55,6 +48,12 @@ public class QuestionController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private TestService testService;
+
+    @Resource
+    private TestQuestionService testQuestionService;
 
     private final static Gson GSON = new Gson();
 
@@ -89,8 +88,6 @@ public class QuestionController {
         questionService.validQuestion(question, true);
         User loginUser = userService.getLoginUser(request);
         question.setUserId(loginUser.getId());
-        question.setFavourNum(0);
-        question.setThumbNum(0);
         boolean result = questionService.save(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         long newQuestionId = question.getId();
@@ -150,8 +147,6 @@ public class QuestionController {
         question.setJudgeConfig(GSON.toJson(judgeConfig, JudgeConfig.class));
         User loginUser = userService.getLoginUser(request);
         question.setUserId(loginUser.getId());
-        question.setFavourNum(0);
-        question.setThumbNum(0);
         boolean result = questionService.save(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         long newQuestionId = question.getId();
@@ -310,8 +305,15 @@ public class QuestionController {
         long size = questionQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Question> questionPage = questionService.page(new Page<>(current, size),
-                questionService.getQueryWrapper(questionQueryRequest));
+        Page<Question> questionPage;
+        if (questionQueryRequest.getNum() == null){
+            questionPage = questionService.page(new Page<>(current, size),
+                    questionService.getQueryWrapper(questionQueryRequest));
+        }
+        else {
+            questionPage = questionService.page(new Page<>(current, questionQueryRequest.getNum()),
+                    questionService.getQueryWrapper(questionQueryRequest));
+        }
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
     }
 
@@ -419,6 +421,10 @@ public class QuestionController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         List<Question> questionList = questionService.list(questionService.getQueryWrapper(questionQueryRequest));
+        if (questionQueryRequest.getNum() != null){
+            List<Question> subList = questionList.subList(0, Math.min(6, questionList.size()));
+            return ResultUtils.success(subList);
+        }
         return ResultUtils.success(questionList);
     }
 
@@ -465,6 +471,96 @@ public class QuestionController {
     }
 
     /**
+     * 获取提交信息
+     * @param id
+     * @param request
+     * @return
+     */
+    @GetMapping("/question_submit/get/vo")
+    public BaseResponse<QuestionSubmitVO> getQuestionSubmitVO(long id,
+                                               HttpServletRequest request) {
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QuestionSubmit questionSubmit = questionSubmitService.getById(id);
+        if (questionSubmit == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        final User loginUser = userService.getLoginUser(request);
+        // 不是本人或管理员，不能直接获取所有信息
+        if (!questionSubmit.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        QuestionSubmitVO questionSubmitVO = questionSubmitService.getQuestionSubmitVO(questionSubmit, loginUser);
+        return ResultUtils.success(questionSubmitVO);
+    }
+
+    /**
+     * 获取提交状态
+     * @param id
+     * @param request
+     * @return
+     */
+    @GetMapping("/question_submit/get/status")
+    public BaseResponse<QuestionSubmitStatusVO> getQuestionSubmitStatus(long id,
+                                                              HttpServletRequest request) {
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QuestionSubmitStatusVO questionSubmitStatusVO = new QuestionSubmitStatusVO();
+        QuestionSubmit questionSubmit = questionSubmitService.getById(id);
+        if (questionSubmit == null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        QuestionSubmitStatusEnum enumByValue = QuestionSubmitStatusEnum.getEnumByValue(questionSubmit.getStatus());
+
+        questionSubmitStatusVO.setStatus("RUNNING");
+        if (enumByValue != null){
+            if (enumByValue.equals(QuestionSubmitStatusEnum.SUCCEED) || enumByValue.equals(QuestionSubmitStatusEnum.FAILED)){
+                questionSubmitStatusVO.setStatus("COMPLETED");
+            }
+        } else {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "判题状态不存在");
+        }
+
+        final User loginUser = userService.getLoginUser(request);
+        // 不是本人或管理员，不能直接获取所有信息
+        if (!questionSubmit.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        QuestionSubmitVO questionSubmitVO = questionSubmitService.getQuestionSubmitVO(questionSubmit, loginUser);
+        if (questionSubmitStatusVO.getStatus().equals("COMPLETED")){
+            questionSubmitStatusVO.setResult(questionSubmitVO);
+        }
+        return ResultUtils.success(questionSubmitStatusVO);
+    }
+
+    /**
+     * 试卷编程题提交
+     * @param questionSubmitAddTestRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/question_submit/test/do")
+    public BaseResponse<Long> doQuestionTestSubmit(@RequestBody QuestionSubmitAddTestRequest questionSubmitAddTestRequest,
+                                               HttpServletRequest request) {
+        if (questionSubmitAddTestRequest == null || questionSubmitAddTestRequest.getQuestionId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        final User loginUser = userService.getLoginUser(request);
+        QuestionSubmitAddRequest questionSubmitAddRequest = new QuestionSubmitAddRequest();
+        BeanUtils.copyProperties(questionSubmitAddTestRequest, questionSubmitAddRequest);
+        long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
+        QuestionSubmit questionSubmit = questionSubmitService.getById(questionSubmitId);
+        questionSubmit.setTestId(questionSubmitAddTestRequest.getTestId());
+        boolean b = questionSubmitService.updateById(questionSubmit);
+        if (!b) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "编程题试卷id更新失败");
+        }
+        return ResultUtils.success(questionSubmitId);
+    }
+
+    /**
      * 分页获取题目提交列表（管理员可以看到全部，普通用户只能看到非答案、提交代码等公开信息）
      *
      * @param questionSubmitQueryRequest
@@ -490,7 +586,7 @@ public class QuestionController {
      * @return 提交记录 id
      */
     @PostMapping("/question_submit/my/list/page")
-    public BaseResponse<Page<QuestionSubmit>> listMyQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
+    public BaseResponse<Page<QuestionSubmitVO>> listMyQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
                                                                          HttpServletRequest request) {
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();
@@ -499,7 +595,16 @@ public class QuestionController {
         queryWrapper.eq("userId", loginUser.getId());
         Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
                queryWrapper);
-        return ResultUtils.success(questionSubmitPage);
+        Page<QuestionSubmitVO> page = new Page<>(questionSubmitPage.getCurrent(),questionSubmitPage.getSize(),questionSubmitPage.getTotal());
+        List<QuestionSubmit> questionSubmitList = questionSubmitPage.getRecords();
+        if (CollectionUtils.isEmpty(questionSubmitList)){
+            return ResultUtils.success(page);
+        }
+        List<QuestionSubmitVO> questionSubmitVOList = questionSubmitList.stream().map(questionSubmit ->{
+            return questionSubmitService.getQuestionSubmitVO(questionSubmit, loginUser);
+        }).collect(Collectors.toList());
+        page.setRecords(questionSubmitVOList);
+        return ResultUtils.success(page);
     }
 
     /**
@@ -582,6 +687,147 @@ public class QuestionController {
         Set<QuestionVO> set = new HashSet<>(list);
         list = new ArrayList<>(set);
         return ResultUtils.success(list);
+    }
+
+    @GetMapping("/idList")
+    public BaseResponse<List<IdTitleVO>> getQuestionIdTitleList(HttpServletRequest request) {
+        List<Question> list = questionService.list();
+        List<IdTitleVO> idTitleVOList = list.stream().map(question -> {
+            IdTitleVO idTitleVO = new IdTitleVO();
+            idTitleVO.setId(question.getId());
+            idTitleVO.setTitle(question.getTitle());
+            return idTitleVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(idTitleVOList);
+    }
+
+    /**
+     * 分页获取问题列表（List）（仅管理员）
+     *
+     * @param questionQueryRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/test/list")
+    public BaseResponse<List<QuestionTestAdminVO>> listQuestionTestByList(@RequestBody QuestionQueryTestAdminRequest questionQueryRequest,
+                                                           HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String userRole = loginUser.getUserRole();
+        if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", questionQueryRequest.getTestId());
+        queryWrapper.eq("type", QuestionTypeEnum.PROGRAMMING_QUESTION.getValue());
+        List<TestQuestion> list = testQuestionService.list(queryWrapper);
+        List<QuestionTestAdminVO> questionTestAdminVOList = list.stream().map(testQuestion -> {
+            QuestionTestAdminVO questionTestAdminVO = new QuestionTestAdminVO();
+            Question question = questionService.getById(testQuestion.getQuestionId());
+            questionTestAdminVO.setScore(testQuestion.getScore());
+            if (question == null) {
+                return null;
+            }
+            BeanUtils.copyProperties(question, questionTestAdminVO);
+            questionTestAdminVO.setId(testQuestion.getId());
+            questionTestAdminVO.setQuestionId(question.getId());
+            return questionTestAdminVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(questionTestAdminVOList);
+    }
+
+    @PostMapping("/test/delete")
+    public BaseResponse<Boolean> deleteTestQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = deleteRequest.getId();
+        // 判断是否存在
+        TestQuestion oldQuestion = testQuestionService.getById(id);
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        Integer score = oldQuestion.getScore();
+        Long testId = oldQuestion.getTestId();
+        // 管理员可删除
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        boolean b = testQuestionService.removeById(id);
+        if (!b) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"删除失败");
+        } else {
+            Test test = testService.getById(testId);
+            test.setTotalScore(test.getTotalScore() - score);
+            test.setQuestionNum(test.getQuestionNum() - 1);
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/test/update")
+    public BaseResponse<Boolean> updateTestQuestion(@RequestBody TestQuestionUpdateRequest testQuestionUpdateRequest, HttpServletRequest request) {
+        if (testQuestionUpdateRequest == null || testQuestionUpdateRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = testQuestionUpdateRequest.getId();
+        // 判断是否存在
+        TestQuestion oldQuestion = testQuestionService.getById(id);
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        // 管理员可删除
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        oldQuestion.setScore(testQuestionUpdateRequest.getScore());
+        boolean b = testQuestionService.updateById(oldQuestion);
+        if (!b) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"修改失败");
+        } else {
+            Test test = testService.getById(oldQuestion.getTestId());
+            test.setTotalScore(test.getTotalScore() - oldQuestion.getScore() + testQuestionUpdateRequest.getScore());
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
+
+    @PostMapping("/test/add")
+    public BaseResponse<Boolean> addTestQuestion(@RequestBody QueryRequest queryRequest, HttpServletRequest request) {
+        QuestionTestAddRequest addRequest = queryRequest.getQuestionTestAddRequest();
+        if (addRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = Long.valueOf(addRequest.getId());
+        // 判断是否存在
+        Question oldQuestion = questionService.getById(id);
+        Integer score = addRequest.getScore();
+        Long testId = Long.valueOf(addRequest.getTestId());
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        // 管理员判定
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        TestQuestion testQuestion = new TestQuestion();
+        testQuestion.setTestId(testId);
+        testQuestion.setQuestionId(id);
+        testQuestion.setType(QuestionTypeEnum.PROGRAMMING_QUESTION.getValue());
+        testQuestion.setScore(score);
+        boolean save = testQuestionService.save(testQuestion);
+        if (!save) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"添加失败");
+        } else {
+            Test test = testService.getById(testId);
+            test.setTotalScore(test.getTotalScore() + score);
+            test.setQuestionNum(test.getQuestionNum() + 1);
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
     }
 
 

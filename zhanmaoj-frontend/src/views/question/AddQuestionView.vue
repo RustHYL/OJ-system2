@@ -12,7 +12,7 @@
     <div class="layout">
       <a-form :model="form" label-align="left" style="max-width: 640px">
         <a-form-item field="title" label="标题">
-          <a-input v-model="form.title" placeholder="请输入标题" />
+          <a-input v-model="form.title" placeholder="请输入标题" allow-clear/>
         </a-form-item>
         <a-form-item field="tags" label="标签">
           <a-input-tag v-model="form.tags" placeholder="请输入标签，回车键生成标签" allow-clear />
@@ -28,22 +28,30 @@
             <a-form-item field="judgeConfig.timeLimit" label="时间限制" style="width: 350px">
               <a-input-number
                   v-model="form.judgeConfig.timeLimit"
-                  placeholder="请输入时间限制"
+                  placeholder="请输入时间限制(ms)"
                   mode="button"
                   min="0"
-                  max="1000"
+                  max="950"
                   size="large"
-              />
+              >
+                <template #suffix>
+                  ms
+                </template>
+              </a-input-number>
             </a-form-item>
             <a-form-item field="judgeConfig.memoryLimit" label="内存限制" style="width: 350px">
               <a-input-number
                   v-model="form.judgeConfig.memoryLimit"
-                  placeholder="请输入内存限制"
+                  placeholder="请输入内存限制(kb)"
                   mode="button"
                   min="0"
-                  max="1000"
+                  max="950"
                   size="large"
-              />
+              >
+                <template #suffix>
+                  KB
+                </template>
+              </a-input-number>
             </a-form-item>
             <a-form-item field="judgeConfig.stackLimit" label="堆栈限制" style="width: 350px">
               <a-input-number
@@ -51,9 +59,13 @@
                   placeholder="请输入堆栈限制"
                   mode="button"
                   min="0"
-                  max="1000"
+                  max="950"
                   size="large"
-              />
+              >
+                <template #suffix>
+                  Byte
+                </template>
+              </a-input-number>
             </a-form-item>
           </a-space>
         </a-form-item>
@@ -77,6 +89,7 @@
                     v-model="judgeCaseItem.input"
                     placeholder="请输入测试输入用例"
                     style="width: 300px"
+                    allow-clear
                 />
               </a-form-item>
               <a-form-item
@@ -88,9 +101,10 @@
                     v-model="judgeCaseItem.output"
                     placeholder="请输入测试输出用例"
                     style="width: 300px"
+                    allow-clear
                 />
               </a-form-item>
-              <a-button status="danger" @click="handleDelete(index)">
+              <a-button status="danger" @click="handleDelete(index)" style="margin-bottom: 10px">
                 删除
               </a-button>
             </a-space>

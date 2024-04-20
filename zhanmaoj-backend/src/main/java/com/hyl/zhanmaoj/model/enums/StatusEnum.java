@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 用户角色枚举
+ * 判断选择状态枚举
  *
  */
 public enum StatusEnum {

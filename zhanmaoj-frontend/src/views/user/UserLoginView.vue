@@ -6,10 +6,11 @@
         <a-input
             v-model="form.userAccount"
             placeholder="请输入账号..."
+            autocomplete="username"
         />
       </a-form-item>
       <a-form-item field="userPassword" tooltip="密码不少于8位" label="密码">
-        <a-input-password v-model="form.userPassword" placeholder="请输入密码..." allow-clear/>
+        <a-input-password v-model="form.userPassword" autocomplete="current-password" placeholder="请输入密码..." allow-clear/>
       </a-form-item>
       <a-form-item field="isRemember">
         <a-checkbox v-model="isRemember"> 记住密码 </a-checkbox>
@@ -95,7 +96,7 @@ const handleSubmit = async () => {
       replace: true,
     })
   } else {
-    message.error("登录失败：" + res.msg);
+    message.error("登录失败：" + res.message);
   }
 };
 

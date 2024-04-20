@@ -306,6 +306,28 @@ userRegisterRequest: UserRegisterRequest,
     }
 
     /**
+     * resetUserPassword
+     * @param deleteRequest deleteRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static resetUserPasswordUsingPost(
+deleteRequest: DeleteRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/reset/password',
+            body: deleteRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * updateUser
      * @param userUpdateRequest userUpdateRequest
      * @returns BaseResponse_boolean_ OK

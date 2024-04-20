@@ -58,3 +58,57 @@ export async function addChoiceQuestionsBackend(
     ...(options || {})
   });
 }
+
+
+export async function searchTestChoiceQuestion(
+  choiceQuestionTestSearchVO?: API.ChoiceQuestionTestSearchRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<API.ChoiceQuestionTestAdminVo[]>>('/api/choiceQuestion/test/list', {
+    method: 'POST',
+    data: {
+      ...choiceQuestionTestSearchVO,
+    },
+    ...(options || {})
+  });
+}
+
+export async function deleteTestChoiceQuestion(
+  id?: number,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/choiceQuestion/test/delete', {
+    method: 'POST',
+    data: {
+      id
+    },
+    ...(options || {})
+  });
+}
+
+export async function updateTestChoiceQuestion(
+  choiceQuestionTestUpdateRequest?: API.ChoiceQuestionTestUpdateRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/choiceQuestion/test/update', {
+    method: 'POST',
+    data: {
+      choiceQuestionTestUpdateRequest
+    },
+    ...(options || {})
+  });
+}
+
+
+export async function addTestChoiceQuestion(
+  choiceQuestionTestAddRequest?: API.ChoiceQuestionTestAddRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/choiceQuestion/test/add', {
+    method: 'POST',
+    data: {
+      choiceQuestionTestAddRequest
+    },
+    ...(options || {})
+  });
+}

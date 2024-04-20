@@ -4,27 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.hyl.zhanmaoj.common.BaseResponse;
-import com.hyl.zhanmaoj.common.DeleteRequest;
-import com.hyl.zhanmaoj.common.ErrorCode;
-import com.hyl.zhanmaoj.common.ResultUtils;
+import com.hyl.zhanmaoj.common.*;
 import com.hyl.zhanmaoj.constant.UserConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
+import com.hyl.zhanmaoj.model.dto.test.TestQuestionUpdateRequest;
 import com.hyl.zhanmaoj.model.dto.trueorfalse.*;
 import com.hyl.zhanmaoj.model.dto.trueorfalsesubmit.TrueOrFalseSubmitAddRequest;
 import com.hyl.zhanmaoj.model.dto.trueorfalsesubmit.TrueOrFalseSubmitQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.trueorfalsesubmit.TrueOrFalseSubmitQueryRequest;
 import com.hyl.zhanmaoj.model.dto.trueorfalsesubmit.TrueOrFalseSubmitUpdateAdminRequest;
-import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
-import com.hyl.zhanmaoj.model.entity.TrueOrFalseSubmit;
-import com.hyl.zhanmaoj.model.entity.User;
+import com.hyl.zhanmaoj.model.entity.*;
+import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
 import com.hyl.zhanmaoj.model.enums.StatusEnum;
-import com.hyl.zhanmaoj.model.vo.TrueOrFalseSubmitVO;
-import com.hyl.zhanmaoj.model.vo.TrueOrFalseVO;
-import com.hyl.zhanmaoj.service.TrueOrFalseService;
-import com.hyl.zhanmaoj.service.TrueOrFalseSubmitService;
-import com.hyl.zhanmaoj.service.UserService;
+import com.hyl.zhanmaoj.model.vo.*;
+import com.hyl.zhanmaoj.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -53,6 +47,12 @@ public class TrueOrFalseController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private TestQuestionService testQuestionService;
+
+    @Resource
+    private TestService testService;
 
     private final static Gson GSON = new Gson();
 
@@ -483,6 +483,152 @@ public class TrueOrFalseController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         return ResultUtils.success(trueOrFalseService.getTrueOrFalseVO(trueOrFalse, request));
+    }
+
+    @GetMapping("/test/idList")
+    public BaseResponse<List<IdTitleVO>> getTestQuestion(Long testId, HttpServletRequest request) {
+        List<TrueOrFalse> list = trueOrFalseService.list();
+        List<IdTitleVO> idTitleVOList = list.stream().map(question -> {
+            IdTitleVO idTitleVO = new IdTitleVO();
+            idTitleVO.setId(question.getId());
+            idTitleVO.setTitle(question.getTitle());
+            return idTitleVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(idTitleVOList);
+    }
+
+    @PostMapping("/test/list")
+    public BaseResponse<List<TrueOrFalseTestAdminVO>> listTrueOrFalseTestByList(@RequestBody TrueOrFalseQueryTestAdminRequest trueOrFalseQueryRequest,
+                                                                                HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String userRole = loginUser.getUserRole();
+        if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", trueOrFalseQueryRequest.getTestId());
+        queryWrapper.eq("type", QuestionTypeEnum.TRUE_OR_FALSE.getValue());
+        List<TestQuestion> list = testQuestionService.list(queryWrapper);
+        List<TrueOrFalseTestAdminVO> trueOrFalseTestAdminVOList = list.stream().map(testQuestion -> {
+            TrueOrFalseTestAdminVO trueOrFalseTestAdminVO = new TrueOrFalseTestAdminVO();
+            TrueOrFalse trueOrFalse = trueOrFalseService.getById(testQuestion.getQuestionId());
+            trueOrFalseTestAdminVO.setScore(testQuestion.getScore());
+            if (trueOrFalse == null) {
+                return null;
+            }
+            BeanUtils.copyProperties(trueOrFalse, trueOrFalseTestAdminVO);
+            trueOrFalseTestAdminVO.setId(testQuestion.getId());
+            trueOrFalseTestAdminVO.setQuestionId(trueOrFalse.getId());
+            return trueOrFalseTestAdminVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(trueOrFalseTestAdminVOList);
+    }
+
+    @PostMapping("/test/delete")
+    public BaseResponse<Boolean> deleteTestTrueOrFalse(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = deleteRequest.getId();
+        // 判断是否存在
+        TestQuestion oldQuestion = testQuestionService.getById(id);
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        Integer score = oldQuestion.getScore();
+        Long testId = oldQuestion.getTestId();
+        // 管理员可删除
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        boolean b = testQuestionService.removeById(id);
+        if (!b) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"删除失败");
+        } else {
+            Test test = testService.getById(testId);
+            test.setTotalScore(test.getTotalScore() - score);
+            test.setQuestionNum(test.getQuestionNum() - 1);
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/test/update")
+    public BaseResponse<Boolean> updateTestTrueOrFalse(@RequestBody TestQuestionUpdateRequest testQuestionUpdateRequest, HttpServletRequest request) {
+        if (testQuestionUpdateRequest == null || testQuestionUpdateRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = testQuestionUpdateRequest.getId();
+        // 判断是否存在
+        TestQuestion oldQuestion = testQuestionService.getById(id);
+        ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        // 管理员可删除
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        oldQuestion.setScore(testQuestionUpdateRequest.getScore());
+        boolean b = testQuestionService.updateById(oldQuestion);
+        if (!b) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"修改失败");
+        } else {
+            Test test = testService.getById(oldQuestion.getTestId());
+            test.setTotalScore(test.getTotalScore() - oldQuestion.getScore() + testQuestionUpdateRequest.getScore());
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
+
+    @PostMapping("/test/add")
+    public BaseResponse<Boolean> addTestTrueOrFalse(@RequestBody QueryRequest queryRequest, HttpServletRequest request) {
+        TrueOrFalseTestAddRequest addRequest = queryRequest.getTrueOrFalseTestAddRequest();
+        if (addRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = Long.valueOf(addRequest.getId());
+        // 判断是否存在
+        TrueOrFalse oldTrueOrFalse = trueOrFalseService.getById(id);
+        Integer score = addRequest.getScore();
+        Long testId = Long.valueOf(addRequest.getTestId());
+        ThrowUtils.throwIf(oldTrueOrFalse == null, ErrorCode.NOT_FOUND_ERROR);
+        // 管理员判定
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        TestQuestion testQuestion = new TestQuestion();
+        testQuestion.setTestId(testId);
+        testQuestion.setQuestionId(id);
+        testQuestion.setType(QuestionTypeEnum.TRUE_OR_FALSE.getValue());
+        testQuestion.setScore(score);
+        boolean save = testQuestionService.save(testQuestion);
+        if (!save) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"添加失败");
+        } else {
+            Test test = testService.getById(testId);
+            test.setTotalScore(test.getTotalScore() + score);
+            test.setQuestionNum(test.getQuestionNum() + 1);
+            boolean update = testService.updateById(test);
+            if (!update) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷信息修改失败");
+            }
+        }
+        return ResultUtils.success(true);
+    }
+
+    @GetMapping("/idList")
+    public BaseResponse<List<IdTitleVO>> getTestQuestion(HttpServletRequest request) {
+        List<TrueOrFalse> list = trueOrFalseService.list();
+        List<IdTitleVO> idTitleVOList = list.stream().map(question -> {
+            IdTitleVO idTitleVO = new IdTitleVO();
+            idTitleVO.setId(question.getId());
+            idTitleVO.setTitle(question.getTitle());
+            return idTitleVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(idTitleVOList);
     }
 
 

@@ -53,6 +53,8 @@ public class TestQueryRequest extends PageRequest implements Serializable {
      */
     private Date updateTime;
 
+    private Integer num;
+
 
 
     private static final long serialVersionUID = 1L;

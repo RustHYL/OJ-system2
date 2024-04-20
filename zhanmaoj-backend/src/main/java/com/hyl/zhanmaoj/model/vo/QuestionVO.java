@@ -52,14 +52,9 @@ public class QuestionVO implements Serializable {
     private JudgeConfig judgeConfig;
 
     /**
-     * 点赞数
+     * 答案
      */
-    private Integer thumbNum;
-
-    /**
-     * 收藏数
-     */
-    private Integer favourNum;
+    private String answer ;
 
     /**
      * 创建用户 id

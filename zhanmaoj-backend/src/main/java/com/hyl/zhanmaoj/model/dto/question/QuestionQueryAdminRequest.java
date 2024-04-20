@@ -58,5 +58,7 @@ public class QuestionQueryAdminRequest extends PageRequest implements Serializab
      */
     private Date updateTime;
 
+    private Integer num;
+
     private static final long serialVersionUID = 1L;
 }

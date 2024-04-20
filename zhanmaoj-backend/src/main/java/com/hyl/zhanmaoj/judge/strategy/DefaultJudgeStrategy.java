@@ -34,12 +34,20 @@ public class DefaultJudgeStrategy implements JudgeStrategy {
         //每一项输出的结果是否和判断示例的结果相等
         for (int i = 0; i < judgeCaseList.size(); i++) {
             JudgeCase judgeCase = judgeCaseList.get(i);
-            if (!judgeCase.getOutput().equals(outputList.get(i))) {
+            String output = judgeCase.getOutput();
+            String standardOutput = outputList.get(i).trim();
+//            if (!judgeCase.getOutput().equals(outputList.get(i))) {
+//                judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
+//                judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
+//                return judgeInfoResponse;
+//            }
+            if (!output.equals(standardOutput)) {
                 judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
                 judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
                 return judgeInfoResponse;
             }
         }
+
         //判断题目的限制
         String judgeConfigStr = question.getJudgeConfig();
         JudgeConfig judgeConfig = JSONUtil.toBean(judgeConfigStr, JudgeConfig.class);
@@ -50,7 +58,7 @@ public class DefaultJudgeStrategy implements JudgeStrategy {
             judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
             return judgeInfoResponse;
         }
-        if (memory > memoryLimit) {
+        if (memory > memoryLimit * 8 * 1024) {
             judgeInfoMessageEnum = JudgeInfoMessageEnum.MEMORY_LIMIT_EXCEEDED;
             judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
             return judgeInfoResponse;

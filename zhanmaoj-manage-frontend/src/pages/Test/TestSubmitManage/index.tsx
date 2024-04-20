@@ -1,8 +1,9 @@
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, TableDropdown } from '@ant-design/pro-components';
-import {Image, message, Tag} from 'antd';
+import {message} from 'antd';
 import { useRef } from 'react';
-import {deleteUserInfo, searchUsers, updateUserInfo} from "@/services/ant-design-pro/user";
+import {deleteTestSubmitInfo, searchTestSubmits, updateTestSubmitInfo} from "@/services/ant-design-pro/testSubmit";
+import ignore from "ignore";
 export const waitTimePromise = async (time: number = 10) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -16,100 +17,84 @@ export const waitTime = async (time: number = 10) => {
 };
 
 
-const columns: ProColumns<API.UserAdminVo>[] = [
+const columns: ProColumns<API.TestSubmitAdminVo>[] = [
   {
     title: 'ID',
     dataIndex: 'id',
     width: 48,
     ellipsis: true,
     fixed: 'left',
+    editable: false,
   },
   {
-    title: '用户头像',
-    dataIndex: 'userAvatar',
-    width: 100,
-    search: false,
-    render: (_, record) => (
-        <div>
-          <Image src={record.userAvatar} width={80} height={80} />
-        </div>
-    ),
-  },
-    {
-        title: '用户名',
-        dataIndex: 'userName',
-        copyable: true,
-        align: 'center',
-        width: 90
-    },
-    {
-        title: '用户账号',
-        dataIndex: 'userAccount',
-        copyable: true,
-        align: 'center',
-        width: 110
-    },
-    {
-        title: '用户密码',
-        dataIndex: 'userPassword',
-        width: 80,
-        ellipsis: true,
-    },
-  {
-    title: '性别',
-    filters: true,
-    onFilter: true,
-    dataIndex: 'gender',
-    valueType: 'select',
-    width: 70 ,
-    valueEnum: {
-      0: {
-        text: '男',
-        status: 'Default',
+      title: '状态',
+      dataIndex: 'status',
+      copyable: true,
+      align: 'center',
+      valueType: 'select',
+      width: 90,
+      valueEnum: {
+          0: {
+              text: '待判题',
+              status: 'Loading',
+          },
+          1: {
+              text: '判题中',
+              status: 'Normal',
+          },
+          2: {
+            text: '成功',
+            status: 'Success',
+          },
+          3: {
+            text: '失败',
+            status: 'Error',
+          },
       },
-      1: {
-        text: '女',
-        status: 'Processing',
-      },
-    },
   },
   {
-    title: '电话',
-    dataIndex: 'phone',
-    align: 'center',
-    copyable: true,
-    ellipsis: true,
-    width: 100
+      title: '分数',
+      dataIndex: 'score',
+      copyable: true,
+      align: 'center',
+      width: 110,
+      search:false,
   },
   {
-    title: '邮件',
-    dataIndex: 'email',
-    copyable: true,
-    align: 'center',
-    width: 100,
+      title: '试卷ID',
+      dataIndex: 'testId',
+      width: 80,
       ellipsis: true,
+      copyable: true,
+      editable: false,
   },
   {
-    title: '简介',
-    dataIndex: 'userProfile',
-    copyable: true,
-    align: 'center',
-    width: 120,
+    title: '用户ID',
+    dataIndex: 'userId',
+    width: 80,
     ellipsis: true,
+    copyable: true,
+    editable: false,
   },
   {
-    dataIndex: 'userRole',
-    title: '用户角色',
+    title: '开始做卷时间',
+    key: 'beginTime',
+    dataIndex: 'beginTime',
+    valueType: 'date',
     align: 'center',
-    width: 120,
-    valueType: 'select',
-    filters: true,
-    onFilter: true,
-    valueEnum: {
-      "user": { text: <Tag color="success">普通用户</Tag>, status: 'Success' },
-      "admin": { text: <Tag color="warning">管理员</Tag>, status: 'Default' },
-      "super": { text: <Tag color="error">超级管理员</Tag>, status: 'Error' },
-    },
+    width: 100,
+    editable: false,
+    search: false,
+  },
+  {
+    title: '结束做卷时间',
+    key: 'endTime',
+    dataIndex: 'endTime',
+    valueType: 'date',
+    align: 'center',
+    width: 100,
+    editable: false,
+    search: false,
   },
   {
     title: '注册时间',
@@ -118,6 +103,7 @@ const columns: ProColumns<API.UserAdminVo>[] = [
     valueType: 'date',
     align: 'center',
     width: 100,
+    editable: false,
   },
   {
     title: '更新时间',
@@ -126,6 +112,8 @@ const columns: ProColumns<API.UserAdminVo>[] = [
     valueType: 'date',
     align: 'center',
     width: 100,
+    editable: false,
+    search: false,
   },
   {
     title: '操作',
@@ -137,7 +125,8 @@ const columns: ProColumns<API.UserAdminVo>[] = [
       <a
           key="editable"
           onClick={() => {
-            action?.startEditable?.(record.id);
+            // @ts-ignore
+              action?.startEditable?.(record.id);
           }}
       >
         编辑
@@ -150,7 +139,7 @@ const columns: ProColumns<API.UserAdminVo>[] = [
                   message.success('复制成功');
               } else if (key === 'delete') {
                 console.log(record)
-                  const res = await deleteUserInfo(record.id);
+                  const res = await deleteTestSubmitInfo(record.id);
                   if (res.code === 0) {
                       message.success('删除成功');
                       action?.reload();
@@ -171,8 +160,8 @@ const columns: ProColumns<API.UserAdminVo>[] = [
 export default () => {
   const actionRef = useRef<ActionType>();
 
-  const saveData = async (key: any, row: API.UserAdminVo) => {
-    const res = await updateUserInfo(row);
+  const saveData = async (key: any, row: API.TestSubmitAdminVo) => {
+    const res = await updateTestSubmitInfo(row);
     if (res.code === 0) {
       message.success('保存成功');
       return true;
@@ -184,15 +173,16 @@ export default () => {
 
 
   return (
-      <ProTable<API.UserAdminVo>
+      <ProTable<API.TestSubmitAdminVo>
           columns={columns}
           actionRef={actionRef}
           cardBordered
           request={async (params = {}, sort, filter) => {
             console.log(sort, filter);
             await waitTime(1000);
+
             const param = {
-                userAdminVO: {
+                testSubmitAdminVo: {
                     ...params
                 },
                 pageVO: {
@@ -200,7 +190,7 @@ export default () => {
                     current: params.current
                 }
             };
-            const res = await searchUsers(param);
+            const res = await searchTestSubmits(param?.testSubmitAdminVo);
             return {
               data: res.data
             }

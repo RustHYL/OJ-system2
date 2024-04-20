@@ -3,9 +3,9 @@
     <template v-if="route.path.startsWith('/user')">
       <router-view/>
     </template>
-    <template v-else-if="route.path.startsWith('/collect')">
-      <collectView/>
-    </template>
+<!--    <template v-else-if="route.path.startsWith('/collect')">-->
+<!--      <collectView/>-->
+<!--    </template>-->
     <template v-else>
       <BasicLayout />
     </template>

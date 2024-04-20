@@ -2,7 +2,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, TableDropdown } from '@ant-design/pro-components';
 import {Image, message, Tag} from 'antd';
 import { useRef } from 'react';
-import {deleteUserInfo, searchUsers, updateUserInfo} from "@/services/ant-design-pro/user";
+import {deleteUserInfo, resetUserPassword, searchUsers, updateUserInfo} from "@/services/ant-design-pro/user";
 export const waitTimePromise = async (time: number = 10) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -14,6 +14,7 @@ export const waitTimePromise = async (time: number = 10) => {
 export const waitTime = async (time: number = 10) => {
   await waitTimePromise(time);
 };
+
 
 
 const columns: ProColumns<API.UserAdminVo>[] = [
@@ -153,27 +154,41 @@ const columns: ProColumns<API.UserAdminVo>[] = [
       >
         编辑
       </a>,
+      <a
+        key="editable"
+        onClick={async () => {
+          const res = await deleteUserInfo(record.id);
+          if (res.code === 0) {
+            message.success('删除成功');
+            action?.reload();
+          } else {
+            // @ts-ignore
+            message.error('删除失败', res.message);
+          }
+        }}
+      >
+        删除
+      </a>,
       <TableDropdown
           key="actionGroup"
           onSelect={async key => {
               if (key === 'copy') {
                   await navigator.clipboard.writeText(JSON.stringify(record));
                   message.success('复制成功');
-              } else if (key === 'delete') {
-                console.log(record)
-                  const res = await deleteUserInfo(record.id);
+              } else if (key === 'reset') {
+                  const res = await resetUserPassword(record.id);
                   if (res.code === 0) {
-                      message.success('删除成功');
+                      message.success('重置密码成功');
                       action?.reload();
                   } else {
                       // @ts-ignore
-                      message.error('删除失败',res.message);
+                      message.error('重置密码失败', res.message);
                   }
               }
           }}
           menus={[
               { key: 'copy', name: '复制' },
-              { key: 'delete', name: '删除' }
+              { key: 'reset', name: '重置密码' },
           ]}
       />,
     ],

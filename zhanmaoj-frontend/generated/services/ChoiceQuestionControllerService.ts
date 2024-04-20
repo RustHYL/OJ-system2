@@ -7,6 +7,8 @@ import type { BaseResponse_ChoiceQuestion_ } from '../models/BaseResponse_Choice
 import type { BaseResponse_ChoiceQuestionVO_ } from '../models/BaseResponse_ChoiceQuestionVO_';
 import type { BaseResponse_List_ChoiceQuestion_ } from '../models/BaseResponse_List_ChoiceQuestion_';
 import type { BaseResponse_List_ChoiceQuestionSubmit_ } from '../models/BaseResponse_List_ChoiceQuestionSubmit_';
+import type { BaseResponse_List_ChoiceQuestionTestAdminVO_ } from '../models/BaseResponse_List_ChoiceQuestionTestAdminVO_';
+import type { BaseResponse_List_IdTitleVO_ } from '../models/BaseResponse_List_IdTitleVO_';
 import type { BaseResponse_long_ } from '../models/BaseResponse_long_';
 import type { BaseResponse_Page_ChoiceQuestion_ } from '../models/BaseResponse_Page_ChoiceQuestion_';
 import type { BaseResponse_Page_ChoiceQuestionSubmitVO_ } from '../models/BaseResponse_Page_ChoiceQuestionSubmitVO_';
@@ -15,6 +17,7 @@ import type { ChoiceQuestionAddAdminRequest } from '../models/ChoiceQuestionAddA
 import type { ChoiceQuestionAddRequest } from '../models/ChoiceQuestionAddRequest';
 import type { ChoiceQuestionEditRequest } from '../models/ChoiceQuestionEditRequest';
 import type { ChoiceQuestionQueryRequest } from '../models/ChoiceQuestionQueryRequest';
+import type { ChoiceQuestionQueryTestAdminRequest } from '../models/ChoiceQuestionQueryTestAdminRequest';
 import type { ChoiceQuestionSubmitAddRequest } from '../models/ChoiceQuestionSubmitAddRequest';
 import type { ChoiceQuestionSubmitQueryAdminRequest } from '../models/ChoiceQuestionSubmitQueryAdminRequest';
 import type { ChoiceQuestionSubmitQueryRequest } from '../models/ChoiceQuestionSubmitQueryRequest';
@@ -22,6 +25,8 @@ import type { ChoiceQuestionSubmitUpdateAdminRequest } from '../models/ChoiceQue
 import type { ChoiceQuestionUpdateAdminRequest } from '../models/ChoiceQuestionUpdateAdminRequest';
 import type { ChoiceQuestionUpdateRequest } from '../models/ChoiceQuestionUpdateRequest';
 import type { DeleteRequest } from '../models/DeleteRequest';
+import type { QueryRequest } from '../models/QueryRequest';
+import type { TestQuestionUpdateRequest } from '../models/TestQuestionUpdateRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -274,6 +279,23 @@ id?: number,
     }
 
     /**
+     * getTestQuestion
+     * @returns BaseResponse_List_IdTitleVO_ OK
+     * @throws ApiError
+     */
+    public static getTestQuestionUsingGet(): CancelablePromise<BaseResponse_List_IdTitleVO_> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/choiceQuestion/idList',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * listChoiceQuestionByList
      * @param choiceQuestionQueryRequest choiceQuestionQueryRequest
      * @returns BaseResponse_List_ChoiceQuestion_ OK
@@ -371,6 +393,94 @@ choiceQuestionQueryRequest: ChoiceQuestionQueryRequest,
             method: 'POST',
             url: '/api/choiceQuestion/my/list/page/vo',
             body: choiceQuestionQueryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * addTestChoiceQuestion
+     * @param queryRequest queryRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static addTestChoiceQuestionUsingPost(
+queryRequest: QueryRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/choiceQuestion/test/add',
+            body: queryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * deleteTestChoiceQuestion
+     * @param deleteRequest deleteRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static deleteTestChoiceQuestionUsingPost(
+deleteRequest: DeleteRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/choiceQuestion/test/delete',
+            body: deleteRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * listChoiceQuestionTestByList
+     * @param choiceQuestionQueryRequest choiceQuestionQueryRequest
+     * @returns BaseResponse_List_ChoiceQuestionTestAdminVO_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static listChoiceQuestionTestByListUsingPost(
+choiceQuestionQueryRequest: ChoiceQuestionQueryTestAdminRequest,
+): CancelablePromise<BaseResponse_List_ChoiceQuestionTestAdminVO_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/choiceQuestion/test/list',
+            body: choiceQuestionQueryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * updateTestChoiceQuestion
+     * @param testQuestionUpdateRequest testQuestionUpdateRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static updateTestChoiceQuestionUsingPost(
+testQuestionUpdateRequest: TestQuestionUpdateRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/choiceQuestion/test/update',
+            body: testQuestionUpdateRequest,
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,

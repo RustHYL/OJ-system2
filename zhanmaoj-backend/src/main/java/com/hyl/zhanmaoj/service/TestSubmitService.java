@@ -1,6 +1,8 @@
 package com.hyl.zhanmaoj.service;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.hyl.zhanmaoj.model.dto.testSubmit.TestSubmitAddRequest;
+import com.hyl.zhanmaoj.model.dto.testSubmit.TestSubmitQueryRequest;
 import com.hyl.zhanmaoj.model.entity.TestSubmit;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hyl.zhanmaoj.model.entity.User;
@@ -12,5 +14,6 @@ import com.hyl.zhanmaoj.model.entity.User;
 */
 public interface TestSubmitService extends IService<TestSubmit> {
 
-    long doTestSubmit(TestSubmitAddRequest testSubmitAddRequest, User loginUser);
+
+    Wrapper<TestSubmit> getQueryWrapper(TestSubmitQueryRequest testSubmitQueryRequest);
 }

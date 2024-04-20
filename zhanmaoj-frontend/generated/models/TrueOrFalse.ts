@@ -6,12 +6,12 @@
 export type TrueOrFalse = {
     acceptedNum?: number;
     answer?: number;
-    content?: string;
     createTime?: string;
     id?: number;
     isDelete?: number;
     submitNum?: number;
     tags?: string;
+    title?: string;
     updateTime?: string;
     userId?: number;
 };

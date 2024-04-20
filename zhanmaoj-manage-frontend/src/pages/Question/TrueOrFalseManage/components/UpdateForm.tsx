@@ -83,7 +83,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       <StepsForm.StepForm
         initialValues={{
           tags: props.values.tags,
-          content:props.values.content
+          title:props.values.title
         }}
         title={'配置题目属性'}
       >
@@ -93,7 +93,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
           label={'标签'}
         />
           <ProFormTextArea
-              name="content"
+              name="title"
               width="md"
               label={'题目'}
               placeholder={'请输入至少五个字符'}

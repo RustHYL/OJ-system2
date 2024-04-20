@@ -258,3 +258,34 @@ create table if not exists test_user
     index idx_testId (testId),
     index idx_questionId (userId)
 ) comment '试卷题目关联' collate = utf8mb4_unicode_ci;
+
+
+-- 错题表
+create table if not exists question_wrong
+(
+    id         bigint auto_increment comment 'id' primary key,
+    language   varchar(128)                       not null comment '编程语言',
+    code       text                               not null comment '用户代码',
+    judgeInfo  text                               null comment '判题信息（json 对象）',
+    questionId bigint                             not null comment '题目 id',
+    userId     bigint                             not null comment '创建用户 id',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除',
+    index idx_questionId (questionId),
+    index idx_userId (userId)
+) comment '错题表';
+
+
+-- 标签表
+create table if not exists tag
+(
+    id          bigint auto_increment comment 'id' primary key,
+    name        varchar(512)                       null comment '标题',
+    pid         bigint                             null comment '父标签id',
+    userId      bigint                             not null comment '创建用户 id',
+    createTime  datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime  datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete    tinyint  default 0                 not null comment '是否删除',
+    index idx_userId (userId)
+) comment '标签' collate = utf8mb4_unicode_ci;

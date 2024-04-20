@@ -1,29 +1,36 @@
 package com.hyl.zhanmaoj.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hyl.zhanmaoj.constant.CommonConstant;
+import com.hyl.zhanmaoj.model.dto.test.MyTestQueryRequest;
 import com.hyl.zhanmaoj.model.dto.test.TestJoinRequest;
 import com.hyl.zhanmaoj.model.dto.test.TestQueryRequest;
 import com.hyl.zhanmaoj.model.entity.Test;
 import com.hyl.zhanmaoj.model.entity.TestUser;
 import com.hyl.zhanmaoj.model.enums.TestStatusEnum;
+import com.hyl.zhanmaoj.model.vo.MyTestVO;
 import com.hyl.zhanmaoj.service.TestService;
 import com.hyl.zhanmaoj.mapper.TestMapper;
 import com.hyl.zhanmaoj.service.TestUserService;
 import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hyl.zhanmaoj.common.DateUtils.convertStringToDate;
 
@@ -85,12 +92,49 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test>
         Long testId = testJoinRequest.getTestId();
         String password = testJoinRequest.getPassword();
         Test test = this.getById(testId);
-        if (test == null || !test.getPassword().equals(password)) {
+        if (test == null || (test.getStatus().equals(TestStatusEnum.ENCRYPTION.getValue()) && StringUtils.isBlank(password))) {
+            return false;
+        }
+        if ((test.getStatus().equals(TestStatusEnum.ENCRYPTION.getValue()) && !test.getPassword().equals(password))) {
             return false;
         }
         return true;
 
     }
+
+    @Override
+    public Page<MyTestVO> getMyTestVOPage(Page<TestUser> testUserPage, HttpServletRequest request, MyTestQueryRequest myTestQueryRequest) {
+        List<TestUser> testUserList = testUserPage.getRecords();
+        Page<MyTestVO> myTestVOPage = new Page<>(testUserPage.getCurrent(), testUserPage.getSize(), testUserPage.getTotal());
+        if (CollectionUtils.isEmpty(testUserList)){
+            return myTestVOPage;
+        }
+        List<Test> testList = testUserList.stream().map(testUser -> this.getById(testUser.getTestId())).collect(Collectors.toList());
+        //填充信息
+        List<MyTestVO> myTestVOList = testList.stream().map(test -> {
+            MyTestVO myTestVO = new MyTestVO();
+            BeanUtils.copyProperties(test, myTestVO);
+            QueryWrapper<TestUser> queryWrapper = new QueryWrapper();
+            queryWrapper.eq("userId", userService.getLoginUser(request).getId());
+            queryWrapper.eq("testId", test.getId());
+            TestUser testUser = testUserService.getOne(queryWrapper);
+            if (testUser != null) {
+                myTestVO.setScore(testUser.getScore());
+            } else {
+                myTestVO.setScore(0);
+            }
+            return myTestVO;
+        }).collect(Collectors.toList());
+        String title = myTestQueryRequest.getTitle();
+        if (title != null){
+            myTestVOList = myTestVOList.stream().filter(myTestVO -> myTestVO.getTitle() != null && myTestVO.getTitle().contains(title))
+                    .collect(Collectors.toList());
+        }
+        myTestVOPage.setRecords(myTestVOList);
+        return myTestVOPage;
+    }
+
+
 }
 
 

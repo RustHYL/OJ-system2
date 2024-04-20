@@ -5,7 +5,7 @@
 
 export type TrueOrFalseTestDetailVO = {
     answer?: number;
-    content?: string;
     id?: number;
     score?: number;
+    title?: string;
 };

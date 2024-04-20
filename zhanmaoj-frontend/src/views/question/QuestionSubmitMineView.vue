@@ -44,10 +44,18 @@
           @page-change="onPageChange"
       >
         <template #judgeInfo="{ record }">
-          {{JSON.stringify(record.judgeInfo)}}
+          <div>判题信息:{{record.judgeInfo.message}}</div>
+          <div>内存消耗:{{record.judgeInfo.memory}}</div>
+          <div>时间消耗:{{record.judgeInfo.time}}</div>
         </template>
         <template #createTime="{ record }">
           {{moment(record.createTime).format("YYYY-MM-DD")}}
+        </template>
+        <template #status="{ record }">
+          <a-tag v-if="record.status === 0">待判题</a-tag>
+          <a-tag color="orange" v-else-if="record.status === 1">正在判题</a-tag>
+          <a-tag color="arcoblue" v-else-if="record.status === 2">成功</a-tag>
+          <a-tag color="red" v-else>失败</a-tag>
         </template>
       </a-table>
     </div>
@@ -55,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from "vue";
+import {onMounted, reactive, ref, watchEffect} from "vue";
 import {
   Question,
   QuestionControllerService,
@@ -75,6 +83,7 @@ const searchParams = ref<QuestionSubmitQueryRequest>({
   pageSize: 8,
   current: 1,
 });
+
 
 const loadData = async () => {
   const res = await QuestionControllerService.listMyQuestionSubmitByPageUsingPost(
@@ -107,7 +116,7 @@ onMounted(() => {
 
 const columns = [
   {
-    title: "提交编号",
+    title: "提交ID",
     dataIndex: "id",
   },
   {
@@ -116,20 +125,22 @@ const columns = [
   },
   {
     title: "提交代码",
-    dataIndex: "code"
+    dataIndex: "code",
+    ellipsis: true,
+    tooltip: true,
   },
   {
     title: "判题信息",
     slotName: "judgeInfo",
+    width: 200
   },
-    // todo 状态切换为文字
   {
     title: "判题状态",
-    dataIndex: "status",
+    slotName: "status",
   },
   {
-    title: "题目编号",
-    dataIndex: "questionId",
+    title: "题目",
+    dataIndex: "questionVO.title",
   },
   {
     title: "试卷ID",
@@ -138,6 +149,7 @@ const columns = [
   {
     title: "创建时间",
     slotName: "createTime",
+    width: 120
   },
 ];
 
@@ -151,11 +163,6 @@ const onPageChange = (page: number) => {
 
 const router = useRouter();
 
-const toQuestionPage = (question: Question) => {
-  router.push({
-    path: `/question/answer/${question.id}`,
-  });
-};
 
 const onSearch = () => {
   searchParams.value = {

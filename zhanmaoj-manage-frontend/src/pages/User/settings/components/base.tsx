@@ -2,19 +2,19 @@ import {UploadOutlined} from '@ant-design/icons';
 import {ProForm, ProFormSelect, ProFormText, ProFormTextArea,} from '@ant-design/pro-components';
 import {useModel, useRequest} from '@umijs/max';
 import {Button, message, Upload} from 'antd';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import useStyles from './index.style';
 import {queryCurrent} from "@/pages/User/settings/service";
 import {ref} from "valtio";
 import {updateMyInfo} from "@/services/ant-design-pro/user";
+import {ProFormInstance} from "@ant-design/pro-form/lib";
 
 
 const BaseView: React.FC = () => {
   const {styles} = useStyles();
 
   const { initialState } = useModel('@@initialState');
-
-  // const [currentUser, setCurrentUser] = useState(null);
+  const formRef = useRef<ProFormInstance>();
 
 
   // 头像组件 方便以后独立，增加裁剪之类的功能
@@ -57,22 +57,35 @@ const BaseView: React.FC = () => {
     return '';
   };
 
+  //回显
+  useEffect(() => {
+    queryCurrent().then(res => {
+      formRef?.current?.setFieldsValue(
+          {userName:res.data.userName,
+            userProfile:res.data.userProfile,
+            gender:res.data.gender,
+            phone:res.data.phone,
+            email:res.data.email});
+      console.log(res)
+    });
+
+
+  })
+
   const handleFinish = async (
     initialValues: API.UserAdminVo
   ) => {
     console.log("aaa" + JSON.stringify(initialValues));
     console.log("当前用户" + JSON.stringify(currentUser));
-    const user = await queryCurrent();
-    console.log("user" + JSON.stringify(user));
 
-    const res = await updateMyInfo(initialValues);
-    if (res.code === 0) {
-      message.success('更新基本信息成功');
-      window.location.reload();
-      return;
-    } else {
-      message.error('更新基本信息失败:' + res.message);
-    }
+    // const res = await updateMyInfo(initialValues);
+    // if (res.code === 0) {
+    //   message.success('更新基本信息成功');
+    //   window.location.reload();
+    //   return;
+    // } else {
+    //   message.error('更新基本信息失败:' + res.message);
+    // }
   };
   return (
       <div className={styles.baseView}>
@@ -80,6 +93,7 @@ const BaseView: React.FC = () => {
             <>
               <div className={styles.left}>
                 <ProForm
+                    formRef={formRef}
                     layout="vertical"
                     onFinish={handleFinish}
                     submitter={{
@@ -91,18 +105,17 @@ const BaseView: React.FC = () => {
                     initialValues={{
                       ...currentUser,
                     }}
-                    hideRequiredMark
                 >
                   <ProFormText
                       width="md"
                       name="userName"
                       label="昵称"
-                      rules={[
-                        {
-                          required: true,
-                          message: '请输入您的昵称!',
-                        },
-                      ]}
+                      // rules={[
+                      //   {
+                      //     required: true,
+                      //     message: '请输入您的昵称!',
+                      //   },
+                      // ]}
                   />
                   <ProFormTextArea
                       name="userProfile"
@@ -113,12 +126,12 @@ const BaseView: React.FC = () => {
                       width="sm"
                       name="gender"
                       label="性别"
-                      rules={[
-                        {
-                          required: true,
-                          message: '请输入您性别!',
-                        },
-                      ]}
+                      // rules={[
+                      //   {
+                      //     required: true,
+                      //     message: '请输入您性别!',
+                      //   },
+                      // ]}
                       options={[
                         {
                           label: '男',

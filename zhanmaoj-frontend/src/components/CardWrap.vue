@@ -93,9 +93,17 @@
     } else if (props.expiredTime < nowTime.value) {
       message.info('考试已结束');
     } else if (props.status === 0) {
-      await router.push({
-        path: `/collect/test/do/${props.id}`, // 使用模板字符串来插入参数
+      const res = await TestControllerService.joinTestUsingPost({
+        testId: props.id,
       })
+      if (res.code === 0){
+        await router.push({
+          path: `/collect/test/do/${props.id}`, // 使用模板字符串来插入参数
+        })
+      }else {
+        message.error('加入失败' + (res.message ? `，${res.message}` : ''))
+      }
+
     } else if (props.status === 1) {
       //打开弹窗
       showPasswordDialog.value = true;

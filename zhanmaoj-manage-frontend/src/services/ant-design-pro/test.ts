@@ -58,3 +58,36 @@ export async function addTest(
         ...(options || {})
     });
 }
+
+export async function getTest(
+  id?: string,
+) {
+  return request<API.BaseResponse<API.TestAdminVo>>('/api/test/get', {
+    method: 'GET',
+    data: {
+      id,
+    },
+  });
+}
+
+export async function getQuestionTestIdTitleVO(
+) {
+  return request<API.BaseResponse<API.IdTitleVO>>('/api/question/idList', {
+    method: 'GET',
+  });
+}
+
+
+export async function getTrueOrFalseTestIdTitleVO(
+) {
+    return request<API.BaseResponse<API.IdTitleVO>>('/api/trueOrFalse/idList', {
+        method: 'GET',
+    });
+}
+
+export async function getChoiceQuestionTestIdTitleVO(
+) {
+    return request<API.BaseResponse<API.IdTitleVO>>('/api/choiceQuestion/idList', {
+        method: 'GET',
+    });
+}

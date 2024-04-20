@@ -14,7 +14,7 @@ public class ChoiceQuestionTestDetailVO implements Serializable {
     /**
      * 内容
      */
-    private String content;
+    private String title;
 
     /**
      * 选项 A

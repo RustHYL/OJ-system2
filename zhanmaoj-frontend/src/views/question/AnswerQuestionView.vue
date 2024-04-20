@@ -27,13 +27,8 @@
               </template>
             </a-card>
           </a-tab-pane>
-          <a-tab-pane key="comment" title="评论区">
-            <!-- todo 评论区-->
-            评论区
-          </a-tab-pane>
           <a-tab-pane key="answer" title="答案">
-            <!--todo 答案-->
-            答案展示
+            <MarkDownViewer :value="questionAnswer"/>
           </a-tab-pane>
         </a-tabs>
       </a-col>
@@ -55,6 +50,11 @@
             </a-select>
           </a-form-item>
         </a-form>
+        <div class="card-container" v-if="showForm">
+          <div class="card">
+            <QuestionSubmitInfoCard :questionSubmitResult="questionSubmitResult" :title="question.title" @closeEvent="handleCloseEvent"/>
+          </div>
+        </div>
         <CodeEditor :value="form.code as string" :language="form.language" :handle-change="changeCode"/>
         <a-divider size="0"/>
         <a-button type="primary" style="min-width: 160px" @click="doSubmit">提交</a-button>
@@ -67,15 +67,18 @@
 import { onMounted, ref } from "vue";
 import {
   QuestionControllerService,
-  QuestionSubmitAddRequest,
+  QuestionSubmitAddRequest, QuestionSubmitVO,
   QuestionVO,
 } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import CodeEditor from "@/components/CodeEditor.vue";
 import MarkDownViewer from "@/components/MarkDownViewer.vue";
+import QuestionSubmitInfoCard from "@/components/QuestionSubmitInfoCard.vue";
 
 const question = ref<QuestionVO>();
+
+const submitId = ref();
 
 const form = ref<QuestionSubmitAddRequest>({
   language: "java",
@@ -85,6 +88,10 @@ const form = ref<QuestionSubmitAddRequest>({
 interface props {
   id: string;
 }
+const showForm = ref(false);
+const changeShowForm = () => {
+  showForm.value = !showForm.value;
+};
 
 const props = withDefaults(defineProps<props>(), {
   id: () => "",
@@ -94,12 +101,18 @@ const loadData = async () => {
   const res = await QuestionControllerService.getQuestionVoByIdUsingGet(
     props.id as any
   );
+  console.log("questionVO:" + JSON.stringify(res.data))
   if (res.code === 0) {
     question.value = res.data;
+    questionAnswer.value = question.value?.answer;
   } else {
     message.error("加载失败，" + res.message);
   }
 };
+
+const questionAnswer = ref();
+
+const questionSubmitResult = ref<QuestionSubmitVO>();
 
 /**
  * 页面加载时，请求数据
@@ -112,7 +125,6 @@ const changeCode = (value: string) => {
   form.value.code = value;
 };
 
-
 const router = useRouter();
 
 const doSubmit = async () => {
@@ -124,22 +136,80 @@ const doSubmit = async () => {
     questionId: question.value.id,
   });
   if (res.code === 0) {
-    message.success("提交成功");
+    message.success("提交成功,正在判题...");
   } else {
     message.error("提交失败，" + res.message);
   }
+  submitId.value = res.data;
+  console.log("submitId:" + submitId.value)
+  // 开始轮询判题结果，直到完成或出错
+  let result = null;
+  let pollActive = true;
+  while (pollActive) {
+    try {
+      const statusRes = await QuestionControllerService.getQuestionSubmitStatusUsingGet(submitId.value);
+      if (statusRes.code === 0) {
+        const { status, result: judgementResult } = statusRes.data;
+        if (status === 'COMPLETED') {
+          // 判题完成
+          result = judgementResult;
+          pollActive = false; // 停止轮询
+        } else {
+          // 判题还在进行中，稍微等待一下
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } else {
+        // 查询状态失败，处理错误
+        console.error('查询判题状态失败：', statusRes.message);
+        pollActive = false; // 停止轮询
+      }
+    } catch (error) {
+      // 发生其他错误，停止轮询
+      console.error('轮询过程中发生错误：', error);
+      pollActive = false;
+    }
+  }
+
+  // 判题完成后，获取完整的判题结果
+  const finalResultRes = await QuestionControllerService.getQuestionSubmitVoUsingGet(submitId.value);
+  console.log("finalResultRes:", finalResultRes);
+  if (finalResultRes.code === 0) {
+    questionSubmitResult.value = finalResultRes.data;
+    changeShowForm(); // 判题完成后调用
+  } else {
+    message.error("获取判题结果失败，" + finalResultRes.message);
+  }
 }
+
+
+const handleCloseEvent = () => {
+  showForm.value = false;
+  // 在这里你可以根据需要对参数进行处理
+};
 
 </script>
 
 <style>
 #answerQuestionView {
-  max-width: 1420px;
+  width: 1420px;
   margin: 0 auto;
 }
 
 #answerQuestionView .arco-space-horizontal .arco-space-item {
   margin-bottom: 0 !important;
+}
+
+.card-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000; /* 确保卡片在其他内容之上 */
+}
+
+.card {
+  width: 900px;
+  height: 580px;
 }
 
 </style>

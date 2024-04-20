@@ -3,9 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { TestSingleAnswer } from './TestSingleAnswer';
+
 export type TestSubmitAddRequest = {
-    choiceRequest?: string;
-    questionAnswer?: string;
+    choiceAnswerList?: Array<TestSingleAnswer>;
     testId?: number;
-    trueOrFalseRequest?: string;
+    trueOrFalseAnswerList?: Array<TestSingleAnswer>;
 };

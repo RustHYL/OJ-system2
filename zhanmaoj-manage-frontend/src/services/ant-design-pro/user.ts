@@ -44,7 +44,6 @@ export async function updateMyInfo(
     ...(options || {})
   });
 }
-
 /** 删除用户信息  POST /api/user/delete */
 export async function deleteUserInfo(
     id?: number,
@@ -57,4 +56,18 @@ export async function deleteUserInfo(
         },
         ...(options || {})
     });
+}
+
+
+export async function resetUserPassword(
+  id?: number,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponse<boolean>>('/api/user/reset/password', {
+    method: 'POST',
+    data: {
+      id
+    },
+    ...(options || {})
+  });
 }

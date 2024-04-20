@@ -12,9 +12,12 @@ import ManageQuestionView from "@/views/question/ManageQuestionView.vue";
 import QuestionsView from "@/views/question/QuestionsView.vue";
 import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
 import QuestionSubmitMyView from "@/views/question/QuestionSubmitMineView.vue";
+import QuestionWrongMyView from "@/views/question/WrongQuestionsView.vue";
 import AnswerQuestionView from "@/views/question/AnswerQuestionView.vue";
 import TestView from "@/views/test/TestCardView.vue";
+import TestScoreView from "@/views/test/TestScoreView.vue";
 import TestDoView from "@/views/test/TestDoView.vue";
+import MyTestView from "@/views/test/MyTestView.vue";
 
 
 export const routes: Array<RouteRecordRaw> = [
@@ -124,9 +127,33 @@ export const routes: Array<RouteRecordRaw> = [
         }
     },
     {
+        path: '/question/test/score/:id',
+        component: TestScoreView,
+        props: true,
+        meta: {
+            access: ACCESS_ENUM.USER,
+        }
+    },
+    {
+        path: '/question/question_wrong/list/page',
+        component: QuestionWrongMyView,
+        props: true,
+        meta: {
+            access: ACCESS_ENUM.USER,
+        }
+    },
+    {
+        path: '/question/test/list/my/page',
+        component: MyTestView,
+        props: true,
+        meta: {
+            access: ACCESS_ENUM.USER,
+        }
+    },
+    {
         path: '/collect/test/do/:id',
-        name: '试题汇总',
         component: TestDoView,
+        props: true,
         meta: {
             hideInMenu: true
         }

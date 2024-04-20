@@ -50,15 +50,6 @@ public class QuestionAdminVO extends PageRequest implements Serializable {
      */
     private String judgeConfig;
 
-    /**
-     * 点赞数
-     */
-    private Integer thumbNum;
-
-    /**
-     * 收藏数
-     */
-    private Integer favourNum;
 
     /**
      * 创建用户 id

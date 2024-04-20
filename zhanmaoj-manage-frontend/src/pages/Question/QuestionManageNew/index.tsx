@@ -20,7 +20,7 @@ import {
 } from "@/services/ant-design-pro/question";
 
 import TagsComponent from "@/components/Tags";
-import {waitTime} from "@/pages/Admin/RoleManage";
+import {waitTime} from "@/pages/Question/QuestionSubmitManage";
 
 
 /**
@@ -35,12 +35,12 @@ const handleAdd = async (fields: API.QuestionAdminVo) => {
        ...fields,
     });
     hide();
-    message.success('Added successfully');
+    message.success('添加成功');
     return true;
   } catch (error) {
     console.log(error);
     hide();
-    message.error('Adding failed, please try again!');
+    message.error('添加失败,请重新添加！');
     return false;
   }
 };
@@ -52,7 +52,7 @@ const handleAdd = async (fields: API.QuestionAdminVo) => {
  * @param fields
  */
 const handleUpdate = async (fields: API.QuestionAdminVo) => {
-  const hide = message.loading('Configuring');
+  const hide = message.loading('修改中');
   try {
     await updateQuestionInfo({
       id: fields.id,
@@ -64,16 +64,14 @@ const handleUpdate = async (fields: API.QuestionAdminVo) => {
       acceptedNum: fields.acceptedNum,
       judgeCase: fields.judgeCase,
       judgeConfig:fields.judgeConfig,
-      thumbNum: fields.thumbNum,
-      favourNum: fields.favourNum,
       userId: fields.userId,
     });
     hide();
-    message.success('Configuration is successful');
+    message.success('修改成功');
     return true;
   } catch (error) {
     hide();
-    message.error('Configuration failed, please try again!');
+    message.error('修改失败！');
     return false;
   }
 };
@@ -140,7 +138,7 @@ const TableList: React.FC = () => {
       ),
     },
     {
-      title: '用户ID',
+      title: '创建用户ID',
       dataIndex: 'userId',
       width: 120,
       align: 'center',
@@ -165,24 +163,6 @@ const TableList: React.FC = () => {
       align: 'center',
       editable:false,
       copyable: true,
-    },
-    {
-      title: '点赞数',
-      dataIndex: 'thumbNum',
-      width: 60 ,
-      search:false,
-      align: 'center',
-      editable:false,
-      copyable: true,
-    },
-    {
-      title: '收藏数',
-      dataIndex: 'favourNum',
-      align: 'center',
-      search:false,
-      editable:false,
-      copyable: true,
-      width: 60
     },
     {
       title: '创建时间',

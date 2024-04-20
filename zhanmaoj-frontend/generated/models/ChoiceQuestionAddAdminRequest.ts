@@ -5,10 +5,10 @@
 
 export type ChoiceQuestionAddAdminRequest = {
     answer?: number;
-    content?: string;
     optionA?: string;
     optionB?: string;
     optionC?: string;
     optionD?: string;
     tags?: string;
+    title?: string;
 };

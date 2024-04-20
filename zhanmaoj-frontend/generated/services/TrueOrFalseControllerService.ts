@@ -3,8 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BaseResponse_boolean_ } from '../models/BaseResponse_boolean_';
+import type { BaseResponse_List_IdTitleVO_ } from '../models/BaseResponse_List_IdTitleVO_';
 import type { BaseResponse_List_TrueOrFalse_ } from '../models/BaseResponse_List_TrueOrFalse_';
 import type { BaseResponse_List_TrueOrFalseSubmit_ } from '../models/BaseResponse_List_TrueOrFalseSubmit_';
+import type { BaseResponse_List_TrueOrFalseTestAdminVO_ } from '../models/BaseResponse_List_TrueOrFalseTestAdminVO_';
 import type { BaseResponse_long_ } from '../models/BaseResponse_long_';
 import type { BaseResponse_Page_TrueOrFalse_ } from '../models/BaseResponse_Page_TrueOrFalse_';
 import type { BaseResponse_Page_TrueOrFalseSubmitVO_ } from '../models/BaseResponse_Page_TrueOrFalseSubmitVO_';
@@ -12,11 +14,14 @@ import type { BaseResponse_Page_TrueOrFalseVO_ } from '../models/BaseResponse_Pa
 import type { BaseResponse_TrueOrFalse_ } from '../models/BaseResponse_TrueOrFalse_';
 import type { BaseResponse_TrueOrFalseVO_ } from '../models/BaseResponse_TrueOrFalseVO_';
 import type { DeleteRequest } from '../models/DeleteRequest';
+import type { QueryRequest } from '../models/QueryRequest';
+import type { TestQuestionUpdateRequest } from '../models/TestQuestionUpdateRequest';
 import type { TrueOrFalseAddAdminRequest } from '../models/TrueOrFalseAddAdminRequest';
 import type { TrueOrFalseAddRequest } from '../models/TrueOrFalseAddRequest';
 import type { TrueOrFalseEditRequest } from '../models/TrueOrFalseEditRequest';
 import type { TrueOrFalseQueryAdminRequest } from '../models/TrueOrFalseQueryAdminRequest';
 import type { TrueOrFalseQueryRequest } from '../models/TrueOrFalseQueryRequest';
+import type { TrueOrFalseQueryTestAdminRequest } from '../models/TrueOrFalseQueryTestAdminRequest';
 import type { TrueOrFalseSubmitAddRequest } from '../models/TrueOrFalseSubmitAddRequest';
 import type { TrueOrFalseSubmitQueryAdminRequest } from '../models/TrueOrFalseSubmitQueryAdminRequest';
 import type { TrueOrFalseSubmitQueryRequest } from '../models/TrueOrFalseSubmitQueryRequest';
@@ -188,6 +193,23 @@ id?: number,
     }
 
     /**
+     * getTestQuestion
+     * @returns BaseResponse_List_IdTitleVO_ OK
+     * @throws ApiError
+     */
+    public static getTestQuestionUsingGet2(): CancelablePromise<BaseResponse_List_IdTitleVO_> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/trueOrFalse/idList',
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * listTrueOrFalseByList
      * @param trueOrFalseQueryRequest trueOrFalseQueryRequest
      * @returns BaseResponse_List_TrueOrFalse_ OK
@@ -294,6 +316,117 @@ trueOrFalseQueryRequest: TrueOrFalseQueryRequest,
     }
 
     /**
+     * addTestTrueOrFalse
+     * @param queryRequest queryRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static addTestTrueOrFalseUsingPost(
+queryRequest: QueryRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/trueOrFalse/test/add',
+            body: queryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * deleteTestTrueOrFalse
+     * @param deleteRequest deleteRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static deleteTestTrueOrFalseUsingPost(
+deleteRequest: DeleteRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/trueOrFalse/test/delete',
+            body: deleteRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * getTestQuestion
+     * @param testId testId
+     * @returns BaseResponse_List_IdTitleVO_ OK
+     * @throws ApiError
+     */
+    public static getTestQuestionUsingGet1(
+testId?: number,
+): CancelablePromise<BaseResponse_List_IdTitleVO_> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/trueOrFalse/test/idList',
+            query: {
+                'testId': testId,
+            },
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * listTrueOrFalseTestByList
+     * @param trueOrFalseQueryRequest trueOrFalseQueryRequest
+     * @returns BaseResponse_List_TrueOrFalseTestAdminVO_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static listTrueOrFalseTestByListUsingPost(
+trueOrFalseQueryRequest: TrueOrFalseQueryTestAdminRequest,
+): CancelablePromise<BaseResponse_List_TrueOrFalseTestAdminVO_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/trueOrFalse/test/list',
+            body: trueOrFalseQueryRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * updateTestTrueOrFalse
+     * @param testQuestionUpdateRequest testQuestionUpdateRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static updateTestTrueOrFalseUsingPost(
+testQuestionUpdateRequest: TestQuestionUpdateRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/trueOrFalse/test/update',
+            body: testQuestionUpdateRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * deleteTrueOrFalseSubmit
      * @param deleteRequest deleteRequest
      * @returns BaseResponse_boolean_ OK
@@ -322,7 +455,7 @@ deleteRequest: DeleteRequest,
      * @returns any Created
      * @throws ApiError
      */
-    public static doTrueOrFalseSubmitUsingPost1(
+    public static doTrueOrFalseSubmitUsingPost(
 trueOrFalseSubmitAddRequest: TrueOrFalseSubmitAddRequest,
 ): CancelablePromise<BaseResponse_long_ | any> {
         return __request(OpenAPI, {

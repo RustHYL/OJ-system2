@@ -1,59 +1,103 @@
-import type { MenuProps } from 'antd';
-import { Button, Dropdown, Space } from 'antd';
-import React from 'react';
+import {PageContainer} from '@ant-design/pro-components';
+import {history, Outlet, useLocation, useMatch} from '@umijs/max';
+import {Descriptions, DescriptionsProps} from 'antd';
+import type {FC} from 'react';
 
-const items: MenuProps['items'] = [
+type SearchProps = {
+  children?: React.ReactNode;
+};
+
+const tabList = [
   {
-    key: '1',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-        1st menu item
-      </a>
-    ),
+    key: 'true_or_false',
+    tab: '判断题',
   },
   {
-    key: '2',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-        2nd menu item
-      </a>
-    ),
+    key: 'choice_question',
+    tab: '选择题',
   },
   {
-    key: '3',
-    label: (
-      <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-        3rd menu item
-      </a>
-    ),
+    key: 'question',
+    tab: '编程题',
   },
 ];
 
-const App: React.FC = () => (
-  <Space direction="vertical">
-    <Space wrap>
-      <Dropdown menu={{ items }} placement="bottomLeft">
-        <Button>bottomLeft</Button>
-      </Dropdown>
-      <Dropdown menu={{ items }} placement="bottom">
-        <Button>bottom</Button>
-      </Dropdown>
-      <Dropdown menu={{ items }} placement="bottomRight">
-        <Button>bottomRight</Button>
-      </Dropdown>
-    </Space>
-    <Space wrap>
-      <Dropdown menu={{ items }} placement="topLeft">
-        <Button>topLeft</Button>
-      </Dropdown>
-      <Dropdown menu={{ items }} placement="top">
-        <Button>top</Button>
-      </Dropdown>
-      <Dropdown menu={{ items }} placement="topRight">
-        <Button>topRight</Button>
-      </Dropdown>
-    </Space>
-  </Space>
-);
+const Search: FC<SearchProps> = () => {
+  const location = useLocation();
+  let match = useMatch(location.pathname);
+  const searchParams = new URLSearchParams(location.search);
+  const id = searchParams.get('id');
 
-export default App;
+  const getId = () => {
+    const searchParams = new URLSearchParams(location.search);
+    console.log(searchParams.get('id'))
+    return searchParams.get('id')
+  }
+  const handleTabChange = (key: string) => {
+    const url =
+      match?.pathname === '/' ? '' : match?.pathname.substring(0, match.pathname.lastIndexOf('/'));
+    switch (key) {
+      case 'true_or_false':
+        history.push(`${url}/true_or_false/${id}`);
+        break;
+      case 'choice_question':
+        history.push(`${url}/choice_question/${id}`);
+        break;
+      case 'question':
+        history.push(`${url}/question/${id}`);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const items: DescriptionsProps['items'] = [
+    {
+      key: '1',
+      label: 'UserName',
+      children: <p>Zhou Maomao</p>,
+    },
+    {
+      key: '2',
+      label: 'Telephone',
+      children: <p>1810000000</p>,
+    },
+    {
+      key: '3',
+      label: 'Live',
+      children: <p>Hangzhou, Zhejiang</p>,
+    },
+    {
+      key: '4',
+      label: 'Remark',
+      children: <p>empty</p>,
+    },
+    {
+      key: '5',
+      label: 'Address',
+      children: <p>No. 18, Wantang Road, Xihu District, Hangzhou, Zhejiang, China</p>,
+    },
+  ];
+
+  const getTabKey = () => {
+    const tabKey = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
+    if (tabKey && tabKey !== '/') {
+      return tabKey;
+    }
+    return 'articles';
+  };
+
+  return (
+    <PageContainer
+      tabList={tabList}
+      tabActiveKey={getTabKey()}
+      onTabChange={handleTabChange}
+    >
+      <Outlet />
+      <Descriptions title="试卷信息" items={items} />;
+    </PageContainer>
+
+  );
+};
+
+export default Search;

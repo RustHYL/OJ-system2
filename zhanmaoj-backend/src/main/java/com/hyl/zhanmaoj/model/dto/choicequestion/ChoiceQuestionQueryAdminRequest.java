@@ -26,7 +26,7 @@ public class ChoiceQuestionQueryAdminRequest extends PageRequest implements Seri
     /**
      * 内容
      */
-    private String content;
+    private String title;
 
     /**
      * 标签列表

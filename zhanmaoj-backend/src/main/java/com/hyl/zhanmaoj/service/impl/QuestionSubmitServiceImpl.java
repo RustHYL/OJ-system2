@@ -16,6 +16,8 @@ import com.hyl.zhanmaoj.model.entity.User;
 import com.hyl.zhanmaoj.model.enums.QuestionSubmitLanguageEnum;
 import com.hyl.zhanmaoj.model.enums.QuestionSubmitStatusEnum;
 import com.hyl.zhanmaoj.model.vo.QuestionSubmitVO;
+import com.hyl.zhanmaoj.model.vo.QuestionVO;
+import com.hyl.zhanmaoj.model.vo.UserVO;
 import com.hyl.zhanmaoj.service.QuestionService;
 import com.hyl.zhanmaoj.service.QuestionSubmitService;
 import com.hyl.zhanmaoj.mapper.QuestionSubmitMapper;
@@ -24,6 +26,7 @@ import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -98,6 +101,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         CompletableFuture.runAsync(() -> {
             judgeService.doJudge(id);
         });
+//        judgeService.doJudge(id);
         return id;
     }
 
@@ -115,7 +119,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
             return queryWrapper;
         }
         String language = questionSubmitQueryRequest.getLanguage();
-        Integer status = questionSubmitQueryRequest.getStatus();;
+        Integer status = questionSubmitQueryRequest.getStatus();
         Long questionId = questionSubmitQueryRequest.getQuestionId();
         Long userId = questionSubmitQueryRequest.getUserId();
         String sortField = questionSubmitQueryRequest.getSortField();
@@ -176,6 +180,14 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (userId != questionSubmit.getUserId() && !userService.isAdmin(loginUser)) {
             questionSubmitVO.setCode(null);
         }
+        Question question = questionService.getById(questionSubmit.getQuestionId());
+        QuestionVO questionVO = QuestionVO.objToVo(question);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(loginUser,userVO);
+        questionVO.setUserVO(userVO);
+        questionVO.setUserVO(userVO);
+        questionSubmitVO.setUserVO(userVO);
+        questionSubmitVO.setQuestionVO(questionVO);
         return questionSubmitVO;
     }
 

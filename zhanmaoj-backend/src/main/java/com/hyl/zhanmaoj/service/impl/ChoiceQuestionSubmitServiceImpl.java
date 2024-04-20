@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.constant.CommonConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
-import com.hyl.zhanmaoj.judge.JudgeService;
 import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitAddRequest;
 import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitQueryRequest;
@@ -23,7 +22,6 @@ import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -50,9 +48,6 @@ public class ChoiceQuestionSubmitServiceImpl extends ServiceImpl<ChoiceQuestionS
     @Resource
     private UserService userService;
 
-    @Resource
-    @Lazy
-    private JudgeService judgeService;
 
 
 
@@ -83,7 +78,10 @@ public class ChoiceQuestionSubmitServiceImpl extends ServiceImpl<ChoiceQuestionS
         ChoiceQuestionSubmit choiceQuestionSubmit = new ChoiceQuestionSubmit();
         choiceQuestionSubmit.setUserId(userId);
         choiceQuestionSubmit.setQuestionId(choiceQuestionId);
-        choiceQuestionSubmit.setTestId(choiceQuestionSubmitAddRequest.getTestId());
+        Long testId = choiceQuestionSubmitAddRequest.getTestId();
+        if (testId != null) {
+            choiceQuestionSubmit.setTestId(testId);
+        }
         choiceQuestionSubmit.setAnswer(answer);
         //判题
         choiceQuestionSubmit.setStatus(StatusEnum.WAITING.getValue());

@@ -66,7 +66,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
         if (choiceQuestion == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String content = choiceQuestion.getContent();
+        String title = choiceQuestion.getTitle();
         String tags = choiceQuestion.getTags();
         Integer answer = choiceQuestion.getAnswer();
         String optionA = choiceQuestion.getOptionA();
@@ -75,10 +75,10 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
         String optionD = choiceQuestion.getOptionD();
         // 创建时，参数不能为空
         if (add) {
-            ThrowUtils.throwIf(StringUtils.isAnyBlank( content, tags), ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(StringUtils.isAnyBlank( title, tags), ErrorCode.PARAMS_ERROR);
         }
         // 有参数则校验
-        if (StringUtils.isNotBlank(content) && content.length() > 8192) {
+        if (StringUtils.isNotBlank(title) && title.length() > 8192) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "内容过长");
         }
         if (TrueOrFalseAnswerEnum.getEnumByValue(answer) == null) {
@@ -111,7 +111,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
             return queryWrapper;
         }
         Long id = choiceQuestionQueryRequest.getId();
-        String content = choiceQuestionQueryRequest.getContent();
+        String title = choiceQuestionQueryRequest.getTitle();
         List<String> tags = choiceQuestionQueryRequest.getTags();
         Long userId = choiceQuestionQueryRequest.getUserId();
         String sortField = choiceQuestionQueryRequest.getSortField();
@@ -119,7 +119,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
         Date createTime = choiceQuestionQueryRequest.getCreateTime();
         Date updateTime = choiceQuestionQueryRequest.getUpdateTime();
         // 拼接查询条件
-        queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
+        queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
         if (CollectionUtils.isNotEmpty(tags)) {
             for (String tag : tags) {
                 queryWrapper.like("tags", "\"" + tag + "\"");
@@ -142,7 +142,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
             return queryWrapper;
         }
         Long id = choiceQuestionQueryRequest.getId();
-        String content = choiceQuestionQueryRequest.getContent();
+        String title = choiceQuestionQueryRequest.getTitle();
         String tags = choiceQuestionQueryRequest.getTags();
         Long userId = choiceQuestionQueryRequest.getUserId();
         String sortField = choiceQuestionQueryRequest.getSortField();
@@ -150,7 +150,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
         Date createTime = choiceQuestionQueryRequest.getCreateTime();
         Date updateTime = choiceQuestionQueryRequest.getUpdateTime();
         // 拼接查询条件
-        queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
+        queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
         queryWrapper.like(StringUtils.isNotBlank(tags), "tags", tags);
         queryWrapper.eq(id != null, "id", id);
         queryWrapper.eq(userId != null, "userId", userId);

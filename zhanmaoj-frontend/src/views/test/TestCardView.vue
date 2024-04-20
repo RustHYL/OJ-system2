@@ -38,6 +38,13 @@
 </script>
 
 <style scoped lang="less">
+#testCardView {
+  width: 100%;
+  height: 100%;
+  .header {
+    padding: 0 20px;
+  }
+}
   .container {
     padding: 0 20px 20px 20px;
     :deep(.arco-list-content) {

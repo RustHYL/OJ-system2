@@ -5,11 +5,11 @@
 
 export type ChoiceQuestionUpdateAdminRequest = {
     answer?: number;
-    content?: string;
     id?: number;
     optionA?: string;
     optionB?: string;
     optionC?: string;
     optionD?: string;
     tags?: string;
+    title?: string;
 };

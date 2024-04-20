@@ -12,14 +12,14 @@
               :style="{ margin: 0, fontSize: '18px', color: 'black' }"
               :heading="5"
           >
-            战码 OJ
+            战码-Java练题网站
           </a-typography-title>
         </a-space>
       </a-layout-header>
       <a-layout-content class="content">
         <router-view />
       </a-layout-content>
-      <a-layout-footer class="footer">xxxsss网站</a-layout-footer>
+      <a-layout-footer class="footer">战码-Java练题网站</a-layout-footer>
     </a-layout>
   </div>
 </template>

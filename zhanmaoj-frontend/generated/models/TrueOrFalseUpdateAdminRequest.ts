@@ -5,7 +5,7 @@
 
 export type TrueOrFalseUpdateAdminRequest = {
     answer?: number;
-    content?: string;
     id?: number;
     tags?: string;
+    title?: string;
 };

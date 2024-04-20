@@ -4,7 +4,7 @@
 /* eslint-disable */
 
 export type TrueOrFalseTitleVO = {
-    content?: string;
     id?: number;
+    title?: string;
     type?: number;
 };
