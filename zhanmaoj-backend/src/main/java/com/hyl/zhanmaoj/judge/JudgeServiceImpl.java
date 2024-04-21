@@ -90,13 +90,25 @@ public class JudgeServiceImpl implements JudgeService {
         judgeContext.setJudgeCaseList(judgeCaseList);
         judgeContext.setQuestion(question);
         judgeContext.setQuestionSubmit(questionSubmit);
-        //选择策略
-        JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
+        JudgeInfo judgeInfo = new JudgeInfo();
+        String message = executeCodeResponse.getMessage();
+        if (message != null){
+            //两种错误 编译错误 运行错误
+            if (message.contains("compile error")){
+                judgeInfo.setMessage(JudgeInfoMessageEnum.COMPILE_ERROR.getValue());
+            } else {
+                judgeInfo.setMessage(JudgeInfoMessageEnum.RUNTIME_ERROR.getValue());
+                judgeInfo.setMemory(executeCodeResponse.getJudgeInfo().getMemory());
+                judgeInfo.setTime(executeCodeResponse.getJudgeInfo().getTime());
+            }
+        } else {
+            //选择策略
+            judgeInfo = judgeManager.doJudge(judgeContext);
+        }
         //修改数据库的判题记录
         questionSubmitUpdate = new QuestionSubmit();
         questionSubmitUpdate.setId(questionSubmitId);
         questionSubmitUpdate.setJudgeInfo(JSONUtil.toJsonStr(judgeInfo));
-        String message = judgeInfo.getMessage();
         questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
         boolean update = questionSubmitService.updateById(questionSubmitUpdate);
         if (!update){
