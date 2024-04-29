@@ -3,7 +3,7 @@ import { DefaultFooter } from '@ant-design/pro-components';
 import React from 'react';
 
 
-const defaultMessage = '黄雨龙单人技术出品';
+const defaultMessage = '猫五郎单人技术出品';
 const currentYear = new Date().getFullYear();
 const Footer: React.FC = () => {
   return (
@@ -11,20 +11,20 @@ const Footer: React.FC = () => {
           copyright={`${currentYear} ${defaultMessage}`}
           links={[
             {
-              key: 'gege',
-              title: '只因o',
-              href: 'https://pro.ant.design',
+              key: 'zhnma练题',
+              title: 'zhanma-练题',
+              href: 'http://localhost:8080/',
               blankTarget: true,
             },
             {
-              key: 'Beautiful',
-              title: '太美',
+              key: 'Ant Deign',
+              title: 'Ant Deign',
               href: 'https://ant.design',
               blankTarget: true,
             },
             {
               key: 'github',
-              title: <><GithubOutlined />黄雨龙 GitHub</>,
+              title: <><GithubOutlined />猫五郎 GitHub</>,
               href: 'https://github.com/RustHYL',
               blankTarget: true,
             },

@@ -48,15 +48,6 @@
       </a-select>
     </a-form-item>
     <a-form-item
-        field="phone"
-        label="电话"
-    >
-      <a-input
-          v-model="formData.phone"
-          :placeholder="store.state.user?.loginUser?.phone || '请填写电话号码'"
-      />
-    </a-form-item>
-    <a-form-item
       field="email"
       label="邮箱"
     >

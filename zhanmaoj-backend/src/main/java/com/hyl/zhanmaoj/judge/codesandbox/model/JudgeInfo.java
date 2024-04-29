@@ -25,5 +25,10 @@ public class JudgeInfo implements Serializable {
      */
     private Long time;
 
+    /**
+     * 程序运行详细信息信息
+     */
+    private String detailErrorMessage;
+
     private static final long serialVersionUID = 1L;
 }

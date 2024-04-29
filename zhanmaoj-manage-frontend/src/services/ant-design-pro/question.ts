@@ -33,7 +33,7 @@ export async function updateQuestionInfo(
 
 /** 删除用户信息  POST /api/question/delete */
 export async function deleteQuestionInfo(
-    id?: number,
+    id?: string,
     options?: { [key: string]: any }
 ) {
     return request<API.BaseResponse<boolean>>('/api/question/delete', {
@@ -74,7 +74,7 @@ export async function searchTestQuestions(
 }
 
 export async function deleteTestQuestion(
-  id?: number,
+  id?: string,
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponse<boolean>>('/api/question/test/delete', {
@@ -93,7 +93,7 @@ export async function updateTestQuestion(
   return request<API.BaseResponse<boolean>>('/api/question/test/update', {
     method: 'POST',
     data: {
-      questionTestUpdateRequest
+      ...questionTestUpdateRequest
     },
     ...(options || {})
   });
@@ -106,7 +106,7 @@ export async function addTestQuestion(
   return request<API.BaseResponse<boolean>>('/api/question/test/add', {
     method: 'POST',
     data: {
-      questionTestAddRequest
+      ...questionTestAddRequest
     },
     ...(options || {})
   });

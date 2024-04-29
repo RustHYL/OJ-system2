@@ -1,11 +1,8 @@
 package com.hyl.zhanmaoj.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.hyl.zhanmaoj.common.PageRequest;
 import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
-import com.hyl.zhanmaoj.model.entity.QuestionSubmit;
 import com.hyl.zhanmaoj.model.entity.QuestionWrong;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

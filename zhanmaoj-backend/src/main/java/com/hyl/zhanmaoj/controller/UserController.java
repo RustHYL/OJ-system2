@@ -11,31 +11,34 @@ import com.hyl.zhanmaoj.config.WxOpenConfig;
 import com.hyl.zhanmaoj.constant.UserConstant;
 import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
+import com.hyl.zhanmaoj.model.dto.file.UploadFileRequest;
 import com.hyl.zhanmaoj.model.dto.user.*;
+import com.hyl.zhanmaoj.model.entity.SMS;
 import com.hyl.zhanmaoj.model.entity.User;
 import com.hyl.zhanmaoj.model.vo.LoginUserVO;
 import com.hyl.zhanmaoj.model.vo.PageVO;
 import com.hyl.zhanmaoj.model.vo.UserAdminVO;
 import com.hyl.zhanmaoj.model.vo.UserVO;
 import com.hyl.zhanmaoj.service.UserService;
+
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.hyl.zhanmaoj.utils.SMSUtil;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户接口
@@ -54,6 +57,12 @@ public class UserController {
     private static final String SALT = "hyl";
 
     private static final String PASSWORD = "12345678";
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Resource
+    private SMSUtil smsUtil;
 
     // region 登录相关
 
@@ -378,6 +387,36 @@ public class UserController {
         return ResultUtils.success(true);
     }
 
+    /**
+     *   更新个人密码
+     *
+     * @param userUpdateMyRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update/my/password")
+    public BaseResponse<Boolean> updateMyPassword(@RequestBody UserUpdateMyPasswordRequest userUpdateMyRequest,
+                                              HttpServletRequest request) {
+        String userPassword = userUpdateMyRequest.getUserPassword();
+        String confirmPassword = userUpdateMyRequest.getConfirmPassword();
+        if (userPassword == null || confirmPassword == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码或确认密码不能为空");
+        }
+        if (userPassword.length() < 8){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码必须超过8位");
+        }
+        if (!userPassword.equals(confirmPassword)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码需和确认密码相同");
+        }
+        User loginUser = userService.getLoginUser(request);
+        User user = new User();
+        user.setUserPassword(DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes()));
+        user.setId(loginUser.getId());
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
     @PostMapping("/reset/password")
     @AuthCheck(mustRole = UserConstant.SUPER_ROLE)
     public BaseResponse<Boolean> resetUserPassword(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
@@ -392,6 +431,72 @@ public class UserController {
         boolean reset = userService.updateById(user);
         if (!reset) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/verify/password")
+    public BaseResponse<Boolean> verifyUserPassword(@RequestBody String password, HttpServletRequest request) {
+        if (StringUtils.isBlank(password) || password.length() < 8){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入密码格式错误");
+        }
+        User loginUser = userService.getLoginUser(request);
+        String oldPassword = loginUser.getUserPassword();
+        //加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        if (StringUtils.equals(oldPassword, encryptPassword)){
+            return ResultUtils.success(true);
+        }
+        return ResultUtils.success(false);
+    }
+
+    /**
+     *   更新个人手机
+     *
+     * @param sms
+     * @param request
+     * @return
+     */
+    @PostMapping("/update/my/phone")
+    public BaseResponse<Boolean> updateMyPhone(@RequestBody SMS sms,
+                                               HttpServletRequest request) {
+        //校验是否登录
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        Long userId = loginUser.getId();
+        //获取验证码
+        String redisStr = userId + ":" + sms.getStatus() + ":" + sms.getPhoneNumber();
+        boolean b = smsUtil.validateSMS(redisStr, sms.getCode());
+        if (b){
+            redisTemplate.delete(redisStr);
+            User user = new User();
+            user.setPhone(sms.getPhoneNumber());
+            user.setId(loginUser.getId());
+            boolean result = userService.updateById(user);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        } else {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+        }
+        return ResultUtils.success(true);
+    }
+
+
+    @PostMapping("/update/my/avatarUrl")
+    public BaseResponse<Boolean> updateMyAvatarUrl(@RequestBody String avatarUrl, HttpServletRequest request) {
+        //校验是否登录
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        Long userId = loginUser.getId();
+        User user = new User();
+        user.setId(userId);
+        user.setUserAvatar(avatarUrl);
+        boolean b = userService.updateById(user);
+        if (!b){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "修改失败");
         }
         return ResultUtils.success(true);
     }

@@ -245,7 +245,7 @@ const TableList: React.FC = () => {
               })
             }}
           >
-            <PlusOutlined /> 新建
+            <PlusOutlined /> 添加题目
           </Button>,
         ]}
         columnsState={{

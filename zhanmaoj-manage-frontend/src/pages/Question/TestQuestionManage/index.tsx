@@ -193,7 +193,7 @@ const TableList: React.FC = () => {
               }
             }}
         >
-          更新
+          删除
         </a>,
         <a
           key="delete"
@@ -202,7 +202,7 @@ const TableList: React.FC = () => {
             setCurrentRow(record);
           }}
         >
-          删除
+          更新
         </a>,
         <TableDropdown
             key="actionGroup"
@@ -253,7 +253,7 @@ const TableList: React.FC = () => {
               })
             }}
           >
-            <PlusOutlined /> 新建
+            <PlusOutlined /> 添加题目
           </Button>,
         ]}
         columnsState={{

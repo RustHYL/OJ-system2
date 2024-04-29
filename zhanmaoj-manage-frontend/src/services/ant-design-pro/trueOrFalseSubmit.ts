@@ -33,7 +33,7 @@ export async function updateTrueOrFalseSubmitInfo(
 
 /** 删除用户信息  POST /api/trueOrFalse/delete */
 export async function deleteTrueOrFalseSubmitInfo(
-    id?: number,
+    id?: string,
     options?: { [key: string]: any }
 ) {
     return request<API.BaseResponse<boolean>>('/api/trueOrFalse/trueOrFalse_submit/delete', {

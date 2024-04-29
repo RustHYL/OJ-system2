@@ -11,11 +11,13 @@ import type { BaseResponse_Page_UserVO_ } from '../models/BaseResponse_Page_User
 import type { BaseResponse_User_ } from '../models/BaseResponse_User_';
 import type { BaseResponse_UserVO_ } from '../models/BaseResponse_UserVO_';
 import type { DeleteRequest } from '../models/DeleteRequest';
+import type { SMS } from '../models/SMS';
 import type { UserAddRequest } from '../models/UserAddRequest';
 import type { UserLoginRequest } from '../models/UserLoginRequest';
 import type { UserQueryRequest } from '../models/UserQueryRequest';
 import type { UserRegisterRequest } from '../models/UserRegisterRequest';
 import type { UserSearchAdminRequest } from '../models/UserSearchAdminRequest';
+import type { UserUpdateMyPasswordRequest } from '../models/UserUpdateMyPasswordRequest';
 import type { UserUpdateMyRequest } from '../models/UserUpdateMyRequest';
 import type { UserUpdateRequest } from '../models/UserUpdateRequest';
 
@@ -363,6 +365,94 @@ userUpdateMyRequest: UserUpdateMyRequest,
             method: 'POST',
             url: '/api/user/update/my',
             body: userUpdateMyRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * updateMyAvatarUrl
+     * @param avatarUrl avatarUrl
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static updateMyAvatarUrlUsingPost(
+avatarUrl: string,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/update/my/avatarUrl',
+            body: avatarUrl,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * updateMyPassword
+     * @param userUpdateMyRequest userUpdateMyRequest
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static updateMyPasswordUsingPost(
+userUpdateMyRequest: UserUpdateMyPasswordRequest,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/update/my/password',
+            body: userUpdateMyRequest,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * updateMyPhone
+     * @param sms sms
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static updateMyPhoneUsingPost(
+sms: SMS,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/update/my/phone',
+            body: sms,
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
+     * verifyUserPassword
+     * @param password password
+     * @returns BaseResponse_boolean_ OK
+     * @returns any Created
+     * @throws ApiError
+     */
+    public static verifyUserPasswordUsingPost(
+password: string,
+): CancelablePromise<BaseResponse_boolean_ | any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/user/verify/password',
+            body: password,
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,

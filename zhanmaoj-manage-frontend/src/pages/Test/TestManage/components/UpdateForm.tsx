@@ -86,7 +86,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       <StepsForm.StepForm
         initialValues={{
           status:props.values.status,
-          tags: props.values.password,
+          password: props.values.password,
           content:props.values.content
         }}
         title={'配置题目属性'}

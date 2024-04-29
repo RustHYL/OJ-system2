@@ -33,7 +33,7 @@ export async function updateChoiceQuestionInfo(
 
 /** 删除用户信息  POST /api/choiceQuestion/delete */
 export async function deleteChoiceQuestionInfo(
-    id?: number,
+    id?: string,
     options?: { [key: string]: any }
 ) {
     return request<API.BaseResponse<boolean>>('/api/choiceQuestion/delete', {
@@ -74,7 +74,7 @@ export async function searchTestChoiceQuestion(
 }
 
 export async function deleteTestChoiceQuestion(
-  id?: number,
+  id?: string,
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponse<boolean>>('/api/choiceQuestion/test/delete', {
@@ -93,7 +93,7 @@ export async function updateTestChoiceQuestion(
   return request<API.BaseResponse<boolean>>('/api/choiceQuestion/test/update', {
     method: 'POST',
     data: {
-      choiceQuestionTestUpdateRequest
+      ...choiceQuestionTestUpdateRequest
     },
     ...(options || {})
   });
@@ -107,7 +107,7 @@ export async function addTestChoiceQuestion(
   return request<API.BaseResponse<boolean>>('/api/choiceQuestion/test/add', {
     method: 'POST',
     data: {
-      choiceQuestionTestAddRequest
+      ...choiceQuestionTestAddRequest
     },
     ...(options || {})
   });

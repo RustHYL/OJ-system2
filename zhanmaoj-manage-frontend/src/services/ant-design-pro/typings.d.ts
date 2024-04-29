@@ -4,7 +4,7 @@
 
 declare namespace API {
   type CurrentUser = {
-    id?: number;
+    id?: string;
     userName?: string;
     userAccount?: string;
     userAvatar?: string;
@@ -21,7 +21,7 @@ declare namespace API {
    * 管理页面用户信息
    */
   type UserAdminVo = {
-    id?: number;
+    id?: string;
     userName?: string;
     userAccount?: string;
     userPassword?: string;
@@ -51,7 +51,7 @@ declare namespace API {
    * 管理页面题目信息
    */
   type QuestionAdminVo = {
-    id?: number;
+    id?: string;
     title?: string;
     content?: string;
     tags?: string;
@@ -60,14 +60,14 @@ declare namespace API {
     acceptedNum?: number;
     judgeCase?: string;
     judgeConfig?: string;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
   };
 
   type QuestionTestAdminVo = {
-    id?: number;
-    questionId?: number;
+    id?: string;
+    questionId?: string;
     title?: string;
     tags?: string;
     answer?: string;
@@ -77,13 +77,13 @@ declare namespace API {
   };
 
   type QuestionTestSearchRequest = {
-    testId?: number;
+    testId?: string;
     current?: number;
     size?: number;
   };
 
   type QuestionTestUpdateRequest = {
-    id?: number;
+    id?: string;
     score?: number;
   };
 
@@ -96,10 +96,10 @@ declare namespace API {
 
 
   type QuestionSearchRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     tags?: string;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
     current?: number;
@@ -108,7 +108,7 @@ declare namespace API {
 
 
   type QuestionUpdateRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     content?: string;
     tags?: string;
@@ -117,7 +117,7 @@ declare namespace API {
     acceptedNum?: number;
     judgeCase?: string;
     judgeConfig?: string;
-    userId?: number;
+    userId?: string;
   };
 
   type JudgeInfo = {
@@ -130,23 +130,23 @@ declare namespace API {
    * 管理页面题目提交信息
    */
   type QuestionSubmitAdminVo = {
-    id?: number;
+    id?: string;
     language?: string;
     code?: string;
     judgeInfo?: string;
     status?: number;
-    questionId?: number;
-    userId?: number;
+    questionId?: string;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
   };
 
   type QuestionSubmitSearchRequest = {
-    id?: number;
+    id?: string;
     language?: string;
     status?: number;
-    questionId?: number;
-    userId?: number;
+    questionId?: string;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
     current?: number;
@@ -154,7 +154,7 @@ declare namespace API {
   };
 
   type QuestionSubmitUpdateRequest = {
-    id?: number;
+    id?: string;
     judgeInfo?: string;
     status?: number;
   };
@@ -163,23 +163,23 @@ declare namespace API {
    * 判断题
    */
   type TrueOrFalseAdminVo = {
-    id?: number;
+    id?: string;
     title?: string;
     tags?: string;
     answer?: string;
     submitNum?: number;
     acceptedNum?: number;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
   };
 
 
   type TrueOrFalseSearchRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     tags?: string;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
     current?: number;
@@ -188,7 +188,7 @@ declare namespace API {
 
 
   type TrueOrFalseUpdateRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     tags?: string;
     answer?: string;
@@ -196,8 +196,8 @@ declare namespace API {
 
 
   type TrueOrFalseTestAdminVo = {
-    id?: number;
-    questionId?: number;
+    id?: string;
+    questionId?: string;
     title?: string;
     tags?: string;
     answer?: string;
@@ -206,13 +206,13 @@ declare namespace API {
 
 
   type TrueOrFalseTestSearchRequest = {
-    testId?: number;
+    testId?: string;
     current?: number;
     size?: number;
   };
 
   type TrueOrFalseTestUpdateRequest = {
-    id?: number;
+    id?: string;
     score?: number;
   };
 
@@ -227,22 +227,22 @@ declare namespace API {
    * 判断题提交
    */
   type TrueOrFalseSubmitAdminVo = {
-    id?: number;
+    id?: string;
     status?: number;
     answer?: number;
-    questionId?: number;
-    userId?: number;
-    testId?: number;
+    questionId?: string;
+    userId?: string;
+    testId?: string;
     createTime?: Date;
     updateTime?: Date;
   };
 
   type TrueOrFalseSubmitSearchRequest = {
-    id?: number;
+    id?: stringr;
     status?: number;
-    questionId?: number;
-    userId?: number;
-    testId?: number;
+    questionId?: string;
+    userId?: string;
+    testId?: string;
     createTime?: Date;
     updateTime?: Date;
     current?: number;
@@ -250,7 +250,7 @@ declare namespace API {
   };
 
   type TrueOrFalseSubmitUpdateRequest = {
-    id?: number;
+    id?: string;
     status?: number;
     answer?: number;
   };
@@ -259,7 +259,7 @@ declare namespace API {
    * 选择题
    */
   type ChoiceQuestionAdminVo = {
-    id?: number;
+    id?: string;
     title?: string;
     tags?: string;
     optionA?: string;
@@ -269,17 +269,17 @@ declare namespace API {
     answer?: string;
     submitNum?: number;
     acceptedNum?: number;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
   };
 
 
   type ChoiceQuestionSearchRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     tags?: string;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
     current?: number;
@@ -288,7 +288,7 @@ declare namespace API {
 
 
   type ChoiceQuestionUpdateRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     optionA?: string;
     optionB?: string;
@@ -299,8 +299,8 @@ declare namespace API {
   };
 
   type ChoiceQuestionTestAdminVo = {
-    id?: number;
-    questionId?: number;
+    id?: string;
+    questionId?: string;
     title?: string;
     tags?: string;
     answer?: string;
@@ -313,13 +313,13 @@ declare namespace API {
 
 
   type ChoiceQuestionTestSearchRequest = {
-    testId?: number;
+    testId?: string;
     current?: number;
     size?: number;
   };
 
   type ChoiceQuestionTestUpdateRequest = {
-    id?: number;
+    id?: string;
     score?: number;
   };
 
@@ -333,22 +333,22 @@ declare namespace API {
    * 选择题提交
    */
   type ChoiceQuestionSubmitAdminVo = {
-    id?: number;
+    id?: string;
     answer?: number;
     status?: number;
-    questionId?: number;
-    userId?: number;
-    testId?: number;
+    questionId?: string;
+    userId?: string;
+    testId?: string;
     createTime?: Date;
     updateTime?: Date;
   };
 
   type ChoiceQuestionSubmitSearchRequest = {
-    id?: number;
+    id?: string;
     status?: number;
-    questionId?: number;
-    userId?: number;
-    testId?: number;
+    questionId?: string;
+    userId?: string;
+    testId?: string;
     createTime?: Date;
     updateTime?: Date;
     current?: number;
@@ -356,7 +356,7 @@ declare namespace API {
   };
 
   type ChoiceQuestionSubmitUpdateRequest = {
-    id?: number;
+    id?: string;
     status?: number;
     answer?: number;
   };
@@ -380,7 +380,7 @@ declare namespace API {
   }
 
   type UserLoginResVo = {
-    id: number;
+    id: string;
     userName: string;
     userProfile: string;
     userAvatar: string;
@@ -448,7 +448,7 @@ declare namespace API {
    * 试卷
    */
   type TestAdminVo = {
-    id?: number;
+    id?: string;
     title?: string;
     status?: number;
     password?: string;
@@ -458,7 +458,7 @@ declare namespace API {
     expiredTime?: Date;
     examTime?: number;
     totalScore?: number;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
   };
@@ -475,16 +475,22 @@ declare namespace API {
     trueOrFalsePerScore?: number;
     choiceQuestionNum?: number;
     choicePerScore?: number;
-    questionList?: string;
+    questionList?: ProgramQuestion[];
+  };
+
+
+  type ProgramQuestion = {
+    id?: string;
+    score?: string;
   };
 
 
   type TestSearchRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     status?: number;
     content?: string;
-    userId?: number;
+    userId?: string;
     createTime?: Date;
     updateTime?: Date;
     current?: number;
@@ -493,7 +499,7 @@ declare namespace API {
 
 
   type TestUpdateRequest = {
-    id?: number;
+    id?: string;
     title?: string;
     status?: number;
     password?: string;
@@ -506,11 +512,11 @@ declare namespace API {
    * 试卷提交
    */
   type TestSubmitAdminVo = {
-    id?: number;
+    id?: string;
     status?: number;
     score?: number;
-    userId?: number;
-    testId?: number;
+    userId?: string;
+    testId?: string;
     beginTime?: Date;
     endTime?: Date;
     createTime?: Date;
@@ -518,10 +524,10 @@ declare namespace API {
   };
 
   type TestSubmitSearchRequest = {
-    id?: number;
+    id?: string;
     status?: number;
-    userId?: number;
-    testId?: number;
+    userId?: string;
+    testId?: string;
     beginTime?: Date;
     endTime?: Date;
     createTime?: Date;
@@ -531,13 +537,26 @@ declare namespace API {
   };
 
   type TestSubmitUpdateRequest = {
-    id?: number;
+    id?: string;
     status?: number;
     score?: number;
   };
 
   type IdTitleVO = {
-    id?: number;
+    id?: string;
     title?: string;
   };
+
+  type SMS = {
+    status?: string;
+    phoneNumber?: string;
+    code?: string;
+    min?: number;
+  };
+
+  type UserUpdateMyPasswordRequest = {
+    userPassword?: string;
+    confirmPassword?: string;
+  };
+
 }

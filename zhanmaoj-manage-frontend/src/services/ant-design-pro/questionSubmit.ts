@@ -33,7 +33,7 @@ export async function updateQuestionSubmitInfo(
 
 /** 删除用户信息  POST /api/question/delete */
 export async function deleteQuestionSubmitInfo(
-    id?: number,
+    id?: string,
     options?: { [key: string]: any }
 ) {
     return request<API.BaseResponse<boolean>>('/api/question/question_submit/delete', {

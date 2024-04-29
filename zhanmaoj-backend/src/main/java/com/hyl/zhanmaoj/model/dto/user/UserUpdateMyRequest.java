@@ -24,6 +24,7 @@ public class UserUpdateMyRequest implements Serializable {
      */
     private String userProfile;
 
+
     /**
      * 电话
      */

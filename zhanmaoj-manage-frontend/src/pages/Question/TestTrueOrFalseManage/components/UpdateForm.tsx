@@ -1,6 +1,5 @@
 import {
   ProFormText,
-  ProFormTextArea,
   StepsForm,
 } from '@ant-design/pro-components';
 import '@umijs/max';
@@ -18,7 +17,7 @@ export type UpdateFormProps = {
   onCancel: (flag?: boolean, formVals?: FormValueType) => void;
   onSubmit: (values: FormValueType) => Promise<void>;
   updateModalOpen: boolean;
-  values: Partial<API.QuestionAdminVo>;
+  values: Partial<API.TrueOrFalseTestAdminVo>;
 };
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   return (
@@ -50,7 +49,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       <StepsForm.StepForm
         initialValues={{
             id:props.values.id,
-            title: props.values.title,
+            score: props.values.score,
         }}
         title={'基本信息'}
       >

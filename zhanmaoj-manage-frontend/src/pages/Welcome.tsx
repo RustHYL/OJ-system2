@@ -139,22 +139,19 @@ const Welcome: React.FC = () => {
               index={1}
               href="https://github.com/RustHYL/OJ-system2"
               title="了解 系统"
-              desc="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-              XXXXXXXXXXXXXXXXXXXXXXXX。"
+              desc="该系统是zhanma-Java练题网站后台管理系统。"
             />
             <InfoCard
               index={2}
               title="了解 功能"
               href="https://github.com/RustHYL/OJ-system2"
-              desc="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-              XXXXXXXXXXXXXXXXXXXXXXXX。"
+              desc="该系统主要提供对于系统中用户、题目、题目提交信息、试卷和试卷提交信息的管理。"
             />
             <InfoCard
               index={3}
               title="了解 结构"
               href="https://github.com/RustHYL/OJ-system2"
-              desc="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-              XXXXXXXXXXXXXXXXXXXXXXXX。"
+              desc="系统后端主要采用Java Sprng Boot框架，前端采用React。"
             />
           </div>
         </div>

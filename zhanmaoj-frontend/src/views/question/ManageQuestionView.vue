@@ -173,7 +173,7 @@ const doDelete = async (question: Question) => {
   });
   if (res.code === 0) {
     message.success("删除成功");
-    loadData();
+    await loadData();
   } else {
     message.error("删除失败");
   }

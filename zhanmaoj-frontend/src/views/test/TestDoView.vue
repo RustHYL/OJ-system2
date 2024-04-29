@@ -74,8 +74,6 @@
                   placeholder="选择编程语言"
               >
                 <a-option>java</a-option>
-<!--                <a-option>cpp</a-option>-->
-<!--                <a-option>go</a-option>-->
               </a-select>
             </a-form-item>
           </a-form>

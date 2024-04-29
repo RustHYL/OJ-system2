@@ -10,8 +10,6 @@ import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.judge.codesandbox.model.JudgeInfo;
 import com.hyl.zhanmaoj.model.dto.choicequestionsubmit.ChoiceQuestionSubmitAddRequest;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitQueryAdminRequest;
-import com.hyl.zhanmaoj.model.dto.questionsbumit.QuestionSubmitUpdateAdminRequest;
 import com.hyl.zhanmaoj.model.dto.test.*;
 import com.hyl.zhanmaoj.model.dto.testSubmit.TestSubmitAddRequest;
 import com.hyl.zhanmaoj.model.dto.testSubmit.TestSubmitQueryRequest;
@@ -22,7 +20,6 @@ import com.hyl.zhanmaoj.model.enums.*;
 import com.hyl.zhanmaoj.model.vo.*;
 import com.hyl.zhanmaoj.service.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -115,30 +112,29 @@ public class TestController {
         if (choiceQuestionPerScore == null) {
             choiceQuestionPerScore = 0;
         }
-        List<Object> questionListObject = new ArrayList<>();
-        String questionListStr = testAddRequest.getQuestionList();
-        List<QuestionTestAddVO> questionList = new ArrayList<>();
-        Type listType = new TypeToken<List<QuestionTestAddVO>>(){}.getType();
-        if (StringUtils.isNotBlank(questionListStr)) {
-            try {
-                questionListObject = GSON.fromJson(questionListStr, listType);
-                for (Object o : questionListObject) {
-                    if (o != null) {
-                        String json = GSON.toJson(o, Object.class);
-                        QuestionTestAddVO questionTestAddVO = GSON.fromJson(json, QuestionTestAddVO.class);
-                        questionList.add(questionTestAddVO);
-                    }
-                }
-                // 如果转换成功，这里会执行
-                System.out.println("Conversion successful: " + questionListStr);
-            } catch (JsonSyntaxException e) {
-                // 如果转换失败，这里会捕获异常并执行
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入编程题列表格式错误");
-            }
-        }
+//        List<Object> questionListObject = new ArrayList<>();
+        List<QuestionTestAddBackendVO> questionList = testAddRequest.getQuestionList();
+//        Type listType = new TypeToken<List<QuestionTestAddVO>>(){}.getType();
+//        if (StringUtils.isNotBlank(questionListStr)) {
+//            try {
+//                questionListObject = GSON.fromJson(questionListStr, listType);
+//                for (Object o : questionListObject) {
+//                    if (o != null) {
+//                        String json = GSON.toJson(o, Object.class);
+//                        QuestionTestAddVO questionTestAddVO = GSON.fromJson(json, QuestionTestAddVO.class);
+//                        questionList.add(questionTestAddVO);
+//                    }
+//                }
+//                // 如果转换成功，这里会执行
+//                System.out.println("Conversion successful: " + questionListStr);
+//            } catch (JsonSyntaxException e) {
+//                // 如果转换失败，这里会捕获异常并执行
+//                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入编程题列表格式错误");
+//            }
+//        }
         int sumScoreNow = 0;
-        for (QuestionTestAddVO questionTestAddVO : questionList) {
-            sumScoreNow += questionTestAddVO.getScore();
+        for (QuestionTestAddBackendVO questionTestAddBackendVO : questionList) {
+            sumScoreNow += Integer.parseInt(questionTestAddBackendVO.getScore());
         }
         Test test = new Test();
         BeanUtils.copyProperties(testAddRequest, test);
@@ -171,11 +167,12 @@ public class TestController {
             testQuestion.setType(QuestionTypeEnum.CHOICE_QUESTION.getValue());
             testQuestionList.add(testQuestion);
         }
-        for (QuestionTestAddVO questionTestAddVO : questionList) {
+        for (QuestionTestAddBackendVO questionTestAddVO : questionList) {
             TestQuestion testQuestionProgram = new TestQuestion();
             testQuestionProgram.setTestId(testId);
             testQuestionProgram.setQuestionId(questionTestAddVO.getId());
             BeanUtils.copyProperties(questionTestAddVO, testQuestionProgram);
+            testQuestionProgram.setScore(Integer.parseInt(questionTestAddVO.getScore()));
             testQuestionProgram.setType(QuestionTypeEnum.PROGRAMMING_QUESTION.getValue());
             testQuestionList.add(testQuestionProgram);
         }
@@ -250,9 +247,9 @@ public class TestController {
     @PostMapping("/list/simple")
     public BaseResponse<List<Test>> listTestSimple(
                                              HttpServletRequest request) {
-        if (!userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
+//        if (!userService.isAdmin(request)) {
+//            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+//        }
         List<Test> testList = testService.list(new QueryWrapper<>());
         return ResultUtils.success(testList);
     }
@@ -265,9 +262,9 @@ public class TestController {
      */
     @PostMapping("/list/mine")
     public BaseResponse<List<MyTestVO>> listTestVOMine(HttpServletRequest request) {
-        if (!userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
+//        if (userService.getLoginUser(request) != null) {
+//            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+//        }
         Long id = userService.getLoginUser(request).getId();
         QueryWrapper<TestUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", id);

@@ -100,6 +100,7 @@ public class JudgeServiceImpl implements JudgeService {
                 judgeInfo.setMessage(JudgeInfoMessageEnum.RUNTIME_ERROR.getValue());
                 judgeInfo.setMemory(executeCodeResponse.getJudgeInfo().getMemory());
                 judgeInfo.setTime(executeCodeResponse.getJudgeInfo().getTime());
+                judgeInfo.setDetailErrorMessage(executeCodeResponse.getMessage());
             }
         } else {
             //选择策略

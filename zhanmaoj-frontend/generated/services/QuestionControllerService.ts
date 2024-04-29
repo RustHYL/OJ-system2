@@ -415,7 +415,7 @@ questionSubmitQueryRequest: QuestionSubmitQueryAdminRequest,
      * @returns any Created
      * @throws ApiError
      */
-        public static listQuestionSubmitByPageUsingPost(
+    public static listQuestionSubmitByPageUsingPost(
 questionSubmitQueryRequest: QuestionSubmitQueryRequest,
 ): CancelablePromise<BaseResponse_Page_QuestionSubmitVO_ | any> {
         return __request(OpenAPI, {

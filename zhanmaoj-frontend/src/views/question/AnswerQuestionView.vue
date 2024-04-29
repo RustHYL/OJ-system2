@@ -169,7 +169,6 @@ const doSubmit = async () => {
       pollActive = false;
     }
   }
-
   // 判题完成后，获取完整的判题结果
   const finalResultRes = await QuestionControllerService.getQuestionSubmitVoUsingGet(submitId.value);
   console.log("finalResultRes:", finalResultRes);

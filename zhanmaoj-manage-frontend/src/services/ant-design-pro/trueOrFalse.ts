@@ -33,7 +33,7 @@ export async function updateTrueOrFalseInfo(
 
 /** 删除用户信息  POST /api/trueOrFalse/delete */
 export async function deleteTrueOrFalseInfo(
-    id?: number,
+    id?: string,
     options?: { [key: string]: any }
 ) {
     return request<API.BaseResponse<boolean>>('/api/trueOrFalse/delete', {
@@ -76,7 +76,7 @@ export async function searchTestTrueOrFalse(
 }
 
 export async function deleteTestTrueOrFalse(
-  id?: number,
+  id?: string,
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponse<boolean>>('/api/trueOrFalse/test/delete', {
@@ -95,7 +95,7 @@ export async function updateTestTrueOrFalse(
   return request<API.BaseResponse<boolean>>('/api/trueOrFalse/test/update', {
     method: 'POST',
     data: {
-      trueOrFalseTestUpdateRequest
+      ...trueOrFalseTestUpdateRequest
     },
     ...(options || {})
   });
@@ -109,7 +109,7 @@ export async function addTestTrueOrFalse(
   return request<API.BaseResponse<boolean>>('/api/trueOrFalse/test/add', {
     method: 'POST',
     data: {
-      trueOrFalseTestAddRequest
+      ...trueOrFalseTestAddRequest
     },
     ...(options || {})
   });

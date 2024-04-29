@@ -92,3 +92,10 @@ cos:
 # 代码沙箱配置
 codesandbox:
   type: remote
+
+# 短信
+
+sms:
+  accountId: 2c94811c8cd4da0a018f01ed0c9869f1
+  authToken: a45d7168b55945408bd0f5a900a467d7
+  appId: 2c94811c8cd4da0a018f01f0bd9c69fb

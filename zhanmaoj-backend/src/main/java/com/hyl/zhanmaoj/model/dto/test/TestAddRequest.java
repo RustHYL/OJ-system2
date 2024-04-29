@@ -2,10 +2,12 @@ package com.hyl.zhanmaoj.model.dto.test;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hyl.zhanmaoj.model.vo.QuestionTestAddBackendVO;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 创建请求
@@ -62,7 +64,7 @@ public class TestAddRequest implements Serializable {
 
     private Integer choiceQuestionPerScore;
 
-    private String questionList;
+    private List<QuestionTestAddBackendVO> questionList;
 
     private static final long serialVersionUID = 1L;
 }

@@ -33,7 +33,7 @@ export async function updateTestSubmitInfo(
 
 /** 删除用户信息  POST /api/test/delete */
 export async function deleteTestSubmitInfo(
-  id?: number,
+  id?: string,
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponse<boolean>>('/api/test/test_submit/delete', {

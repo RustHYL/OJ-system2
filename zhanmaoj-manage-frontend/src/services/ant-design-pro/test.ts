@@ -33,7 +33,7 @@ export async function updateTestInfo(
 
 /** 删除用户信息  POST /api/test/delete */
 export async function deleteTestInfo(
-    id?: number,
+    id?: string,
     options?: { [key: string]: any }
 ) {
     return request<API.BaseResponse<boolean>>('/api/test/delete', {
@@ -47,13 +47,13 @@ export async function deleteTestInfo(
 
 
 export async function addTest(
-    testAdminVo?: API.TestAdminVo,
+    testAddRequest?: API.TestAddRequest,
     options?: { [key: string]: any }
 ) {
     return request<API.BaseResponse<number>>('/api/test/add', {
         method: 'POST',
         data: {
-            ...testAdminVo
+            ...testAddRequest
         },
         ...(options || {})
     });

@@ -1,9 +1,10 @@
-import {PlusOutlined} from '@ant-design/icons';
+import {MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   ModalForm,
   PageContainer,
   ProDescriptions,
+  ProFormList,
   ProFormText,
   ProFormTextArea,
   ProTable, TableDropdown,
@@ -20,7 +21,7 @@ import {history} from "@umijs/max";
 
 
 
-const handleAdd = async (fields: API.TestAdminVo) => {
+const handleAdd = async (fields: API.TestAddRequest) => {
   const hide = message.loading('正在添加');
   try {
     await addTest({
@@ -234,15 +235,6 @@ const TableList: React.FC = () => {
         >
           更新
         </a>,
-        // <Link
-        //     key="detail"
-        //     to={{
-        //       pathname: '/test/detail', // 指定目标页面的路径
-        //       search: `?id=${record.id}`, // 将record.id作为查询参数传递
-        //     }}
-        // >
-        //   详情
-        // </Link>,
         <a
             key="delete"
             onClick={async () => {
@@ -335,8 +327,9 @@ const TableList: React.FC = () => {
         open={createModalOpen}
         onOpenChange={handleModalOpen}
         onFinish={async (value) => {
-          const success = await handleAdd(value as API.TestAddRequest);
-          if (success) {
+          console.log("value: ", value);
+          const res = await handleAdd(value as API.TestAddRequest);
+          if (res) {
             handleModalOpen(false);
             if (actionRef.current) {
               actionRef.current.reload();
@@ -366,7 +359,7 @@ const TableList: React.FC = () => {
         />
         <ProFormDigit
           label="做题时间"
-          name="examTIme"
+          name="examTime"
           width="sm"
           min={0}
           max={1000}
@@ -399,15 +392,54 @@ const TableList: React.FC = () => {
             min={0}
             max={20}
         />
-        <ProFormTextArea
-            name="questionList"
-            width="md"
-            tooltip={"[  \n" +
-              "  {\"id\": 1730853831375450113, \"score\": 20},\n" +
-              "  {\"id\": 1730853941824057345, \"score\": 30}\n" +
-              "]"}
-            label={'编程题'}
-        />
+          <ProFormList
+              name="questionList"
+              label="编程题"
+              initialValue={[]}
+              creatorButtonProps={{
+                  creatorButtonText: '添加题目',
+              }}
+              deleteIconProps={false}
+              copyIconProps={ false  }
+              itemRender={({ listDom, action }, { record }) => {
+                return (<>
+                      {listDom}
+                </>
+                );
+              }}
+          >
+            {(meta,index,action,count)=>{
+              return (<div
+                  style={{
+                    display: 'flex',
+                    marginBottom: 8,
+                    alignItems: 'center',
+                  }}
+              >
+                <div>
+                  <ProFormText
+                      name="id" // 使用数组形式的name属性
+                      label="题目ID"
+                      width="md"
+                      rules={[{ required: true, message: '请输入题目ID' }]}
+                  />
+                  <ProFormText
+                      name="score" // 使用数组形式的name属性
+                      label="题目分数"
+                      width="md"
+                      rules={[{ required: true, message: '请输入题目分数' }]}
+                  />
+                </div>
+                <MinusCircleOutlined
+                    onClick={() =>{
+                      action.remove?.(index)
+                    }}
+                    style={{ margin: '0 8px', color: 'red', fontSize: '24px', cursor: 'pointer' }}
+                />
+              </div>)
+
+            }}
+          </ProFormList>
       </ModalForm>
       <UpdateForm
         onSubmit={async (value) => {

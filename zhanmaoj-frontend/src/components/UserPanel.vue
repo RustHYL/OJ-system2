@@ -57,10 +57,13 @@
     RequestOption,
   } from '@arco-design/web-vue/es/upload/interfaces';
   import {useStore} from "vuex";
-  import { userUploadApi } from '@/api/user-center';
   import type { DescData } from '@arco-design/web-vue/es/descriptions/interface';
+  import {FileControllerService, UserControllerService} from "../../generated";
+  import message from "@arco-design/web-vue/es/message";
 
   const store = useStore();
+
+  const avatarUrl = ref('');
   const file = {
     uid: '-2',
     name: 'avatar.png',
@@ -123,16 +126,20 @@
       };
 
       try {
-        // https://github.com/axios/axios/issues/1630
-        // https://github.com/nuysoft/Mock/issues/127
-        console.log("form========" + JSON.stringify(formData));
-        console.log("con========" +JSON.stringify(controller));
-        console.log("upload========" +onUploadProgress);
-
-        // const res = await userUploadApi(formData, {
-        //   controller,
-        //   onUploadProgress,
-        // });
+        const res = await FileControllerService.uploadFileUsingPost("user_avatar",formData.get("file"));
+        if (res.code === 0){
+          avatarUrl.value = res.data;
+          console.log("url:" + avatarUrl.value)
+          const resUpdate = await UserControllerService.updateMyAvatarUrlUsingPost(avatarUrl.value);
+          if (resUpdate.code === 0){
+            message.success("修改成功")
+            window.location.reload()
+          } else {
+            message.error(res.message)
+          }
+        } else {
+          message.error(res.message)
+        }
         onSuccess(res);
       } catch (error) {
         onError(error);
