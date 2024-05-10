@@ -12,10 +12,10 @@ const JudgeInfoComponent: React.FC<Props> = ({ judgeInfo }) => {
               <strong>Message:</strong> {judgeInfo.message}
             </li>
             <li style={{textAlign: 'left'}}>
-              <strong>Memory:</strong> {judgeInfo.memory}
+              <strong>Memory:</strong> {judgeInfo.memory}Byte
             </li>
             <li style={{textAlign: 'left'}}>
-              <strong>Time:</strong> {judgeInfo.time}
+              <strong>Time:</strong> {judgeInfo.time} ms
             </li>
           </ul>
         </div>

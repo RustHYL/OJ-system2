@@ -192,6 +192,29 @@ testId?: string,
     }
 
     /**
+     * GetWrongTestDetail
+     * @param testId testId
+     * @returns BaseResponse_TestVO_ OK
+     * @throws ApiError
+     */
+    public static getWrongTestDetailUsingGet(
+testId?: string,
+): CancelablePromise<BaseResponse_TestVO_> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/test/get/wrong/detail',
+            query: {
+                'testId': testId,
+            },
+            errors: {
+                401: `Unauthorized`,
+                403: `Forbidden`,
+                404: `Not Found`,
+            },
+        });
+    }
+
+    /**
      * JoinTest
      * @param testJoinRequest testJoinRequest
      * @returns BaseResponse_boolean_ OK

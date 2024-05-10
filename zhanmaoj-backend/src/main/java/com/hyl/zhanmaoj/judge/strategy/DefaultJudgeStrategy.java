@@ -36,18 +36,12 @@ public class DefaultJudgeStrategy implements JudgeStrategy {
             JudgeCase judgeCase = judgeCaseList.get(i);
             String output = judgeCase.getOutput();
             String standardOutput = outputList.get(i).trim();
-//            if (!judgeCase.getOutput().equals(outputList.get(i))) {
-//                judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
-//                judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
-//                return judgeInfoResponse;
-//            }
             if (!output.equals(standardOutput)) {
                 judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
                 judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
                 return judgeInfoResponse;
             }
         }
-
         //判断题目的限制
         String judgeConfigStr = question.getJudgeConfig();
         JudgeConfig judgeConfig = JSONUtil.toBean(judgeConfigStr, JudgeConfig.class);

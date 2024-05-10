@@ -33,6 +33,11 @@
         <template #expiredTime="{ record }">
           {{moment(record.expiredTime).format("YYYY-MM-DD")}}
         </template>
+        <template #optional="{ record }">
+          <a-space>
+            <a-button type="primary" @click="toTestPage(record)">查看</a-button>
+          </a-space>
+        </template>
       </a-table>
     </div>
   </div>
@@ -140,6 +145,9 @@ const columns = [
     ellipsis: true,
     tooltip: true,
   },
+  {
+    slotName: "optional",
+  },
 ];
 
 const onPageChange = (page: number) => {
@@ -150,6 +158,12 @@ const onPageChange = (page: number) => {
 };
 
 const router = useRouter();
+
+const toTestPage = (test: any) => {
+  router.push({
+    path: `/collect/test/wrong/do/${test.id}`, // 使用模板字符串来插入参数
+  })
+}
 
 </script>
 

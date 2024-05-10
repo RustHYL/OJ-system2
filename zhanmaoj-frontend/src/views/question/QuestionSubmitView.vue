@@ -46,8 +46,8 @@
       >
         <template #judgeInfo="{ record }">
           <div>判题信息:{{record.judgeInfo.message}}</div>
-          <div>内存消耗:{{record.judgeInfo.memory}}</div>
-          <div>时间消耗:{{record.judgeInfo.time}}</div>
+          <div>内存消耗:{{record.judgeInfo.memory}}Byte</div>
+          <div>时间消耗:{{record.judgeInfo.time}}ms</div>
         </template>
         <template #createTime="{ record }">
           {{moment(record.createTime).format("YYYY-MM-DD")}}
@@ -124,7 +124,7 @@ const columns = [
     dataIndex: "language",
   },
   {
-    title: "判题信息",
+    title: "判题结果信息",
     slotName: "judgeInfo",
   },
   {

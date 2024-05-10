@@ -14,15 +14,7 @@
         :key="test.id"
         action-layout="horizontal"
       >
-<!--          <a-row :gutter="6">-->
-<!--            <a-col :span="6">-->
-<!--              <a-skeleton-shape shape="circle" />-->
-<!--            </a-col>-->
-<!--            <a-col :span="16">-->
-<!--              <a-skeleton-line :widths="['100%', '40%']" :rows="2" />-->
-<!--            </a-col>-->
-<!--          </a-row>-->
-        <a-list-item-meta :title="test.title">
+        <a-list-item-meta :title="test.title" @click="handleClick(test)" style="cursor: pointer">
           <template #description> 共{{ test.questionNum }}题    得分:{{test.score}}</template>
         </a-list-item-meta>
       </a-list-item>
@@ -34,6 +26,9 @@
   import {TestControllerService} from "../../generated";
   import message from "@arco-design/web-vue/es/message";
   import {ref, onMounted} from "vue";
+  import {useRouter} from "vue-router";
+
+  const router = useRouter();
 
   const testVOList: any = ref([]);
   const loadData = async () => {
@@ -44,6 +39,12 @@
       message.error("加载失败，" + res.message);
     }
   };
+
+  const handleClick = (test: any) => {
+    router.push({
+      path: `/collect/test/wrong/do/${test.id}`, // 使用模板字符串来插入参数
+    })
+  }
 
   onMounted(() => {
     loadData();

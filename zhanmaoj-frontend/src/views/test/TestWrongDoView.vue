@@ -2,7 +2,7 @@
   <div class="maxBox">
     <div class="treeBox">
       <p style="font-weight: 700;color: #505050;display: flex;justify-content: space-between;line-height: 40px;margin: 0;border-bottom: 1px solid #eee;">
-        <span>题目 {{examTimeShow}}</span>
+        <span>题目</span>
         <span>总分数:{{ totalScore }}</span>
       </p>
       <div style="height: calc(100% - 40px);overflow: auto">
@@ -54,7 +54,7 @@
         <div class="question" v-if="selectedType === 'question'">
           <MarkDownViewer :value="selectedTree.content || ''"/>
           <div class="submit">
-            <a-button type="primary" @click="doQuestionSubmit">提交本题作答</a-button>
+            <a-button type="primary" @click="doQuestionSubmit" disabled>提交本题作答</a-button>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@
         </div>
       </div>
       <div class="submit">
-        <a-button type="primary" @click="doSubmit">提交试卷</a-button>
+        <a-button type="primary" @click="doSubmit" disabled>提交试卷</a-button>
       </div>
     </div>
   </div>
@@ -138,28 +138,28 @@ const handleCloseEvent = () => {
   questionSubmitResult.value = undefined
 };
 
-function changeTime(){
-
-  let time = examTime.value
-  let min = Math.floor(time / 60)
-  let sec = Math.floor(time % 60)
-  examTimeShow.value = (min < 10 ? ('0' + min) : min) + ':' + (sec < 10 ? ('0' + sec) : sec)
-  examTime.value --
-  if (min === 0 && sec === 0) {
-    message.info('考试时间到，自动提交试卷')
-    doSubmit()
-    return
-  }else{
-    setTimeout(changeTime, 1000)
-  }
-}
+// function changeTime(){
+//
+//   let time = examTime.value
+//   let min = Math.floor(time / 60)
+//   let sec = Math.floor(time % 60)
+//   examTimeShow.value = (min < 10 ? ('0' + min) : min) + ':' + (sec < 10 ? ('0' + sec) : sec)
+//   examTime.value --
+//   if (min === 0 && sec === 0) {
+//     message.info('考试时间到，自动提交试卷')
+//     doSubmit()
+//     return
+//   }else{
+//     setTimeout(changeTime, 1000)
+//   }
+// }
 
 async function getTest() {
   let testId = route.params.id
-  const res = await TestControllerService.getTestDetailUsingGet(testId)
+  const res = await TestControllerService.getWrongTestDetailUsingGet(testId)
   console.log(res.data)
   examTime.value = res.data?.examTime * 60
-  changeTime()
+  // changeTime()
   let choiceQuestionTestDetailVOS = res.data?.choiceQuestionTestDetailVOS
   let trueOrFalseTestDetailVOS = res.data?.trueOrFalseTestDetailVOS
   let questionTestDetailVOS = res.data?.questionTestDetailVOS
@@ -167,14 +167,14 @@ async function getTest() {
   choiceQuestionTestDetailVOS?.forEach(item => {
     myChoiceAnswer.value.push({
       id:item.id,
-      value: 0
+      value: item.answer
     })
     item.id = 'choice' + item.id
   })
   trueOrFalseTestDetailVOS?.forEach(item => {
     myTrueOrFalseAnswer.value.push({
       id:item.id,
-      value: 0
+      value: item.answer
     })
     item.id = 'trueOrFalse' + item.id
   })
@@ -277,21 +277,6 @@ const changeShowForm = () => {
 };
 
 async function doQuestionSubmit() {
-  // if (!questionId.value) {
-  //   return;
-  // }
-  // const res = await QuestionControllerService.doQuestionTestSubmitUsingPost({
-  //   ...form.value,
-  //   questionId: questionId.value as any,
-  // });
-  // if (res.code === 0) {
-  //   message.success("提交成功," + res.message);
-  //   form.value.code = '';
-  // } else {
-  //   message.error("提交失败，" + res.message);
-  // }
-
-
   if (!questionId.value) {
     return;
   }
@@ -305,7 +290,7 @@ async function doQuestionSubmit() {
     message.error("提交失败，" + res.message);
   }
   submitId.value = res.data;
-
+  
   console.log("submitId:" + submitId.value)
   // 开始轮询判题结果，直到完成或出错
   let result = null;
@@ -339,6 +324,11 @@ async function doQuestionSubmit() {
   console.log("finalResultRes:", finalResultRes);
   if (finalResultRes.code === 0) {
     questionSubmitResult.value = finalResultRes.data;
+    if (questionSubmitResult.value?.judgeInfo?.message === "Accepted") {
+      await QuestionWrongControllerService.deleteQuestionWrongUsingPost({
+        id: submitId.value
+      })
+    }
     changeShowForm(); // 判题完成后调用
   } else {
     message.error("获取判题结果失败，" + finalResultRes.message);

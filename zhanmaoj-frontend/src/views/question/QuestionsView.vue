@@ -57,6 +57,7 @@ import {Question, QuestionControllerService, QuestionQueryRequest,} from "../../
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
+import {useStore} from "vuex";
 
 const tableRef = ref();
 
@@ -130,8 +131,9 @@ const onPageChange = (page: number) => {
 
 
 const router = useRouter();
-
+const store = useStore();
 const toQuestionPage = (question: Question) => {
+  store.state.questionWrong = "";
   router.push({
     path: `/question/answer/${question.id}`,
   });

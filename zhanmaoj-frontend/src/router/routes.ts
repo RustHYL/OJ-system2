@@ -17,6 +17,7 @@ import AnswerQuestionView from "@/views/question/AnswerQuestionView.vue";
 import TestView from "@/views/test/TestCardView.vue";
 import TestScoreView from "@/views/test/TestScoreView.vue";
 import TestDoView from "@/views/test/TestDoView.vue";
+import TestWrongDoView from "@/views/test/TestWrongDoView.vue";
 import MyTestView from "@/views/test/MyTestView.vue";
 
 
@@ -153,6 +154,14 @@ export const routes: Array<RouteRecordRaw> = [
     {
         path: '/collect/test/do/:id',
         component: TestDoView,
+        props: true,
+        meta: {
+            hideInMenu: true
+        }
+    },
+    {
+        path: '/collect/test/wrong/do/:id',
+        component: TestWrongDoView,
         props: true,
         meta: {
             hideInMenu: true

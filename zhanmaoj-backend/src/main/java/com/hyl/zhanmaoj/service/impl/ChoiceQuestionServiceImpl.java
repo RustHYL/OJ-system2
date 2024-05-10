@@ -10,10 +10,7 @@ import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.model.dto.choicequestion.ChoiceQuestionQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.choicequestion.ChoiceQuestionQueryRequest;
-import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
-import com.hyl.zhanmaoj.model.entity.TestQuestion;
-import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
-import com.hyl.zhanmaoj.model.entity.User;
+import com.hyl.zhanmaoj.model.entity.*;
 import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
 import com.hyl.zhanmaoj.model.enums.TrueOrFalseAnswerEnum;
 import com.hyl.zhanmaoj.model.vo.ChoiceQuestionTestDetailVO;
@@ -22,6 +19,7 @@ import com.hyl.zhanmaoj.model.vo.ChoiceQuestionVO;
 import com.hyl.zhanmaoj.model.vo.UserVO;
 import com.hyl.zhanmaoj.service.ChoiceQuestionService;
 import com.hyl.zhanmaoj.mapper.ChoiceQuestionMapper;
+import com.hyl.zhanmaoj.service.ChoiceQuestionSubmitService;
 import com.hyl.zhanmaoj.service.TestQuestionService;
 import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
@@ -29,6 +27,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -52,6 +51,10 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
 
     @Resource
     private ChoiceQuestionMapper choiceQuestionMapper;
+
+    @Resource
+    @Lazy
+    private ChoiceQuestionSubmitService choiceQuestionSubmitService;
 
     @Resource
     private TestQuestionService testQuestionService;
@@ -218,6 +221,37 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
             BeanUtils.copyProperties(choiceQuestion, choiceQuestionTestDetailVO);
             choiceQuestionTestDetailVO.setScore(testQuestion.getScore());
             choiceQuestionTestDetailVO.setAnswer(0);
+            choiceQuestionTestDetailVOList.add(choiceQuestionTestDetailVO);
+        });
+
+        return choiceQuestionTestDetailVOList;
+    }
+
+    @Override
+    public List<ChoiceQuestionTestDetailVO> getChoiceQuestonWrongTestDetailList(long testId, HttpServletRequest request) {
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", testId);
+        queryWrapper.eq("type", QuestionTypeEnum.CHOICE_QUESTION.getValue());
+        List<ChoiceQuestionTestDetailVO> choiceQuestionTestDetailVOList = new ArrayList<>();
+        List<TestQuestion> testQuestionList = testQuestionService.list(queryWrapper);
+        if (CollectionUtils.isEmpty(testQuestionList)) {
+            return choiceQuestionTestDetailVOList;
+        }
+        testQuestionList.forEach(testQuestion -> {
+            ChoiceQuestionTestDetailVO choiceQuestionTestDetailVO = new ChoiceQuestionTestDetailVO();
+            ChoiceQuestion choiceQuestion = this.getById(testQuestion.getQuestionId());
+            BeanUtils.copyProperties(choiceQuestion, choiceQuestionTestDetailVO);
+            choiceQuestionTestDetailVO.setScore(testQuestion.getScore());
+            QueryWrapper<ChoiceQuestionSubmit> choiceQuestionSubmitQueryWrapper = new QueryWrapper<>();
+            choiceQuestionSubmitQueryWrapper.eq("userId", userService.getLoginUser(request).getId());
+            choiceQuestionSubmitQueryWrapper.eq("questionId", choiceQuestion.getId());
+            choiceQuestionSubmitQueryWrapper.eq("testId", testId);
+            ChoiceQuestionSubmit choiceQuestionSubmit = choiceQuestionSubmitService.getOne(choiceQuestionSubmitQueryWrapper);
+            if (choiceQuestionSubmit == null) {
+                choiceQuestionTestDetailVO.setAnswer(0);
+            } else {
+                choiceQuestionTestDetailVO.setAnswer(choiceQuestionSubmit.getAnswer());
+            }
             choiceQuestionTestDetailVOList.add(choiceQuestionTestDetailVO);
         });
 

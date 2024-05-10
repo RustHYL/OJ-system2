@@ -1,10 +1,13 @@
 package com.hyl.zhanmaoj.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.hyl.zhanmaoj.common.BaseResponse;
+import com.hyl.zhanmaoj.common.DeleteRequest;
 import com.hyl.zhanmaoj.common.ErrorCode;
 import com.hyl.zhanmaoj.common.ResultUtils;
+import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.model.dto.questionWrong.QuestionWrongQueryRequest;
 import com.hyl.zhanmaoj.model.entity.QuestionWrong;
@@ -66,6 +69,19 @@ public class QuestionWrongController {
         return ResultUtils.success(questionWrongService.getQuestionWrongVOPage(questionWrongPage, request));
     }
 
-
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteQuestionWrong(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        Long submitId = deleteRequest.getId();
+        if (submitId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<QuestionWrong> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("submitId", submitId);
+        boolean remove = questionWrongService.remove(queryWrapper);
+        if (!remove) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        return ResultUtils.success(true);
+    }
 
 }

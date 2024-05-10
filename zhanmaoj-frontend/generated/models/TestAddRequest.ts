@@ -3,6 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { QuestionTestAddBackendVO } from './QuestionTestAddBackendVO';
+
 export type TestAddRequest = {
     beginTime?: string;
     choiceQuestionNum?: number;
@@ -11,7 +13,7 @@ export type TestAddRequest = {
     examTime?: number;
     expiredTime?: string;
     password?: string;
-    questionList?: string;
+    questionList?: Array<QuestionTestAddBackendVO>;
     status?: number;
     title?: string;
     trueOrFalseNum?: number;

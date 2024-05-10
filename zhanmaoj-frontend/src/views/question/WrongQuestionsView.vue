@@ -59,6 +59,7 @@ import {
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
+import {useStore} from "vuex";
 
 const tableRef = ref();
 
@@ -132,12 +133,16 @@ const onPageChange = (page: number) => {
   };
 };
 
-
+const store = useStore()
 const router = useRouter();
 
 const toQuestionPage = (questionWrongVO: QuestionWrongVO) => {
+  store.state.questionWrong = questionWrongVO;
   router.push({
     path: `/question/answer/${questionWrongVO.questionId}`,
+    // query: {
+    //   code: questionWrongVO.code,
+    // },
   });
 };
 

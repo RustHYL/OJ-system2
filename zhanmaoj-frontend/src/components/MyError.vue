@@ -15,7 +15,7 @@
         :xxl="8"
         class="my-project-item"
       >
-        <a-card size="small" @click="goToQuestion(questionWrong.questionId)">
+        <a-card size="small" @click="goToQuestion(questionWrong)">
           <a-space direction="vertical">
             <a-typography-text bold>{{ questionWrong.submitId }}</a-typography-text>
             <a-typography-text type="secondary">
@@ -32,13 +32,14 @@
 </template>
 
 <script lang="ts" setup>
-import {QuestionWrongControllerService} from "../../generated";
+import {QuestionWrongControllerService, QuestionWrongVO} from "../../generated";
 import message from "@arco-design/web-vue/es/message";
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
+import {useStore} from "vuex";
 
 const router = useRouter();
-
+const store = useStore()
 const dataList = ref([]);
   const total = ref(0);
   const searchParams = ref({
@@ -62,8 +63,9 @@ const loadData = async () => {
     loadData();
   });
 
-  const goToQuestion = (id: number) => {
-    router.push({path: `/question/answer/${id}`})
+  const goToQuestion = (questionWrong: QuestionWrongVO) => {
+    store.state.questionWrong = questionWrong
+    router.push({path: `/question/answer/${questionWrong.questionId}`})
   }
 
 

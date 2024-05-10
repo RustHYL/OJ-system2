@@ -9,22 +9,21 @@ import com.hyl.zhanmaoj.exception.BusinessException;
 import com.hyl.zhanmaoj.exception.ThrowUtils;
 import com.hyl.zhanmaoj.model.dto.trueorfalse.TrueOrFalseQueryAdminRequest;
 import com.hyl.zhanmaoj.model.dto.trueorfalse.TrueOrFalseQueryRequest;
-import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
-import com.hyl.zhanmaoj.model.entity.TestQuestion;
-import com.hyl.zhanmaoj.model.entity.TrueOrFalse;
-import com.hyl.zhanmaoj.model.entity.User;
+import com.hyl.zhanmaoj.model.entity.*;
 import com.hyl.zhanmaoj.model.enums.QuestionTypeEnum;
 import com.hyl.zhanmaoj.model.enums.TrueOrFalseAnswerEnum;
 import com.hyl.zhanmaoj.model.vo.*;
 import com.hyl.zhanmaoj.service.TestQuestionService;
 import com.hyl.zhanmaoj.service.TrueOrFalseService;
 import com.hyl.zhanmaoj.mapper.TrueOrFalseMapper;
+import com.hyl.zhanmaoj.service.TrueOrFalseSubmitService;
 import com.hyl.zhanmaoj.service.UserService;
 import com.hyl.zhanmaoj.utils.SqlUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -49,6 +48,10 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
 
     @Resource
     private TrueOrFalseMapper trueOrFalseMapper;
+
+    @Resource
+    @Lazy
+    private TrueOrFalseSubmitService trueOrFalseSubmitService;
     
     @Resource
     private TestQuestionService testQuestionService;
@@ -196,6 +199,38 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
             BeanUtils.copyProperties(trueOrFalse, trueOrFalseTestDetailVO);
             trueOrFalseTestDetailVO.setScore(testQuestion.getScore());
             trueOrFalseTestDetailVO.setAnswer(0);
+            trueOrFalseTestDetailVOList.add(trueOrFalseTestDetailVO);
+        });
+
+        return trueOrFalseTestDetailVOList;
+    }
+
+    @Override
+    public List<TrueOrFalseTestDetailVO> getTrueOrFalseWrongTestDetailList(long testId, HttpServletRequest request) {
+        QueryWrapper<TestQuestion> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("testId", testId);
+        queryWrapper.eq("type", QuestionTypeEnum.TRUE_OR_FALSE.getValue());
+        List<TrueOrFalseTestDetailVO> trueOrFalseTestDetailVOList = new ArrayList<>();
+        List<TestQuestion> testQuestionList = testQuestionService.list(queryWrapper);
+        if (CollectionUtils.isEmpty(testQuestionList)) {
+            return trueOrFalseTestDetailVOList;
+        }
+        testQuestionList.forEach(testQuestion -> {
+            TrueOrFalseTestDetailVO trueOrFalseTestDetailVO = new TrueOrFalseTestDetailVO();
+            TrueOrFalse trueOrFalse = this.getById(testQuestion.getQuestionId());
+            BeanUtils.copyProperties(trueOrFalse, trueOrFalseTestDetailVO);
+            trueOrFalseTestDetailVO.setScore(testQuestion.getScore());
+            //答案
+            QueryWrapper<TrueOrFalseSubmit> trueOrFalseSubmitQueryWrapper = new QueryWrapper<>();
+            trueOrFalseSubmitQueryWrapper.eq("questionId", testQuestion.getQuestionId());
+            trueOrFalseSubmitQueryWrapper.eq("userId", userService.getLoginUser(request).getId());
+            trueOrFalseSubmitQueryWrapper.eq("testId", testId);
+            TrueOrFalseSubmit one = trueOrFalseSubmitService.getOne(trueOrFalseSubmitQueryWrapper);
+            if (one == null) {
+                trueOrFalseTestDetailVO.setAnswer(0);
+            }else {
+                trueOrFalseTestDetailVO.setAnswer(one.getAnswer());
+            }
             trueOrFalseTestDetailVOList.add(trueOrFalseTestDetailVO);
         });
 

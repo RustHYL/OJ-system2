@@ -74,6 +74,13 @@ public interface TrueOrFalseService extends IService<TrueOrFalse> {
     List<TrueOrFalseTestDetailVO> getTrueOrFalseTestDetailList(long testId);
 
     /**
+     * 获取错误试卷判断题题目信息列表
+     * @param testId
+     * @return
+     */
+    List<TrueOrFalseTestDetailVO> getTrueOrFalseWrongTestDetailList(long testId, HttpServletRequest request);
+
+    /**
      * 获取题目id type title列表
      * @param testId
      * @return

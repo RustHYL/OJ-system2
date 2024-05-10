@@ -3,14 +3,12 @@ package com.hyl.zhanmaojcodesandbox;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
-import com.hyl.zhanmaojcodesandbox.model.ExecuteCodeRequest;
-import com.hyl.zhanmaojcodesandbox.model.ExecuteCodeResponse;
-import com.hyl.zhanmaojcodesandbox.model.ExecuteMessage;
-import com.hyl.zhanmaojcodesandbox.model.JudgeInfo;
+import com.hyl.zhanmaojcodesandbox.model.*;
 import com.hyl.zhanmaojcodesandbox.utils.ProcessUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +28,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
 
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
+        System.out.println(executeCodeRequest);
         List<String> inputList = executeCodeRequest.getInputList();
         String code = executeCodeRequest.getCode();
         String language = executeCodeRequest.getLanguage();
@@ -64,7 +63,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
         //把用户代码隔离存放
         String userCodeParentPath = globalCodePath + File.separator + UUID.randomUUID();
         String userCodePath = userCodeParentPath + File.separator + Global_JAVA_CODE_NAME;
-        File userCodeFile = FileUtil.writeUtf8String(code, userCodePath);
+        File userCodeFile = FileUtil.writeString(code, userCodePath, StandardCharsets.UTF_8);
         return userCodeFile;
     }
 
@@ -79,11 +78,10 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
             Process compileProcess = Runtime.getRuntime().exec(compileCmd);
             ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(compileProcess, "编译");
             if (executeMessage.getExitValue() != 0){
-                throw new RuntimeException("编译错误");
+                throw new RuntimeException("compile error");
             }
             return executeMessage;
         } catch (Exception e) {
-//            return this.getErrorResponse(e);
             throw new RuntimeException(e);
         }
     }
@@ -110,7 +108,6 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
                         runProcess.destroy();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
-                        //return this.getErrorResponse(e);
                     }
                 }).start();
                 ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
@@ -141,14 +138,14 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
             if (StrUtil.isNotBlank(errorMessage)) {
                 executeCodeResponse.setMessage(errorMessage);
                 //用户提交的代码错误
-                executeCodeResponse.setStatus(3);
+                executeCodeResponse.setStatus(QuestionSubmitStatusEnum.FAILED.getValue());
                 break;
             }
             outputList.add(executeMessage.getMessage());
         }
         executeCodeResponse.setOutputList(outputList);
         if (outputList.size() == executeMessageList.size()) {
-            executeCodeResponse.setStatus(1);
+            executeCodeResponse.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
         }
         JudgeInfo judgeInfo = new JudgeInfo();
         //时间使用最大值,容易和判题标准时间作比较，进行判题
@@ -156,7 +153,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox{
         judgeInfo.setMemory(executeMessageList.stream().mapToLong(ExecuteMessage::getMemory).max().getAsLong());
         judgeInfo.setMessage(executeMessageList.stream().map(executeMessage -> {
             String errorMessage = executeMessage.getErrorMessage();
-            if (StrUtil.isBlank(errorMessage)) {
+            if (StrUtil.isNotBlank(errorMessage)) {
                 return errorMessage;
             }
             return executeMessage.getMessage();

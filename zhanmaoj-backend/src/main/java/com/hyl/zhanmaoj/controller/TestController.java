@@ -112,26 +112,7 @@ public class TestController {
         if (choiceQuestionPerScore == null) {
             choiceQuestionPerScore = 0;
         }
-//        List<Object> questionListObject = new ArrayList<>();
         List<QuestionTestAddBackendVO> questionList = testAddRequest.getQuestionList();
-//        Type listType = new TypeToken<List<QuestionTestAddVO>>(){}.getType();
-//        if (StringUtils.isNotBlank(questionListStr)) {
-//            try {
-//                questionListObject = GSON.fromJson(questionListStr, listType);
-//                for (Object o : questionListObject) {
-//                    if (o != null) {
-//                        String json = GSON.toJson(o, Object.class);
-//                        QuestionTestAddVO questionTestAddVO = GSON.fromJson(json, QuestionTestAddVO.class);
-//                        questionList.add(questionTestAddVO);
-//                    }
-//                }
-//                // 如果转换成功，这里会执行
-//                System.out.println("Conversion successful: " + questionListStr);
-//            } catch (JsonSyntaxException e) {
-//                // 如果转换失败，这里会捕获异常并执行
-//                throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入编程题列表格式错误");
-//            }
-//        }
         int sumScoreNow = 0;
         for (QuestionTestAddBackendVO questionTestAddBackendVO : questionList) {
             sumScoreNow += Integer.parseInt(questionTestAddBackendVO.getScore());
@@ -379,6 +360,26 @@ public class TestController {
         return ResultUtils.success(testVO);
     }
 
+    @GetMapping("/get/wrong/detail")
+    public BaseResponse<TestVO> GetWrongTestDetail(String testId,
+                                              HttpServletRequest request) {
+        Long id = Long.valueOf(testId);
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        TestVO testVO = new TestVO();
+        Test test = testService.getById(id);
+        //
+        BeanUtils.copyProperties(test, testVO);
+        List<ChoiceQuestionTestDetailVO> choiceQuestionTestDetailVOList = choiceQuestionService.getChoiceQuestonWrongTestDetailList(id, request);
+        List<TrueOrFalseTestDetailVO> trueOrFalseTestDetailVOList = trueOrFalseService.getTrueOrFalseWrongTestDetailList(id, request);
+        List<QuestionTestDetailVO> questionTestDetailVOList = questionService.getQuestionTestDetailList(id, request);
+        testVO.setQuestionTestDetailVOS(questionTestDetailVOList);
+        testVO.setTrueOrFalseTestDetailVOS(trueOrFalseTestDetailVOList);
+        testVO.setChoiceQuestionTestDetailVOS(choiceQuestionTestDetailVOList);
+        return ResultUtils.success(testVO);
+    }
+
     @GetMapping("/test/title")
     public BaseResponse<TestTitleVO> GetTestTitle(long testId,
                                               HttpServletRequest request) {
@@ -396,138 +397,6 @@ public class TestController {
         testTitleVO.setQuestionTitleVOS(questionTitleVOList);
         return ResultUtils.success(testTitleVO);
     }
-
-//    @PostMapping("/test_submit/do")
-//    public BaseResponse<Long> doTestSubmit(@RequestBody TestSubmitAddRequest testSubmitAddRequest,
-//                                          HttpServletRequest request) {
-//        if (testSubmitAddRequest == null || testSubmitAddRequest.getTestId() <= 0) {
-//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-//        }
-//        List<TestSingleAnswer> trueOrFalseAnswerList = testSubmitAddRequest.getTrueOrFalseAnswerList();
-//        List<TestSingleAnswer> choiceAnswerList = testSubmitAddRequest.getChoiceAnswerList();
-//        Long testId = testSubmitAddRequest.getTestId();
-//        User loginUser = userService.getLoginUser(request);
-//        Long userId = loginUser.getId();
-//        TestSubmit testSubmit = new TestSubmit();
-//        testSubmit.setTestId(testSubmitAddRequest.getTestId());
-//        testSubmit.setUserId(userId);
-//        testSubmit.setStatus(1);
-//        for (TestSingleAnswer testSingleAnswer : trueOrFalseAnswerList) {
-//            long id = testSingleAnswer.getId();
-//            Integer value = testSingleAnswer.getValue();
-//            TrueOrFalseSubmitAddRequest trueOrFalseSubmitAddRequest = new TrueOrFalseSubmitAddRequest();
-//            trueOrFalseSubmitAddRequest.setTestId(testId);
-//            trueOrFalseSubmitAddRequest.setAnswer(value);
-//            trueOrFalseSubmitAddRequest.setQuestionId(id);
-//            long submitId = trueOrFalseSubmitService.doTrueOrFalseSubmit(trueOrFalseSubmitAddRequest, loginUser);
-//            if (submitId <= 0) {
-//                throw new BusinessException(ErrorCode.OPERATION_ERROR,"判断题判题失败");
-//            }
-//        }
-//
-//        for (TestSingleAnswer testChoiceSingleAnswer : choiceAnswerList) {
-//            long id = testChoiceSingleAnswer.getId();
-//            Integer value = testChoiceSingleAnswer.getValue();
-//            ChoiceQuestionSubmitAddRequest choiceQuestionSubmitAddRequest = new ChoiceQuestionSubmitAddRequest();
-//            choiceQuestionSubmitAddRequest.setTestId(testId);
-//            choiceQuestionSubmitAddRequest.setAnswer(value);
-//            choiceQuestionSubmitAddRequest.setQuestionId(id);
-//            long submitId = choiceQuestionSubmitService.doChoiceQuestionSubmit(choiceQuestionSubmitAddRequest, loginUser);
-//            if (submitId <= 0) {
-//                throw new BusinessException(ErrorCode.OPERATION_ERROR,"选择题判题失败");
-//            }
-//        }
-//        QueryWrapper<TrueOrFalseSubmit> trueOrFalseSubmitQueryWrapper = new QueryWrapper<>();
-//        trueOrFalseSubmitQueryWrapper.eq("testId", testId);
-//        trueOrFalseSubmitQueryWrapper.eq("userId", userId);
-//        trueOrFalseSubmitQueryWrapper.eq("status", StatusEnum.TRUE.getValue());
-//        List<TrueOrFalseSubmit> trueOrFalseSubmitList = trueOrFalseSubmitService.list(trueOrFalseSubmitQueryWrapper);
-//        List<Integer> trueOrFalseScores = trueOrFalseSubmitList.stream().map(trueOrFalseSubmit -> {
-//            if (trueOrFalseSubmit != null) {
-//                Long questionId = trueOrFalseSubmit.getQuestionId();
-//                QueryWrapper<TestQuestion> testQuestionQueryWrapper = new QueryWrapper<>();
-//                testQuestionQueryWrapper.eq("testId", testId);
-//                testQuestionQueryWrapper.eq("questionId", questionId);
-//                return testQuestionService.getOne(testQuestionQueryWrapper).getScore();
-//            }
-//            return 0;
-//        }).collect(Collectors.toList());
-//        QueryWrapper<ChoiceQuestionSubmit> choiceQuestionSubmitQueryWrapper = new QueryWrapper<>();
-//        choiceQuestionSubmitQueryWrapper.eq("testId", testId);
-//        choiceQuestionSubmitQueryWrapper.eq("userId", userId);
-//        choiceQuestionSubmitQueryWrapper.eq("status",  StatusEnum.TRUE.getValue());
-//        List<ChoiceQuestionSubmit> choiceQuestionSubmitList = choiceQuestionSubmitService.list(choiceQuestionSubmitQueryWrapper);
-//        List<Integer> choiceQuestionScores = choiceQuestionSubmitList.stream().map(choiceQuestionSubmit -> {
-//            if (choiceQuestionSubmit != null) {
-//                Long questionId = choiceQuestionSubmit.getQuestionId();
-//                QueryWrapper<TestQuestion> testQuestionQueryWrapper = new QueryWrapper<>();
-//                testQuestionQueryWrapper.eq("testId", testId);
-//                testQuestionQueryWrapper.eq("questionId", questionId);
-//                return testQuestionService.getOne(testQuestionQueryWrapper).getScore();
-//            }
-//            return 0;
-//        }).collect(Collectors.toList());
-//        QueryWrapper<QuestionSubmit> questionSubmitQueryWrapper = new QueryWrapper<>();
-//        questionSubmitQueryWrapper.eq("testId", testId);
-//        questionSubmitQueryWrapper.eq("userId", userId);
-//        List<QuestionSubmit> questionSubmitList = questionSubmitService.list(questionSubmitQueryWrapper);
-//        List<Integer> questionScoreList = questionSubmitList.stream().map(questionSubmit -> {
-//            if (questionSubmit != null){
-//                String judgeInfoStr = questionSubmit.getJudgeInfo();
-//                JudgeInfo judgeInfoObj = GSON.fromJson(judgeInfoStr, JudgeInfo.class);
-//                if (Objects.equals(judgeInfoObj.getMessage(), "Accept")) {
-//                    Long questionId = questionSubmit.getQuestionId();
-//                    QueryWrapper<TestQuestion> testQuestionQueryWrapper = new QueryWrapper<>();
-//                    testQuestionQueryWrapper.eq("testId", testId);
-//                    testQuestionQueryWrapper.eq("questionId", questionId);
-//                    TestQuestion testQuestion = testQuestionService.getOne(testQuestionQueryWrapper);
-//                    return testQuestion.getScore();
-//                }
-//            }
-//            return 0;
-//        }).collect(Collectors.toList());
-//        int sum = 0;
-//        for (Integer trueOrFalseScore : trueOrFalseScores) {
-//            sum += trueOrFalseScore;
-//        }
-//        for (Integer choiceQuestionScore : choiceQuestionScores) {
-//            sum += choiceQuestionScore;
-//        }
-//        for (Integer questionScore : questionScoreList) {
-//            sum += questionScore;
-//        }
-//        QueryWrapper<TestUser> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("userId", userId);
-//        queryWrapper.eq("testId", testId);
-//        TestUser testUser = testUserService.getOne(queryWrapper);
-//        if (testUser == null) {
-//            testUser = new TestUser();
-//            testUser.setScore(sum);
-//            testUser.setTestId(testId);
-//            testUser.setUserId(userId);
-//            boolean save = testUserService.save(testUser);
-//            if (!save) {
-//                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷用户关系表保存失败");
-//            }
-//        } else {
-//            testUser.setScore(sum);
-//            boolean b = testUserService.updateById(testUser);
-//            if (!b) {
-//                throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷用户关系表更改失败");
-//            }
-//        }
-//        testSubmit.setTestId(testId);
-//        testSubmit.setUserId(userId);
-//        testSubmit.setScore(sum);
-//        testSubmit.setStatus(2);
-//        boolean save = testSubmitService.save(testSubmit);
-//        if (!save) {
-//            throw new BusinessException(ErrorCode.OPERATION_ERROR,"试卷提交保存失败");
-//        }
-//        Long id = testSubmit.getId();
-//        return ResultUtils.success(id);
-//    }
-
 
     @PostMapping("/test_submit/do")
     public BaseResponse<Long> doTestSubmit(@RequestBody TestSubmitAddRequest testSubmitAddRequest,

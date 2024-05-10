@@ -71,5 +71,7 @@ public interface ChoiceQuestionService extends IService<ChoiceQuestion> {
      */
     List<ChoiceQuestionTestDetailVO> getChoiceQuestonTestDetailList(long testId);
 
+    List<ChoiceQuestionTestDetailVO> getChoiceQuestonWrongTestDetailList(long testId, HttpServletRequest request);
+
     List<ChoiceQuestionTitleVO> getChoiceQuestonTitleList(long testId);
 }

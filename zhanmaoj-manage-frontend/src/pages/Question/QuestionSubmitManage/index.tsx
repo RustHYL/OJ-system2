@@ -52,7 +52,7 @@ const columns: ProColumns<API.QuestionSubmitAdminVo>[] = [
         ellipsis: true,
     },
     {
-        title: '判题信息',
+        title: '判题结果信息',
         dataIndex: 'judgeInfo',
         copyable: true,
         align: 'center',

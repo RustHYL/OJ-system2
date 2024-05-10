@@ -68,21 +68,23 @@ import { onMounted, ref } from "vue";
 import {
   QuestionControllerService,
   QuestionSubmitAddRequest, QuestionSubmitVO,
-  QuestionVO,
+  QuestionVO, QuestionWrongControllerService,
 } from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import CodeEditor from "@/components/CodeEditor.vue";
 import MarkDownViewer from "@/components/MarkDownViewer.vue";
 import QuestionSubmitInfoCard from "@/components/QuestionSubmitInfoCard.vue";
+import {useStore} from "vuex";
 
 const question = ref<QuestionVO>();
-
 const submitId = ref();
+const store = useStore()
+
 
 const form = ref<QuestionSubmitAddRequest>({
   language: "java",
-  code: "",
+  code: store.state.questionWrong.code,
 });
 
 interface props {
@@ -101,7 +103,6 @@ const loadData = async () => {
   const res = await QuestionControllerService.getQuestionVoByIdUsingGet(
     props.id as any
   );
-  console.log("questionVO:" + JSON.stringify(res.data))
   if (res.code === 0) {
     question.value = res.data;
     questionAnswer.value = question.value?.answer;
@@ -111,7 +112,6 @@ const loadData = async () => {
 };
 
 const questionAnswer = ref();
-
 const questionSubmitResult = ref<QuestionSubmitVO>();
 
 /**
@@ -174,6 +174,14 @@ const doSubmit = async () => {
   console.log("finalResultRes:", finalResultRes);
   if (finalResultRes.code === 0) {
     questionSubmitResult.value = finalResultRes.data;
+    if (questionSubmitResult.value?.judgeInfo?.message === "Accepted" && store.state.questionWrong.submitId) {
+      const deleteWrongRes = await QuestionWrongControllerService.deleteQuestionWrongUsingPost({
+        id: store.state.questionWrong.submitId
+      })
+      if (deleteWrongRes.code === 0) {
+        store.state.questionWrong = null
+      }
+    }
     changeShowForm(); // 判题完成后调用
   } else {
     message.error("获取判题结果失败，" + finalResultRes.message);

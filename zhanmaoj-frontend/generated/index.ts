@@ -127,6 +127,7 @@ export type { QuestionSubmitQueryRequest } from './models/QuestionSubmitQueryReq
 export type { QuestionSubmitStatusVO } from './models/QuestionSubmitStatusVO';
 export type { QuestionSubmitUpdateAdminRequest } from './models/QuestionSubmitUpdateAdminRequest';
 export type { QuestionSubmitVO } from './models/QuestionSubmitVO';
+export type { QuestionTestAddBackendVO } from './models/QuestionTestAddBackendVO';
 export type { QuestionTestAddRequest } from './models/QuestionTestAddRequest';
 export type { QuestionTestAdminVO } from './models/QuestionTestAdminVO';
 export type { QuestionTestDetailVO } from './models/QuestionTestDetailVO';
