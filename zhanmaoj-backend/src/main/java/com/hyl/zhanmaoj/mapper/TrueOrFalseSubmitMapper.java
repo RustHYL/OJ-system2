@@ -1,7 +1,7 @@
 package com.hyl.zhanmaoj.mapper;
 
-import com.hyl.zhanmaoj.model.entity.TrueOrFalseSubmit;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hyl.zhanmaoj.model.entity.TrueOrFalseSubmit;
 
 /**
 * @author Alan

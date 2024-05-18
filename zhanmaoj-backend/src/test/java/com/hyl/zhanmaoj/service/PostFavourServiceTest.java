@@ -2,7 +2,6 @@ package com.hyl.zhanmaoj.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.hyl.zhanmaoj.model.entity.Post;
 import com.hyl.zhanmaoj.model.entity.User;
 import javax.annotation.Resource;
 

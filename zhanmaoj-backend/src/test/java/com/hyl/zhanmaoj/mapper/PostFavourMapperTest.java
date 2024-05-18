@@ -3,7 +3,7 @@ package com.hyl.zhanmaoj.mapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.hyl.zhanmaoj.model.entity.Post;
+
 import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Assertions;

@@ -1,7 +1,7 @@
 package com.hyl.zhanmaoj.mapper;
 
-import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hyl.zhanmaoj.model.entity.ChoiceQuestion;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 

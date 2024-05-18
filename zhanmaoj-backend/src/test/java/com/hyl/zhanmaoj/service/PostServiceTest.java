@@ -2,7 +2,7 @@ package com.hyl.zhanmaoj.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hyl.zhanmaoj.model.dto.post.PostQueryRequest;
-import com.hyl.zhanmaoj.model.entity.Post;
+
 import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Assertions;

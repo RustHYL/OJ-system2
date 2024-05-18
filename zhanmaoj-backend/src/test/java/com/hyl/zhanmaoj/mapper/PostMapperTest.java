@@ -1,6 +1,5 @@
 package com.hyl.zhanmaoj.mapper;
 
-import com.hyl.zhanmaoj.model.entity.Post;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Resource;
