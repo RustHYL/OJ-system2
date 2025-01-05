@@ -19,6 +19,21 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.hyl</groupId>
+            <artifactId>zhanmaoj-backend-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hyl</groupId>
+            <artifactId>zhanmaoj-backend-model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hyl</groupId>
+            <artifactId>zhanmaoj-backend-user-service</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
