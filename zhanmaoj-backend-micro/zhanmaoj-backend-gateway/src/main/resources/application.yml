@@ -1,6 +1,29 @@
 spring:
+  application:
+    name: zhanmaoj-backend-gateway
   cloud:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+    gateway:
+      routes:
+        - id: zhanmaoj-backend-user-service
+          uri: lb://zhanmaoj-backend-user-service
+          predicates:
+            - Path=/api/user/**
+        - id: zhanmaoj-backend-question-service
+          uri: lb://zhanmaoj-backend-question-service
+          predicates:
+            - Path=/api/question/**
+        - id: zhanmaoj-backend-judge-service
+          uri: lb://zhanmaoj-backend-judge-service
+          predicates:
+            - Path=/api/judge/**
+
+  main:
+    web-application-type: reactive
+server:
+  port: 8101
+
+
 
