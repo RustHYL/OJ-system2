@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>com.hyl</groupId>
-            <artifactId>zhanmaoj-backend-user-service</artifactId>
+            <artifactId>zhanmaoj-backend-service-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

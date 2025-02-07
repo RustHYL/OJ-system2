@@ -24,7 +24,7 @@ import com.hyl.zhanmaojbackendquestionservice.mapper.TrueOrFalseMapper;
 import com.hyl.zhanmaojbackendquestionservice.service.TestQuestionService;
 import com.hyl.zhanmaojbackendquestionservice.service.TrueOrFalseService;
 import com.hyl.zhanmaojbackendquestionservice.service.TrueOrFalseSubmitService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +50,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
     implements TrueOrFalseService {
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
 
     @Resource
@@ -157,9 +157,9 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
         Long userId = trueOrFalse.getUserId();
         User user = null;
         if (userId != null && userId > 0) {
-            user = userService.getById(userId);
+            user = userFeignClient.getById(userId);
         }
-        UserVO userVO = userService.getUserVO(user);
+        UserVO userVO = userFeignClient.getUserVO(user);
         trueOrFalseVO.setUserVO(userVO);
         return trueOrFalseVO;
     }
@@ -173,7 +173,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
         }
         // 1. 关联查询用户信息
         Set<Long> userIdSet = trueOrFalseList.stream().map(TrueOrFalse::getUserId).collect(Collectors.toSet());
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+        Map<Long, List<User>> userIdUserListMap = userFeignClient.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 填充信息
         List<TrueOrFalseVO> trueOrFalseVOList = trueOrFalseList.stream().map(trueOrFalse -> {
@@ -183,7 +183,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            trueOrFalseVO.setUserVO(userService.getUserVO(user));
+            trueOrFalseVO.setUserVO(userFeignClient.getUserVO(user));
             return trueOrFalseVO;
         }).collect(Collectors.toList());
         trueOrFalseVOPage.setRecords(trueOrFalseVOList);
@@ -230,7 +230,7 @@ public class TrueOrFalseServiceImpl extends ServiceImpl<TrueOrFalseMapper, TrueO
             //答案
             QueryWrapper<TrueOrFalseSubmit> trueOrFalseSubmitQueryWrapper = new QueryWrapper<>();
             trueOrFalseSubmitQueryWrapper.eq("questionId", testQuestion.getQuestionId());
-            trueOrFalseSubmitQueryWrapper.eq("userId", userService.getLoginUser(request).getId());
+            trueOrFalseSubmitQueryWrapper.eq("userId", userFeignClient.getLoginUser(request).getId());
             trueOrFalseSubmitQueryWrapper.eq("testId", testId);
             TrueOrFalseSubmit one = trueOrFalseSubmitService.getOne(trueOrFalseSubmitQueryWrapper);
             if (one == null) {

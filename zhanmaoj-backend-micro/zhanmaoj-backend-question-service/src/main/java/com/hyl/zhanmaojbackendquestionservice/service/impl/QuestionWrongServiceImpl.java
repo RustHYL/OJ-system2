@@ -10,13 +10,11 @@ import com.hyl.zhanmaojbackendmodel.model.entity.QuestionWrong;
 import com.hyl.zhanmaojbackendmodel.model.vo.QuestionWrongVO;
 import com.hyl.zhanmaojbackendquestionservice.mapper.QuestionWrongMapper;
 import com.hyl.zhanmaojbackendquestionservice.service.QuestionWrongService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
@@ -34,8 +32,6 @@ import static com.hyl.zhanmaojbackendcommon.common.DateUtils.convertStringToDate
 public class QuestionWrongServiceImpl extends ServiceImpl<QuestionWrongMapper, QuestionWrong>
     implements QuestionWrongService {
 
-    @Resource
-    private UserService userService;
 
     @Override
     public QueryWrapper<QuestionWrong> getQueryWrapper(QuestionWrongQueryRequest questionWrongQueryRequest) {

@@ -19,7 +19,7 @@ import com.hyl.zhanmaojbackendmodel.model.vo.TrueOrFalseSubmitVO;
 import com.hyl.zhanmaojbackendquestionservice.mapper.TrueOrFalseSubmitMapper;
 import com.hyl.zhanmaojbackendquestionservice.service.TrueOrFalseService;
 import com.hyl.zhanmaojbackendquestionservice.service.TrueOrFalseSubmitService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class TrueOrFalseSubmitServiceImpl extends ServiceImpl<TrueOrFalseSubmitM
     private TrueOrFalseService trueOrFalseService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
 
 
@@ -176,7 +176,7 @@ public class TrueOrFalseSubmitServiceImpl extends ServiceImpl<TrueOrFalseSubmitM
         // 脱敏：仅本人和管理员能看见自己（提交 userId 和登录用户 id 不同）提交的代码
         long userId = loginUser.getId();
         // 处理脱敏
-        if (userId != trueOrFalseSubmit.getUserId() && !userService.isAdmin(loginUser)) {
+        if (userId != trueOrFalseSubmit.getUserId() && !userFeignClient.isAdmin(loginUser)) {
             trueOrFalseSubmitVO.setAnswer(null);
         }
         return trueOrFalseSubmitVO;

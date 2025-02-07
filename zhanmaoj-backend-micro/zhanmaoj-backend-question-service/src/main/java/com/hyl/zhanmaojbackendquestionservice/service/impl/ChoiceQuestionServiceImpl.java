@@ -25,7 +25,7 @@ import com.hyl.zhanmaojbackendquestionservice.mapper.ChoiceQuestionMapper;
 import com.hyl.zhanmaojbackendquestionservice.service.ChoiceQuestionService;
 import com.hyl.zhanmaojbackendquestionservice.service.ChoiceQuestionSubmitService;
 import com.hyl.zhanmaojbackendquestionservice.service.TestQuestionService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +50,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
     implements ChoiceQuestionService {
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private ChoiceQuestionMapper choiceQuestionMapper;
@@ -175,9 +175,9 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
         Long userId = choiceQuestion.getUserId();
         User user = null;
         if (userId != null && userId > 0) {
-            user = userService.getById(userId);
+            user = userFeignClient.getById(userId);
         }
-        UserVO userVO = userService.getUserVO(user);
+        UserVO userVO = userFeignClient.getUserVO(user);
         choiceQuestionVO.setUserVO(userVO);
         return choiceQuestionVO;
     }
@@ -191,7 +191,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
         }
         // 1. 关联查询用户信息
         Set<Long> userIdSet = choiceQuestionList.stream().map(ChoiceQuestion::getUserId).collect(Collectors.toSet());
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+        Map<Long, List<User>> userIdUserListMap = userFeignClient.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         // 填充信息
         List<ChoiceQuestionVO> choiceQuestionVOList = choiceQuestionList.stream().map(choiceQuestion -> {
@@ -201,7 +201,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            choiceQuestionVO.setUserVO(userService.getUserVO(user));
+            choiceQuestionVO.setUserVO(userFeignClient.getUserVO(user));
             return choiceQuestionVO;
         }).collect(Collectors.toList());
         choiceQuestionVOPage.setRecords(choiceQuestionVOList);
@@ -246,7 +246,7 @@ public class ChoiceQuestionServiceImpl extends ServiceImpl<ChoiceQuestionMapper,
             BeanUtils.copyProperties(choiceQuestion, choiceQuestionTestDetailVO);
             choiceQuestionTestDetailVO.setScore(testQuestion.getScore());
             QueryWrapper<ChoiceQuestionSubmit> choiceQuestionSubmitQueryWrapper = new QueryWrapper<>();
-            choiceQuestionSubmitQueryWrapper.eq("userId", userService.getLoginUser(request).getId());
+            choiceQuestionSubmitQueryWrapper.eq("userId", userFeignClient.getLoginUser(request).getId());
             choiceQuestionSubmitQueryWrapper.eq("questionId", choiceQuestion.getId());
             choiceQuestionSubmitQueryWrapper.eq("testId", testId);
             ChoiceQuestionSubmit choiceQuestionSubmit = choiceQuestionSubmitService.getOne(choiceQuestionSubmitQueryWrapper);

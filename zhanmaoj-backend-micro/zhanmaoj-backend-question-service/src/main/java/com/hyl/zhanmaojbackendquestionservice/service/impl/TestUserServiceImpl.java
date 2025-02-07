@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hyl.zhanmaojbackendmodel.model.entity.TestUser;
 import com.hyl.zhanmaojbackendquestionservice.mapper.TestUserMapper;
 import com.hyl.zhanmaojbackendquestionservice.service.TestUserService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,7 +20,7 @@ public class TestUserServiceImpl extends ServiceImpl<TestUserMapper, TestUser>
 
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
 
 }

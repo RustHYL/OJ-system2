@@ -7,10 +7,11 @@ import com.hyl.zhanmaojbackendcommon.common.ErrorCode;
 import com.hyl.zhanmaojbackendcommon.common.ResultUtils;
 import com.hyl.zhanmaojbackendcommon.constant.FileConstant;
 import com.hyl.zhanmaojbackendcommon.exception.BusinessException;
+import com.hyl.zhanmaojbackendcommon.utils.CosManager;
 import com.hyl.zhanmaojbackendmodel.model.dto.file.UploadFileRequest;
 import com.hyl.zhanmaojbackendmodel.model.entity.User;
 import com.hyl.zhanmaojbackendmodel.model.enums.FileUploadBizEnum;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,12 +30,12 @@ import java.util.Arrays;
  *
  */
 @RestController
-@RequestMapping("/file")
+@RequestMapping("/")
 @Slf4j
 public class FileController {
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private CosManager cosManager;
@@ -47,7 +48,7 @@ public class FileController {
      * @param request
      * @return
      */
-    @PostMapping("/upload")
+    @PostMapping("/file/upload")
     public BaseResponse<String> uploadFile(@RequestPart("file") MultipartFile multipartFile,
                                            UploadFileRequest uploadFileRequest, HttpServletRequest request) {
         String biz = uploadFileRequest.getBiz();
@@ -56,7 +57,7 @@ public class FileController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         validFile(multipartFile, fileUploadBizEnum);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         // 文件目录：根据业务、用户来划分
         String uuid = RandomStringUtils.randomAlphanumeric(8);
         String filename = uuid + "-" + multipartFile.getOriginalFilename();

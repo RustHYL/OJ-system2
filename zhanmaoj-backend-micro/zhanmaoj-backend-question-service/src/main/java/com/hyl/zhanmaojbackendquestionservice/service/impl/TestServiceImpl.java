@@ -18,7 +18,7 @@ import com.hyl.zhanmaojbackendmodel.model.vo.MyTestVO;
 import com.hyl.zhanmaojbackendquestionservice.mapper.TestMapper;
 import com.hyl.zhanmaojbackendquestionservice.service.TestService;
 import com.hyl.zhanmaojbackendquestionservice.service.TestUserService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +49,7 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test>
     private TestUserService testUserService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     private ObjectMapper configureObjectMapper(ObjectMapper objectMapper) {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -116,7 +116,7 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test>
             MyTestVO myTestVO = new MyTestVO();
             BeanUtils.copyProperties(test, myTestVO);
             QueryWrapper<TestUser> queryWrapper = new QueryWrapper();
-            queryWrapper.eq("userId", userService.getLoginUser(request).getId());
+            queryWrapper.eq("userId", userFeignClient.getLoginUser(request).getId());
             queryWrapper.eq("testId", test.getId());
             TestUser testUser = testUserService.getOne(queryWrapper);
             if (testUser != null) {

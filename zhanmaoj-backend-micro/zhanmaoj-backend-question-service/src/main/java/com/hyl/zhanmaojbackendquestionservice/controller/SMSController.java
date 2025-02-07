@@ -9,7 +9,8 @@ import com.hyl.zhanmaojbackendcommon.exception.BusinessException;
 import com.hyl.zhanmaojbackendcommon.utils.SMSUtil;
 import com.hyl.zhanmaojbackendmodel.model.entity.SMS;
 import com.hyl.zhanmaojbackendmodel.model.entity.User;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * 短信验证
  */
 @RestController
-@RequestMapping("/sms")
+@RequestMapping("/")
 @Slf4j
 @CrossOrigin
 public class SMSController {
@@ -32,15 +33,15 @@ public class SMSController {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private SMSUtil smsUtil;
 
-    @PostMapping("/sendSMS")
+    @PostMapping("/sms/sendSMS")
     public BaseResponse<String> sendSMS(@RequestBody SMS sms, HttpServletRequest request) {
         //校验是否登录
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -58,10 +59,10 @@ public class SMSController {
         return ResultUtils.success(code);
     }
 
-    @PostMapping("/validateSMS")
+    @PostMapping("/sms/validateSMS")
     public BaseResponse<Boolean> validateSMS(@RequestBody SMS sms, HttpServletRequest request) {
         //校验是否登录
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }

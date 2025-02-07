@@ -25,7 +25,8 @@ import com.hyl.zhanmaojbackendquestionservice.service.ChoiceQuestionService;
 import com.hyl.zhanmaojbackendquestionservice.service.ChoiceQuestionSubmitService;
 import com.hyl.zhanmaojbackendquestionservice.service.TestQuestionService;
 import com.hyl.zhanmaojbackendquestionservice.service.TestService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -42,7 +43,7 @@ import java.util.stream.Collectors;
  *
  */
 @RestController
-@RequestMapping("/choiceQuestion")
+@RequestMapping("/")
 @Slf4j
 public class ChoiceQuestionController {
 
@@ -53,7 +54,7 @@ public class ChoiceQuestionController {
     private ChoiceQuestionSubmitService choiceQuestionSubmitService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private TestQuestionService testQuestionService;
@@ -72,7 +73,7 @@ public class ChoiceQuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/add")
+    @PostMapping("/choiceQuestion/add")
     public BaseResponse<Long> addChoiceQuestion(@RequestBody ChoiceQuestionAddRequest choiceQuestionAddRequest, HttpServletRequest request) {
         if (choiceQuestionAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -83,7 +84,7 @@ public class ChoiceQuestionController {
         if (tags != null) {
             choiceQuestion.setTags(GSON.toJson(tags));
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         choiceQuestion.setUserId(loginUser.getId());
         choiceQuestion.setSubmitNum(0);
         choiceQuestion.setAcceptedNum(0);
@@ -93,7 +94,7 @@ public class ChoiceQuestionController {
         return ResultUtils.success(newChoiceQuestionId);
     }
 
-    @PostMapping("/add/backend")
+    @PostMapping("/choiceQuestion/add/backend")
     public BaseResponse<Long> addChoiceQuestionBackend(@RequestBody ChoiceQuestionAddAdminRequest choiceQuestionAddRequest, HttpServletRequest request) {
         if (choiceQuestionAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -114,7 +115,7 @@ public class ChoiceQuestionController {
         } else {
             tags = tagsList.toString();
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         choiceQuestion.setUserId(loginUser.getId());
         choiceQuestion.setTags(tags);
         boolean result = choiceQuestionService.save(choiceQuestion);
@@ -130,18 +131,18 @@ public class ChoiceQuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/delete")
+    @PostMapping("/choiceQuestion/delete")
     public BaseResponse<Boolean> deleteChoiceQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         ChoiceQuestion oldChoiceQuestion = choiceQuestionService.getById(id);
         ThrowUtils.throwIf(oldChoiceQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldChoiceQuestion.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldChoiceQuestion.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = choiceQuestionService.removeById(id);
@@ -154,7 +155,7 @@ public class ChoiceQuestionController {
      * @param choiceQuestionUpdateRequest
      * @return
      */
-    @PostMapping("/update")
+    @PostMapping("/choiceQuestion/update")
     public BaseResponse<Boolean> updateChoiceQuestion(@RequestBody ChoiceQuestionUpdateRequest choiceQuestionUpdateRequest) {
         if (choiceQuestionUpdateRequest == null || choiceQuestionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -175,7 +176,7 @@ public class ChoiceQuestionController {
         return ResultUtils.success(result);
     }
 
-    @PostMapping("/update/backend")
+    @PostMapping("/choiceQuestion/update/backend")
     public BaseResponse<Boolean> updateChoiceQuestionBackend(@RequestBody ChoiceQuestionUpdateAdminRequest choiceQuestionUpdateRequest) {
         if (choiceQuestionUpdateRequest == null || choiceQuestionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -211,7 +212,7 @@ public class ChoiceQuestionController {
      * @param id
      * @return
      */
-    @GetMapping("/get/vo")
+    @GetMapping("/choiceQuestion/get/vo")
     public BaseResponse<ChoiceQuestionVO> getChoiceQuestionVOById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -230,7 +231,7 @@ public class ChoiceQuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/list/page/vo")
+    @PostMapping("/choiceQuestion/list/page/vo")
     public BaseResponse<Page<ChoiceQuestionVO>> listChoiceQuestionVOByPage(@RequestBody ChoiceQuestionQueryRequest choiceQuestionQueryRequest,
             HttpServletRequest request) {
         long current = choiceQuestionQueryRequest.getCurrent();
@@ -249,13 +250,13 @@ public class ChoiceQuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/my/list/page/vo")
+    @PostMapping("/choiceQuestion/my/list/page/vo")
     public BaseResponse<Page<ChoiceQuestionVO>> listMyChoiceQuestionVOByPage(@RequestBody ChoiceQuestionQueryRequest choiceQuestionQueryRequest,
             HttpServletRequest request) {
         if (choiceQuestionQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         choiceQuestionQueryRequest.setUserId(loginUser.getId());
         long current = choiceQuestionQueryRequest.getCurrent();
         long size = choiceQuestionQueryRequest.getPageSize();
@@ -274,7 +275,7 @@ public class ChoiceQuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/edit")
+    @PostMapping("/choiceQuestion/edit")
     public BaseResponse<Boolean> editChoiceQuestion(@RequestBody ChoiceQuestionEditRequest choiceQuestionEditRequest, HttpServletRequest request) {
         if (choiceQuestionEditRequest == null || choiceQuestionEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -287,22 +288,22 @@ public class ChoiceQuestionController {
         }
         // 参数校验
         choiceQuestionService.validChoiceQuestion(choiceQuestion, false);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         long id = choiceQuestionEditRequest.getId();
         // 判断是否存在
         ChoiceQuestion oldChoiceQuestion = choiceQuestionService.getById(id);
         ThrowUtils.throwIf(oldChoiceQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
-        if (!oldChoiceQuestion.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!oldChoiceQuestion.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = choiceQuestionService.updateById(choiceQuestion);
         return ResultUtils.success(result);
     }
 
-    @PostMapping("/list/my/error")
+    @PostMapping("/choiceQuestion/list/my/error")
     public BaseResponse<List<ChoiceQuestion>> listMyErrorChoiceQuestion(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         QueryWrapper<ChoiceQuestionSubmit> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", loginUser.getId());
         queryWrapper.eq("status", StatusEnum.FALSE);
@@ -319,10 +320,10 @@ public class ChoiceQuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/list/page")
+    @PostMapping("/choiceQuestion/list/page")
     public BaseResponse<Page<ChoiceQuestion>> listChoiceQuestionByPage(@RequestBody ChoiceQuestionQueryRequest choiceQuestionQueryRequest,
                                                    HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -341,10 +342,10 @@ public class ChoiceQuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/list")
+    @PostMapping("/choiceQuestion/list")
     public BaseResponse<List<ChoiceQuestion>> listChoiceQuestionByList(@RequestBody ChoiceQuestionQueryRequest choiceQuestionQueryRequest,
                                                            HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -360,7 +361,7 @@ public class ChoiceQuestionController {
      * @param id
      * @return
      */
-    @GetMapping("/get")
+    @GetMapping("/choiceQuestion/get")
     public BaseResponse<ChoiceQuestion> getChoiceQuestionById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -369,9 +370,9 @@ public class ChoiceQuestionController {
         if (choiceQuestion == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         // 不是本人或管理员，不能直接获取所有信息
-        if (!choiceQuestion.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!choiceQuestion.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         return ResultUtils.success(choiceQuestion);
@@ -384,13 +385,13 @@ public class ChoiceQuestionController {
      * @param request
      * @return 提交记录 id
      */
-    @PostMapping("/choiceQuestion_submit/do")
+    @PostMapping("/choiceQuestion/choiceQuestion_submit/do")
     public BaseResponse<Long> doChoiceQuestionSubmit(@RequestBody ChoiceQuestionSubmitAddRequest choiceQuestionSubmitAddRequest,
                                                HttpServletRequest request) {
         if (choiceQuestionSubmitAddRequest == null || choiceQuestionSubmitAddRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         long choiceQuestionSubmitId = choiceQuestionSubmitService.doChoiceQuestionSubmit(choiceQuestionSubmitAddRequest, loginUser);
         return ResultUtils.success(choiceQuestionSubmitId);
     }
@@ -402,12 +403,12 @@ public class ChoiceQuestionController {
      * @param request
      * @return 提交记录 id
      */
-    @PostMapping("/choiceQuestion_submit/list/page")
+    @PostMapping("/choiceQuestion/choiceQuestion_submit/list/page")
     public BaseResponse<Page<ChoiceQuestionSubmitVO>> listChoiceQuestionSubmitByPage(@RequestBody ChoiceQuestionSubmitQueryRequest choiceQuestionSubmitQueryRequest,
                                                                                      HttpServletRequest request) {
         long current = choiceQuestionSubmitQueryRequest.getCurrent();
         long size = choiceQuestionSubmitQueryRequest.getPageSize();
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         Page<ChoiceQuestionSubmit> choiceQuestionSubmitPage = choiceQuestionSubmitService.page(new Page<>(current, size),
                 choiceQuestionSubmitService.getQueryWrapper(choiceQuestionSubmitQueryRequest));
         return ResultUtils.success(choiceQuestionSubmitService.getChoiceQuestionSubmitVOPage(choiceQuestionSubmitPage, loginUser));
@@ -420,10 +421,10 @@ public class ChoiceQuestionController {
      * @param request
      * @return 提交记录 id
      */
-    @PostMapping("/choiceQuestion_submit/list")
+    @PostMapping("/choiceQuestion/choiceQuestion_submit/list")
     public BaseResponse<List<ChoiceQuestionSubmit>> listChoiceQuestionSubmit(@RequestBody ChoiceQuestionSubmitQueryAdminRequest choiceQuestionSubmitQueryRequest,
                                                                          HttpServletRequest request) {
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         List<ChoiceQuestionSubmit> choiceQuestionSubmitList = choiceQuestionSubmitService.list(choiceQuestionSubmitService.getQueryWrapper(choiceQuestionSubmitQueryRequest));
@@ -431,25 +432,25 @@ public class ChoiceQuestionController {
     }
 
 
-    @PostMapping("/choiceQuestion_submit/delete")
+    @PostMapping("/choiceQuestion/choiceQuestion_submit/delete")
     public BaseResponse<Boolean> deleteChoiceQuestionSubmit(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         ChoiceQuestionSubmit oldChoiceQuestionSubmit = choiceQuestionSubmitService.getById(id);
         ThrowUtils.throwIf(oldChoiceQuestionSubmit == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldChoiceQuestionSubmit.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldChoiceQuestionSubmit.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = choiceQuestionSubmitService.removeById(id);
         return ResultUtils.success(b);
     }
 
-    @PostMapping("choiceQuestion_submit/update/backend")
+    @PostMapping("/choiceQuestion/choiceQuestion_submit/update/backend")
     public BaseResponse<Boolean> updateChoiceQuestionSubmitBackend(@RequestBody ChoiceQuestionSubmitUpdateAdminRequest choiceQuestionSubmitUpdateRequest) {
         if (choiceQuestionSubmitUpdateRequest == null || choiceQuestionSubmitUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -469,7 +470,7 @@ public class ChoiceQuestionController {
         return ResultUtils.success(result);
     }
 
-    @GetMapping("/idList")
+    @GetMapping("/choiceQuestion/idList")
     public BaseResponse<List<IdTitleVO>> getTestQuestion(HttpServletRequest request) {
         List<ChoiceQuestion> list = choiceQuestionService.list();
         List<IdTitleVO> idTitleVOList = list.stream().map(question -> {
@@ -481,10 +482,10 @@ public class ChoiceQuestionController {
         return ResultUtils.success(idTitleVOList);
     }
 
-    @PostMapping("/test/list")
+    @PostMapping("/choiceQuestion/test/list")
     public BaseResponse<List<ChoiceQuestionTestAdminVO>> listChoiceQuestionTestByList(@RequestBody ChoiceQuestionQueryTestAdminRequest choiceQuestionQueryRequest,
                                                                                       HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -508,7 +509,7 @@ public class ChoiceQuestionController {
         return ResultUtils.success(choiceQuestionTestAdminVOList);
     }
 
-    @PostMapping("/test/delete")
+    @PostMapping("/choiceQuestion/test/delete")
     public BaseResponse<Boolean> deleteTestChoiceQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -520,7 +521,7 @@ public class ChoiceQuestionController {
         Integer score = oldQuestion.getScore();
         Long testId = oldQuestion.getTestId();
         // 管理员可删除
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = testQuestionService.removeById(id);
@@ -538,7 +539,7 @@ public class ChoiceQuestionController {
         return ResultUtils.success(true);
     }
 
-    @PostMapping("/test/update")
+    @PostMapping("/choiceQuestion/test/update")
     public BaseResponse<Boolean> updateTestChoiceQuestion(@RequestBody TestQuestionUpdateRequest testQuestionUpdateRequest, HttpServletRequest request) {
         if (testQuestionUpdateRequest == null || testQuestionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -548,7 +549,7 @@ public class ChoiceQuestionController {
         TestQuestion oldQuestion = testQuestionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 管理员可删除
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         oldQuestion.setScore(testQuestionUpdateRequest.getScore());
@@ -567,7 +568,7 @@ public class ChoiceQuestionController {
     }
 
 
-    @PostMapping("/test/add")
+    @PostMapping("/choiceQuestion/test/add")
     public BaseResponse<Boolean> addTestChoiceQuestion(@RequestBody QueryRequest queryRequest, HttpServletRequest request) {
         ChoiceQuestionTestAddRequest addRequest = queryRequest.getChoiceQuestionTestAddRequest();
         if (addRequest == null) {
@@ -580,7 +581,7 @@ public class ChoiceQuestionController {
         Long testId = Long.valueOf(addRequest.getTestId());
         ThrowUtils.throwIf(oldChoiceQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 管理员判定
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         TestQuestion testQuestion = new TestQuestion();

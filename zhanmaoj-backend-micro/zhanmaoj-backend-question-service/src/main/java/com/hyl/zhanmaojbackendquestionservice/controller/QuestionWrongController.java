@@ -13,7 +13,7 @@ import com.hyl.zhanmaojbackendmodel.model.dto.questionWrong.QuestionWrongQueryRe
 import com.hyl.zhanmaojbackendmodel.model.entity.QuestionWrong;
 import com.hyl.zhanmaojbackendmodel.model.vo.QuestionWrongVO;
 import com.hyl.zhanmaojbackendquestionservice.service.QuestionWrongService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  */
 @RestController
-@RequestMapping("/question_wrong")
+@RequestMapping("/")
 @Slf4j
 public class QuestionWrongController {
 
@@ -37,7 +37,7 @@ public class QuestionWrongController {
     private QuestionWrongService questionWrongService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     private final static Gson GSON = new Gson();
 
@@ -49,7 +49,7 @@ public class QuestionWrongController {
      * @param request
      * @return
      */
-    @PostMapping("/list/my/page/vo")
+    @PostMapping("/question_wrong/list/my/page/vo")
     public BaseResponse<Page<QuestionWrongVO>> listMyQuestionWrongVOByPage(@RequestBody QuestionWrongQueryRequest questionWrongQueryRequest,
                                                                            HttpServletRequest request) {
         long current = questionWrongQueryRequest.getCurrent();
@@ -60,7 +60,7 @@ public class QuestionWrongController {
         }
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        questionWrongQueryRequest.setUserId(userService.getLoginUser(request).getId());
+        questionWrongQueryRequest.setUserId(userFeignClient.getLoginUser(request).getId());
         Page<QuestionWrong> questionWrongPage = new Page<>();
         if (num != 0){
             questionWrongPage = questionWrongService.page(new Page<>(current, num),
@@ -72,7 +72,7 @@ public class QuestionWrongController {
         return ResultUtils.success(questionWrongService.getQuestionWrongVOPage(questionWrongPage, request));
     }
 
-    @PostMapping("/delete")
+    @PostMapping("/question_wrong/delete")
     public BaseResponse<Boolean> deleteQuestionWrong(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         Long submitId = deleteRequest.getId();
         if (submitId == null) {

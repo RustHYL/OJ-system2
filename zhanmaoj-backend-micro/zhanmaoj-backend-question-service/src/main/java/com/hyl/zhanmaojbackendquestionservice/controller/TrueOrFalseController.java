@@ -25,7 +25,8 @@ import com.hyl.zhanmaojbackendquestionservice.service.TestQuestionService;
 import com.hyl.zhanmaojbackendquestionservice.service.TestService;
 import com.hyl.zhanmaojbackendquestionservice.service.TrueOrFalseService;
 import com.hyl.zhanmaojbackendquestionservice.service.TrueOrFalseSubmitService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -42,7 +43,7 @@ import java.util.stream.Collectors;
  *
  */
 @RestController
-@RequestMapping("/trueOrFalse")
+@RequestMapping("/")
 @Slf4j
 public class TrueOrFalseController {
 
@@ -53,7 +54,7 @@ public class TrueOrFalseController {
     private TrueOrFalseSubmitService trueOrFalseSubmitService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private TestQuestionService testQuestionService;
@@ -72,7 +73,7 @@ public class TrueOrFalseController {
      * @param request
      * @return
      */
-    @PostMapping("/add")
+    @PostMapping("/trueOrFalse/add")
     public BaseResponse<Long> addTrueOrFalse(@RequestBody TrueOrFalseAddRequest trueOrFalseAddRequest, HttpServletRequest request) {
         if (trueOrFalseAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -83,7 +84,7 @@ public class TrueOrFalseController {
         if (tags != null) {
             trueOrFalse.setTags(GSON.toJson(tags));
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         trueOrFalse.setUserId(loginUser.getId());
         trueOrFalse.setSubmitNum(0);
         trueOrFalse.setAcceptedNum(0);
@@ -93,7 +94,7 @@ public class TrueOrFalseController {
         return ResultUtils.success(newTrueOrFalseId);
     }
 
-    @PostMapping("/add/backend")
+    @PostMapping("/trueOrFalse/add/backend")
     public BaseResponse<Long> addTrueOrFalseBackend(@RequestBody TrueOrFalseAddAdminRequest trueOrFalseAddRequest, HttpServletRequest request) {
         if (trueOrFalseAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -114,7 +115,7 @@ public class TrueOrFalseController {
         }else {
             trueOrFalse.setTags(tagsList.toString());
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         trueOrFalse.setUserId(loginUser.getId());
         boolean result = trueOrFalseService.save(trueOrFalse);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -129,18 +130,18 @@ public class TrueOrFalseController {
      * @param request
      * @return
      */
-    @PostMapping("/delete")
+    @PostMapping("/trueOrFalse/delete")
     public BaseResponse<Boolean> deleteTrueOrFalse(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         TrueOrFalse oldTrueOrFalse = trueOrFalseService.getById(id);
         ThrowUtils.throwIf(oldTrueOrFalse == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldTrueOrFalse.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldTrueOrFalse.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = trueOrFalseService.removeById(id);
@@ -153,7 +154,7 @@ public class TrueOrFalseController {
      * @param trueOrFalseUpdateRequest
      * @return
      */
-    @PostMapping("/update")
+    @PostMapping("/trueOrFalse/update")
     public BaseResponse<Boolean> updateTrueOrFalse(@RequestBody TrueOrFalseUpdateRequest trueOrFalseUpdateRequest) {
         if (trueOrFalseUpdateRequest == null || trueOrFalseUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -174,7 +175,7 @@ public class TrueOrFalseController {
         return ResultUtils.success(result);
     }
 
-    @PostMapping("/update/backend")
+    @PostMapping("/trueOrFalse/update/backend")
     public BaseResponse<Boolean> updateTrueOrFalseBackend(@RequestBody TrueOrFalseUpdateAdminRequest trueOrFalseUpdateRequest) {
         if (trueOrFalseUpdateRequest == null || trueOrFalseUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -210,7 +211,7 @@ public class TrueOrFalseController {
      * @param id
      * @return
      */
-    @GetMapping("/get/vo")
+    @GetMapping("/trueOrFalse/get/vo")
     public BaseResponse<TrueOrFalseVO> getTrueOrFalseVOById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -229,7 +230,7 @@ public class TrueOrFalseController {
      * @param request
      * @return
      */
-    @PostMapping("/list/page/vo")
+    @PostMapping("/trueOrFalse/list/page/vo")
     public BaseResponse<Page<TrueOrFalseVO>> listTrueOrFalseVOByPage(@RequestBody TrueOrFalseQueryRequest trueOrFalseQueryRequest,
             HttpServletRequest request) {
         long current = trueOrFalseQueryRequest.getCurrent();
@@ -248,13 +249,13 @@ public class TrueOrFalseController {
      * @param request
      * @return
      */
-    @PostMapping("/my/list/page/vo")
+    @PostMapping("/trueOrFalse/my/list/page/vo")
     public BaseResponse<Page<TrueOrFalseVO>> listMyTrueOrFalseVOByPage(@RequestBody TrueOrFalseQueryRequest trueOrFalseQueryRequest,
             HttpServletRequest request) {
         if (trueOrFalseQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         trueOrFalseQueryRequest.setUserId(loginUser.getId());
         long current = trueOrFalseQueryRequest.getCurrent();
         long size = trueOrFalseQueryRequest.getPageSize();
@@ -273,7 +274,7 @@ public class TrueOrFalseController {
      * @param request
      * @return
      */
-    @PostMapping("/edit")
+    @PostMapping("/trueOrFalse/edit")
     public BaseResponse<Boolean> editTrueOrFalse(@RequestBody TrueOrFalseEditRequest trueOrFalseEditRequest, HttpServletRequest request) {
         if (trueOrFalseEditRequest == null || trueOrFalseEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -286,13 +287,13 @@ public class TrueOrFalseController {
         }
         // 参数校验
         trueOrFalseService.validTrueOrFalse(trueOrFalse, false);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         long id = trueOrFalseEditRequest.getId();
         // 判断是否存在
         TrueOrFalse oldTrueOrFalse = trueOrFalseService.getById(id);
         ThrowUtils.throwIf(oldTrueOrFalse == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
-        if (!oldTrueOrFalse.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!oldTrueOrFalse.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = trueOrFalseService.updateById(trueOrFalse);
@@ -306,10 +307,10 @@ public class TrueOrFalseController {
      * @param request
      * @return
      */
-    @PostMapping("/list/page")
+    @PostMapping("/trueOrFalse/list/page")
     public BaseResponse<Page<TrueOrFalse>> listTrueOrFalseByPage(@RequestBody TrueOrFalseQueryRequest trueOrFalseQueryRequest,
                                                    HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -328,10 +329,10 @@ public class TrueOrFalseController {
      * @param request
      * @return
      */
-    @PostMapping("/list")
+    @PostMapping("/trueOrFalse/list")
     public BaseResponse<List<TrueOrFalse>> listTrueOrFalseByList(@RequestBody TrueOrFalseQueryAdminRequest trueOrFalseQueryRequest,
                                                            HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -340,9 +341,9 @@ public class TrueOrFalseController {
         return ResultUtils.success(trueOrFalseList);
     }
 
-    @PostMapping("/list/my/error")
+    @PostMapping("/trueOrFalse/list/my/error")
     public BaseResponse<List<TrueOrFalse>> listMyErrorTrueOrFalse(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -365,7 +366,7 @@ public class TrueOrFalseController {
      * @param id
      * @return
      */
-    @GetMapping("/get")
+    @GetMapping("/trueOrFalse/get")
     public BaseResponse<TrueOrFalse> getTrueOrFalseById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -374,9 +375,9 @@ public class TrueOrFalseController {
         if (trueOrFalse == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         // 不是本人或管理员，不能直接获取所有信息
-        if (!trueOrFalse.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!trueOrFalse.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         return ResultUtils.success(trueOrFalse);
@@ -389,13 +390,13 @@ public class TrueOrFalseController {
      * @param request
      * @return 提交记录 id
      */
-    @PostMapping("/trueOrFalse_submit/do")
+    @PostMapping("/trueOrFalse/trueOrFalse_submit/do")
     public BaseResponse<Long> doTrueOrFalseSubmit(@RequestBody TrueOrFalseSubmitAddRequest trueOrFalseSubmitAddRequest,
                                                HttpServletRequest request) {
         if (trueOrFalseSubmitAddRequest == null || trueOrFalseSubmitAddRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         long trueOrFalseSubmitId = trueOrFalseSubmitService.doTrueOrFalseSubmit(trueOrFalseSubmitAddRequest, loginUser);
         return ResultUtils.success(trueOrFalseSubmitId);
     }
@@ -407,12 +408,12 @@ public class TrueOrFalseController {
      * @param request
      * @return 提交记录 id
      */
-    @PostMapping("/trueOrFalse_submit/list/page")
+    @PostMapping("/trueOrFalse/trueOrFalse_submit/list/page")
     public BaseResponse<Page<TrueOrFalseSubmitVO>> listTrueOrFalseSubmitByPage(@RequestBody TrueOrFalseSubmitQueryRequest trueOrFalseSubmitQueryRequest,
                                                                                HttpServletRequest request) {
         long current = trueOrFalseSubmitQueryRequest.getCurrent();
         long size = trueOrFalseSubmitQueryRequest.getPageSize();
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         Page<TrueOrFalseSubmit> trueOrFalseSubmitPage = trueOrFalseSubmitService.page(new Page<>(current, size),
                 trueOrFalseSubmitService.getQueryWrapper(trueOrFalseSubmitQueryRequest));
         return ResultUtils.success(trueOrFalseSubmitService.getTrueOrFalseSubmitVOPage(trueOrFalseSubmitPage, loginUser));
@@ -425,10 +426,10 @@ public class TrueOrFalseController {
      * @param request
      * @return 提交记录 id
      */
-    @PostMapping("/trueOrFalse_submit/list")
+    @PostMapping("/trueOrFalse/trueOrFalse_submit/list")
     public BaseResponse<List<TrueOrFalseSubmit>> listTrueOrFalseSubmit(@RequestBody TrueOrFalseSubmitQueryAdminRequest trueOrFalseSubmitQueryRequest,
                                                                          HttpServletRequest request) {
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         List<TrueOrFalseSubmit> trueOrFalseSubmitList = trueOrFalseSubmitService.list(trueOrFalseSubmitService.getQueryWrapper(trueOrFalseSubmitQueryRequest));
@@ -436,25 +437,25 @@ public class TrueOrFalseController {
     }
 
 
-    @PostMapping("/trueOrFalse_submit/delete")
+    @PostMapping("/trueOrFalse/trueOrFalse_submit/delete")
     public BaseResponse<Boolean> deleteTrueOrFalseSubmit(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         TrueOrFalseSubmit oldTrueOrFalseSubmit = trueOrFalseSubmitService.getById(id);
         ThrowUtils.throwIf(oldTrueOrFalseSubmit == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldTrueOrFalseSubmit.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldTrueOrFalseSubmit.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = trueOrFalseSubmitService.removeById(id);
         return ResultUtils.success(b);
     }
 
-    @PostMapping("trueOrFalse_submit/update/backend")
+    @PostMapping("/trueOrFalse/trueOrFalse_submit/update/backend")
     public BaseResponse<Boolean> updateTrueOrFalseSubmitBackend(@RequestBody TrueOrFalseSubmitUpdateAdminRequest trueOrFalseSubmitUpdateRequest) {
         if (trueOrFalseSubmitUpdateRequest == null || trueOrFalseSubmitUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -480,7 +481,7 @@ public class TrueOrFalseController {
      * @param id
      * @return
      */
-    @GetMapping("/get/score/vo")
+    @GetMapping("/trueOrFalse/get/score/vo")
     public BaseResponse<TrueOrFalseVO> getTrueOrFalseScoreVOById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -492,7 +493,7 @@ public class TrueOrFalseController {
         return ResultUtils.success(trueOrFalseService.getTrueOrFalseVO(trueOrFalse, request));
     }
 
-    @GetMapping("/test/idList")
+    @GetMapping("/trueOrFalse/test/idList")
     public BaseResponse<List<IdTitleVO>> getTestQuestion(Long testId, HttpServletRequest request) {
         List<TrueOrFalse> list = trueOrFalseService.list();
         List<IdTitleVO> idTitleVOList = list.stream().map(question -> {
@@ -504,10 +505,10 @@ public class TrueOrFalseController {
         return ResultUtils.success(idTitleVOList);
     }
 
-    @PostMapping("/test/list")
+    @PostMapping("/trueOrFalse/test/list")
     public BaseResponse<List<TrueOrFalseTestAdminVO>> listTrueOrFalseTestByList(@RequestBody TrueOrFalseQueryTestAdminRequest trueOrFalseQueryRequest,
                                                                                 HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -531,7 +532,7 @@ public class TrueOrFalseController {
         return ResultUtils.success(trueOrFalseTestAdminVOList);
     }
 
-    @PostMapping("/test/delete")
+    @PostMapping("/trueOrFalse/test/delete")
     public BaseResponse<Boolean> deleteTestTrueOrFalse(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -543,7 +544,7 @@ public class TrueOrFalseController {
         Integer score = oldQuestion.getScore();
         Long testId = oldQuestion.getTestId();
         // 管理员可删除
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = testQuestionService.removeById(id);
@@ -561,7 +562,7 @@ public class TrueOrFalseController {
         return ResultUtils.success(true);
     }
 
-    @PostMapping("/test/update")
+    @PostMapping("/trueOrFalse/test/update")
     public BaseResponse<Boolean> updateTestTrueOrFalse(@RequestBody TestQuestionUpdateRequest testQuestionUpdateRequest, HttpServletRequest request) {
         if (testQuestionUpdateRequest == null || testQuestionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -571,7 +572,7 @@ public class TrueOrFalseController {
         TestQuestion oldQuestion = testQuestionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 管理员可删除
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         oldQuestion.setScore(testQuestionUpdateRequest.getScore());
@@ -590,7 +591,7 @@ public class TrueOrFalseController {
     }
 
 
-    @PostMapping("/test/add")
+    @PostMapping("/trueOrFalse/test/add")
     public BaseResponse<Boolean> addTestTrueOrFalse(@RequestBody QueryRequest queryRequest, HttpServletRequest request) {
         TrueOrFalseTestAddRequest addRequest = queryRequest.getTrueOrFalseTestAddRequest();
         if (addRequest == null) {
@@ -603,7 +604,7 @@ public class TrueOrFalseController {
         Long testId = Long.valueOf(addRequest.getTestId());
         ThrowUtils.throwIf(oldTrueOrFalse == null, ErrorCode.NOT_FOUND_ERROR);
         // 管理员判定
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         TestQuestion testQuestion = new TestQuestion();
@@ -626,7 +627,7 @@ public class TrueOrFalseController {
         return ResultUtils.success(true);
     }
 
-    @GetMapping("/idList")
+    @GetMapping("/trueOrFalse/idList")
     public BaseResponse<List<IdTitleVO>> getTestQuestion(HttpServletRequest request) {
         List<TrueOrFalse> list = trueOrFalseService.list();
         List<IdTitleVO> idTitleVOList = list.stream().map(question -> {

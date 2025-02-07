@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * 用户接口
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/")
 @Slf4j
 public class UserController {
 

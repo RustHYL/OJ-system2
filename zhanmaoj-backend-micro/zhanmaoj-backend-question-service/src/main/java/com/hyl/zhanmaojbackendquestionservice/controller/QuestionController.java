@@ -20,7 +20,7 @@ import com.hyl.zhanmaojbackendquestionservice.service.QuestionService;
 import com.hyl.zhanmaojbackendquestionservice.service.QuestionSubmitService;
 import com.hyl.zhanmaojbackendquestionservice.service.TestQuestionService;
 import com.hyl.zhanmaojbackendquestionservice.service.TestService;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  *
  */
 @RestController
-@RequestMapping("/question")
+@RequestMapping("/")
 @Slf4j
 public class QuestionController {
 
@@ -51,7 +51,7 @@ public class QuestionController {
     private QuestionSubmitService questionSubmitService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private TestService testService;
@@ -90,7 +90,7 @@ public class QuestionController {
             question.setJudgeConfig(GSON.toJson(judgeConfig));
         }
         questionService.validQuestion(question, true);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         question.setUserId(loginUser.getId());
         boolean result = questionService.save(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -149,7 +149,7 @@ public class QuestionController {
             }
         }
         question.setJudgeConfig(GSON.toJson(judgeConfig, JudgeConfig.class));
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         question.setUserId(loginUser.getId());
         boolean result = questionService.save(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -169,13 +169,13 @@ public class QuestionController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestion.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldQuestion.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionService.removeById(id);
@@ -334,7 +334,7 @@ public class QuestionController {
         if (questionQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         questionQueryRequest.setUserId(loginUser.getId());
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
@@ -374,13 +374,13 @@ public class QuestionController {
         }
         // 参数校验
         questionService.validQuestion(question, false);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         long id = questionEditRequest.getId();
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
-        if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = questionService.updateById(question);
@@ -397,7 +397,7 @@ public class QuestionController {
     @PostMapping("/list/page")
     public BaseResponse<Page<Question>> listQuestionByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
                                                    HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -419,7 +419,7 @@ public class QuestionController {
     @PostMapping("/list")
     public BaseResponse<List<Question>> listQuestionByList(@RequestBody QuestionQueryAdminRequest questionQueryRequest,
                                                            HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -448,9 +448,9 @@ public class QuestionController {
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         // 不是本人或管理员，不能直接获取所有信息
-        if (!question.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!question.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         return ResultUtils.success(question);
@@ -469,7 +469,7 @@ public class QuestionController {
         if (questionSubmitAddRequest == null || questionSubmitAddRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
         return ResultUtils.success(questionSubmitId);
     }
@@ -490,9 +490,9 @@ public class QuestionController {
         if (questionSubmit == null){
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         // 不是本人或管理员，不能直接获取所有信息
-        if (!questionSubmit.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!questionSubmit.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         QuestionSubmitVO questionSubmitVO = questionSubmitService.getQuestionSubmitVO(questionSubmit, loginUser);
@@ -527,9 +527,9 @@ public class QuestionController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "判题状态不存在");
         }
 
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         // 不是本人或管理员，不能直接获取所有信息
-        if (!questionSubmit.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!questionSubmit.getUserId().equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         QuestionSubmitVO questionSubmitVO = questionSubmitService.getQuestionSubmitVO(questionSubmit, loginUser);
@@ -551,7 +551,7 @@ public class QuestionController {
         if (questionSubmitAddTestRequest == null || questionSubmitAddTestRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         QuestionSubmitAddRequest questionSubmitAddRequest = new QuestionSubmitAddRequest();
         BeanUtils.copyProperties(questionSubmitAddTestRequest, questionSubmitAddRequest);
         long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
@@ -576,7 +576,7 @@ public class QuestionController {
                                                                          HttpServletRequest request) {
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
                 questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUser));
@@ -594,7 +594,7 @@ public class QuestionController {
                                                                          HttpServletRequest request) {
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userFeignClient.getLoginUser(request);
         QueryWrapper<QuestionSubmit> queryWrapper = questionSubmitService.getQueryWrapper(questionSubmitQueryRequest);
         queryWrapper.eq("userId", loginUser.getId());
         Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
@@ -621,7 +621,7 @@ public class QuestionController {
     @PostMapping("/question_submit/list")
     public BaseResponse<List<QuestionSubmit>> listQuestionSubmit(@RequestBody QuestionSubmitQueryAdminRequest questionSubmitQueryRequest,
                                                                          HttpServletRequest request) {
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         List<QuestionSubmit> questionSubmitList = questionSubmitService.list(questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
@@ -634,13 +634,13 @@ public class QuestionController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         QuestionSubmit oldQuestionSubmit = questionSubmitService.getById(id);
         ThrowUtils.throwIf(oldQuestionSubmit == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestionSubmit.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldQuestionSubmit.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionSubmitService.removeById(id);
@@ -682,7 +682,7 @@ public class QuestionController {
 
     @PostMapping("my/error")
     public BaseResponse<List<QuestionVO>> getMyErrorQuestion(HttpServletRequest request) {
-        Long id = userService.getLoginUser(request).getId();
+        Long id = userFeignClient.getLoginUser(request).getId();
         QueryWrapper<QuestionSubmit> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", id);
         List<QuestionVO> list = questionSubmitService.list(queryWrapper).stream().map(questionSubmit -> {
@@ -712,10 +712,10 @@ public class QuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/test/list")
+    @PostMapping("/question_test/list")
     public BaseResponse<List<QuestionTestAdminVO>> listQuestionTestByList(@RequestBody QuestionQueryTestAdminRequest questionQueryRequest,
                                                                           HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         String userRole = loginUser.getUserRole();
         if (UserConstant.DEFAULT_ROLE.equals(userRole) || UserConstant.USER_LOGIN_STATE.equals(userRole)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -739,7 +739,7 @@ public class QuestionController {
         return ResultUtils.success(questionTestAdminVOList);
     }
 
-    @PostMapping("/test/delete")
+    @PostMapping("/test_question/delete")
     public BaseResponse<Boolean> deleteTestQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -751,7 +751,7 @@ public class QuestionController {
         Integer score = oldQuestion.getScore();
         Long testId = oldQuestion.getTestId();
         // 管理员可删除
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = testQuestionService.removeById(id);
@@ -769,7 +769,7 @@ public class QuestionController {
         return ResultUtils.success(true);
     }
 
-    @PostMapping("/test/update")
+    @PostMapping("/test_question/update")
     public BaseResponse<Boolean> updateTestQuestion(@RequestBody TestQuestionUpdateRequest testQuestionUpdateRequest, HttpServletRequest request) {
         if (testQuestionUpdateRequest == null || testQuestionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -779,7 +779,7 @@ public class QuestionController {
         TestQuestion oldQuestion = testQuestionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 管理员可删除
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         oldQuestion.setScore(testQuestionUpdateRequest.getScore());
@@ -798,7 +798,7 @@ public class QuestionController {
     }
 
 
-    @PostMapping("/test/add")
+    @PostMapping("/test_question/add")
     public BaseResponse<Boolean> addTestQuestion(@RequestBody QueryRequest queryRequest, HttpServletRequest request) {
         QuestionTestAddRequest addRequest = queryRequest.getQuestionTestAddRequest();
         if (addRequest == null) {
@@ -811,7 +811,7 @@ public class QuestionController {
         Long testId = Long.valueOf(addRequest.getTestId());
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 管理员判定
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         TestQuestion testQuestion = new TestQuestion();

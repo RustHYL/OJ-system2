@@ -20,7 +20,8 @@ import com.hyl.zhanmaojbackendmodel.model.entity.*;
 import com.hyl.zhanmaojbackendmodel.model.enums.*;
 import com.hyl.zhanmaojbackendmodel.model.vo.*;
 import com.hyl.zhanmaojbackendquestionservice.service.*;
-import com.hyl.zhanmaojbackenduserservice.service.UserService;
+
+import com.hyl.zhanmaojbackendserviceclient.service.UserFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -35,7 +36,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/")
 @Slf4j
 public class TestController {
 
@@ -55,7 +56,7 @@ public class TestController {
     private QuestionService questionService;
 
     @Resource
-    private UserService userService;
+    private UserFeignClient userFeignClient;
 
     @Resource
     private TestUserService testUserService;
@@ -75,7 +76,7 @@ public class TestController {
 
     private final static Gson GSON = new Gson();
 
-    @PostMapping("/add")
+    @PostMapping("/test/add")
     public BaseResponse<Long> addTest(@RequestBody TestAddRequest testAddRequest,
                                       HttpServletRequest request) {
         if (testAddRequest == null){
@@ -122,7 +123,7 @@ public class TestController {
         BeanUtils.copyProperties(testAddRequest, test);
         test.setTotalScore(sumScoreNow + trueOrFalseNum * trueOrFalsePerScore + choiceQuestionNum * choiceQuestionPerScore);
         test.setQuestionNum(questionList.size() + trueOrFalseNum + choiceQuestionNum);
-        Long id = userService.getLoginUser(request).getId();
+        Long id = userFeignClient.getLoginUser(request).getId();
         test.setUserId(id);
         boolean save = testService.save(test);
         if (!save) {
@@ -168,7 +169,7 @@ public class TestController {
         return ResultUtils.success(testId);
     }
 
-    @PostMapping("/delete")
+    @PostMapping("/test/delete")
     public BaseResponse<Boolean> addTest(@RequestBody DeleteRequest deleteRequest,
                                       HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
@@ -179,7 +180,7 @@ public class TestController {
         Test oldTest = testService.getById(testId);
         ThrowUtils.throwIf(oldTest == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = testService.removeById(testId);
@@ -190,7 +191,7 @@ public class TestController {
         return ResultUtils.success(true);
     }
 
-    @PostMapping("/update")
+    @PostMapping("/test/update")
     public BaseResponse<Boolean> updateTest(@RequestBody TestUpdateRequest testUpdateRequest,
                                             HttpServletRequest request) {
         if (testUpdateRequest == null || testUpdateRequest.getId() <= 0) {
@@ -202,7 +203,7 @@ public class TestController {
         //todo 校验数据
         Test test = new Test();
         BeanUtils.copyProperties(testUpdateRequest, test);
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         // 参数校验
@@ -210,10 +211,10 @@ public class TestController {
         return ResultUtils.success(result);
     }
 
-    @PostMapping("/list")
+    @PostMapping("/test/list")
     public BaseResponse<List<Test>> listTest(@RequestBody TestQueryRequest testQueryRequest,
                                              HttpServletRequest request) {
-//        if (!userService.isAdmin(request)) {
+//        if (!userFeignClient.isAdmin(request)) {
 //            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
 //        }
         List<Test> testList;
@@ -226,10 +227,10 @@ public class TestController {
         return ResultUtils.success(testList);
     }
 
-    @PostMapping("/list/simple")
+    @PostMapping("/test/list/simple")
     public BaseResponse<List<Test>> listTestSimple(
                                              HttpServletRequest request) {
-//        if (!userService.isAdmin(request)) {
+//        if (!userFeignClient.isAdmin(request)) {
 //            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
 //        }
         List<Test> testList = testService.list(new QueryWrapper<>());
@@ -242,12 +243,12 @@ public class TestController {
      * @param request
      * @return
      */
-    @PostMapping("/list/mine")
+    @PostMapping("/test/list/mine")
     public BaseResponse<List<MyTestVO>> listTestVOMine(HttpServletRequest request) {
-//        if (userService.getLoginUser(request) != null) {
+//        if (userFeignClient.getLoginUser(request) != null) {
 //            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
 //        }
-        Long id = userService.getLoginUser(request).getId();
+        Long id = userFeignClient.getLoginUser(request).getId();
         QueryWrapper<TestUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", id);
         List<TestUser> testUserList = testUserService.list(queryWrapper);
@@ -268,7 +269,7 @@ public class TestController {
      * @param request
      * @return
      */
-    @PostMapping("/list/mine/page/vo")
+    @PostMapping("/test/list/mine/page/vo")
     public BaseResponse<Page<MyTestVO>> listTestVOMinePage(@RequestBody MyTestQueryRequest myTestQueryRequest, HttpServletRequest request) {
         long current = myTestQueryRequest.getCurrent();
         long size = myTestQueryRequest.getPageSize();
@@ -278,7 +279,7 @@ public class TestController {
         }
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Long userId = userService.getLoginUser(request).getId();
+        Long userId = userFeignClient.getLoginUser(request).getId();
         String title = myTestQueryRequest.getTitle();
         Page<TestUser> testUserPage = new Page<>();
         QueryWrapper<TestUser> queryWrapper = new QueryWrapper<>();
@@ -295,7 +296,7 @@ public class TestController {
     }
 
 
-    @PostMapping("/join")
+    @PostMapping("/test/join")
     public BaseResponse<Boolean> JoinTest(@RequestBody TestJoinRequest testJoinRequest,
                                                   HttpServletRequest request) {
         if (testJoinRequest == null || testJoinRequest.getTestId() <= 0) {
@@ -306,7 +307,7 @@ public class TestController {
         if (!result) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR,"密码错误");
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         Long userId = loginUser.getId();
         TestUser testUser = new TestUser();
         testUser.setUserId(userId);
@@ -341,7 +342,7 @@ public class TestController {
         return ResultUtils.success(true);
     }
 
-    @GetMapping("/get/detail")
+    @GetMapping("/test/get/detail")
     public BaseResponse<TestVO> GetTestDetail(String testId,
                                               HttpServletRequest request) {
         Long id = Long.valueOf(testId);
@@ -361,7 +362,7 @@ public class TestController {
         return ResultUtils.success(testVO);
     }
 
-    @GetMapping("/get/wrong/detail")
+    @GetMapping("/test/get/wrong/detail")
     public BaseResponse<TestVO> GetWrongTestDetail(String testId,
                                               HttpServletRequest request) {
         Long id = Long.valueOf(testId);
@@ -381,7 +382,7 @@ public class TestController {
         return ResultUtils.success(testVO);
     }
 
-    @GetMapping("/test/title")
+    @GetMapping("/test/test/title")
     public BaseResponse<TestTitleVO> GetTestTitle(long testId,
                                               HttpServletRequest request) {
         if (testId <= 0) {
@@ -399,7 +400,7 @@ public class TestController {
         return ResultUtils.success(testTitleVO);
     }
 
-    @PostMapping("/test_submit/do")
+    @PostMapping("/test/test_submit/do")
     public BaseResponse<Long> doTestSubmit(@RequestBody TestSubmitAddRequest testSubmitAddRequest,
                                            HttpServletRequest request) {
         if (testSubmitAddRequest == null || testSubmitAddRequest.getTestId() <= 0) {
@@ -408,7 +409,7 @@ public class TestController {
         List<TestSingleAnswer> trueOrFalseAnswerList = testSubmitAddRequest.getTrueOrFalseAnswerList();
         List<TestSingleAnswer> choiceAnswerList = testSubmitAddRequest.getChoiceAnswerList();
         Long testId = testSubmitAddRequest.getTestId();
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(request);
         Long userId = loginUser.getId();
         TestSubmit testSubmit = new TestSubmit();
         testSubmit.setTestId(testSubmitAddRequest.getTestId());
@@ -551,7 +552,7 @@ public class TestController {
         return ResultUtils.success(id);
     }
 
-    @GetMapping("/test_submit/get/final_detail")
+    @GetMapping("/test/test_submit/get/final_detail")
     public BaseResponse<TestSubmitFinalDetailVO> getFinalDetail(Long testSubmitId){
         if (testSubmitId <= 0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "传入id错误");
@@ -587,10 +588,10 @@ public class TestController {
      * @param request
      * @return 提交记录 id
      */
-    @PostMapping("/test_submit/list")
+    @PostMapping("/test/test_submit/list")
     public BaseResponse<List<TestSubmit>> listTestSubmit(@RequestBody TestSubmitQueryRequest testSubmitQueryRequest,
                                                                  HttpServletRequest request) {
-        if (!userService.isAdmin(request)) {
+        if (!userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         List<TestSubmit> testSubmitList = testSubmitService.list(testSubmitService.getQueryWrapper(testSubmitQueryRequest));
@@ -598,25 +599,25 @@ public class TestController {
     }
 
 
-    @PostMapping("/test_submit/delete")
+    @PostMapping("/test/test_submit/delete")
     public BaseResponse<Boolean> deleteTestSubmit(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         TestSubmit oldTestSubmit = testSubmitService.getById(id);
         ThrowUtils.throwIf(oldTestSubmit == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldTestSubmit.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldTestSubmit.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = testSubmitService.removeById(id);
         return ResultUtils.success(b);
     }
 
-    @PostMapping("test_submit/update/backend")
+    @PostMapping("/test/test_submit/update/backend")
     public BaseResponse<Boolean> updateTestSubmitBackend(@RequestBody TestSubmitUpdateRequest testSubmitUpdateRequest) {
         if (testSubmitUpdateRequest == null || testSubmitUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -636,7 +637,7 @@ public class TestController {
         return ResultUtils.success(result);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/test/get")
     public BaseResponse<Test> getTestSubmitById(String testId, HttpServletRequest request) {
         Long id = Long.valueOf(testId);
         if (id <= 0) {
@@ -646,7 +647,7 @@ public class TestController {
         return ResultUtils.success(test);
     }
 
-    @GetMapping("/get/trueOrFalse")
+    @GetMapping("/test/get/trueOrFalse")
     public BaseResponse<List<TrueOrFalseTestDetailVO>> GetTestTrueOeFalseDetail(String testId,
                                               HttpServletRequest request) {
         Long id = Long.valueOf(testId);
@@ -657,7 +658,7 @@ public class TestController {
         return ResultUtils.success(trueOrFalseTestDetailVOList);
     }
 
-    @GetMapping("/get/choiceQuestion")
+    @GetMapping("/test/get/choiceQuestion")
     public BaseResponse<List<ChoiceQuestionTestDetailVO>> GetChoiceQuestionDetail(String testId,
                                               HttpServletRequest request) {
         Long id = Long.valueOf(testId);
@@ -668,7 +669,7 @@ public class TestController {
         return ResultUtils.success(choiceQuestionTestDetailVOList);
     }
 
-    @GetMapping("/get/question")
+    @GetMapping("/test/get/question")
     public BaseResponse<List<QuestionTestDetailVO>> GetQuestionDetail(String testId,
                                               HttpServletRequest request) {
         Long id = Long.valueOf(testId);
@@ -679,7 +680,7 @@ public class TestController {
         return ResultUtils.success(questionTestDetailVOList);
     }
 
-    @PostMapping("/title/id/list")
+    @PostMapping("/test/title/id/list")
     public BaseResponse<List<TestTitleIdVO>> getTestTitleIdList( HttpServletRequest request) {
         List<Test> testList = testService.list();
         List<TestTitleIdVO> testTitleIdVOS = testList.stream().map(test -> {
